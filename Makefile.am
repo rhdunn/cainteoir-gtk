@@ -2,8 +2,13 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 localedir = $(datadir)/locale
 
-AM_LDFLAGS  = ${LTLIBINTL}
-AM_CXXFLAGS = -std=c++0x -DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
+AM_LDFLAGS  = \
+	${GTK_LIBS} \
+	${LTLIBINTL}
+
+AM_CXXFLAGS = \
+	${GTK_CFLAGS}  \
+	-std=c++0x -DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
 
 ACLOCAL_AMFLAGS = -I m4
 

@@ -29,6 +29,14 @@ AC_CHECK_HEADERS([getopt.h])
 AC_CHECK_FUNCS([getopt_long])
 
 dnl ================================================================
+dnl GTK+/Gtkmm checks.
+dnl ================================================================
+
+PKG_CHECK_MODULES([GTK], [gtkmm-2.4 >= 2.8.0])
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+
+dnl ================================================================
 dnl Generate output.
 dnl ================================================================
 

@@ -21,12 +21,19 @@
 #include <config.h>
 #include <libintl.h>
 #include <locale.h>
+#include <gtkmm.h>
 
 int main(int argc, char ** argv)
 {
 	setlocale(LC_MESSAGES, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+
+	Gtk::Main app(argc, argv);
+
+	Gtk::Window window;
+
+	Gtk::Main::run(window);
 
 	return 0;
 }

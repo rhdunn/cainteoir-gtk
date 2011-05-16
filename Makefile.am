@@ -2,11 +2,16 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 localedir = $(datadir)/locale
 
+CAINTEOIR_CFLAGS = 
+CAINTEOIR_LIBS   = -lcainteoir
+
 AM_LDFLAGS  = \
+	${CAINTEOIR_LIBS} \
 	${GTK_LIBS} \
 	${LTLIBINTL}
 
 AM_CXXFLAGS = \
+	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
 	-std=c++0x -DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
 

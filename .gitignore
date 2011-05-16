@@ -59,7 +59,7 @@ po/insert-header.sin
 po/quot.sed
 po/remove-potcdate.sed
 po/remove-potcdate.sin
-po/cainteoir-engine.pot
+po/cainteoir-gtk.pot
 po/stamp-po
 
 # debian output:

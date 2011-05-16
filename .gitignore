@@ -1,0 +1,74 @@
+# build artefacts:
+
+*.o
+*.lo
+*.pyc
+
+# vi/vim editor files:
+
+*~
+.*.swp
+
+# build output:
+
+src/cainteoir-gtk
+
+# autotools output:
+
+Makefile
+Makefile.in
+
+.libs/
+.deps/
+.dirstamp
+
+INSTALL
+aclocal.m4
+autom4te.cache/
+ChangeLog
+config.h
+config.h.in
+config.h.in~
+config.log
+config.status
+configure
+depcomp
+install-sh
+missing
+stamp-h1
+libtool
+ltmain.sh
+
+# gettext/libintl/autopoint output:
+
+ABOUT-NLS
+config.guess
+config.rpath
+config.sub
+m4/
+po/*~
+
+po/Makefile.in.in
+po/Makevars.template
+po/POTFILES
+po/Rules-quot
+po/boldquot.sed
+po/en@boldquot.header
+po/en@quot.header
+po/insert-header.sin
+po/quot.sed
+po/remove-potcdate.sed
+po/remove-potcdate.sin
+po/cainteoir-engine.pot
+po/stamp-po
+
+# debian output:
+
+debian/tmp/
+
+debian/*.debhelper.log
+debian/*.substvars
+debian/*.debhelper
+debian/debhelper.log
+debian/files
+debian/substvars

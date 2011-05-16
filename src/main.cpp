@@ -31,6 +31,25 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
+void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
+{
+	rql::results formats = rql::select(
+		rql::select(aMetadata, rql::predicate, rdf::rdf("type")),
+		rql::object, rdf::tts("DocumentFormat"));
+
+	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
+	{
+		const rdf::uri * uri = rql::subject(*format);
+
+		rql::results mimetypes = rql::select(
+			rql::select(aMetadata, rql::predicate, rdf::tts("mimetype")),
+			rql::subject, *uri);
+
+		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
+			filter.add_mime_type(rql::value(*mimetype));
+	}
+}
+
 struct document : public cainteoir::document_events
 {
 	document()
@@ -120,15 +139,20 @@ public:
 	Cainteoir();
 protected:
 	void on_open_document();
+	void on_recent_files_dialog();
+	void on_recent_file();
 
-	void load_document(const std::string & filename);
+	void load_document(std::string filename);
 private:
 	Gtk::VBox box;
 	MetadataView metadata;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;
+
+	Gtk::RecentFilter recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
+	Glib::RefPtr<Gtk::RecentAction> recentAction;
 
 	document doc;
 };
@@ -142,9 +166,20 @@ Cainteoir::Cainteoir()
 	uiManager = Gtk::UIManager::create();
 	recentManager = Gtk::RecentManager::get_default();
 
+	create_recent_filter(recentFilter, doc.m_metadata);
+
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
 	actions->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
+	actions->add(Gtk::Action::create("FileRecentDialog", _("Recent Files _Dialog")), sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
 	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::hide));
+
+	recentAction = Gtk::RecentAction::create("FileRecentFiles", _("_Recent Files"));
+	recentAction->signal_item_activated().connect(sigc::mem_fun(*this, &Cainteoir::on_recent_file));
+	actions->add(recentAction);
+
+	recentAction->set_show_numbers(true);
+	recentAction->set_sort_type(Gtk::RECENT_SORT_MRU);
+	recentAction->set_filter(recentFilter);
 
 	uiManager->insert_action_group(actions);
 	add_accel_group(uiManager->get_accel_group());
@@ -154,6 +189,8 @@ Cainteoir::Cainteoir()
 		"	<menubar name='MenuBar'>"
 		"		<menu action='FileMenu'>"
 		"			<menuitem action='FileOpen'/>"
+		"			<menuitem action='FileRecentFiles'/>"
+		"			<menuitem action='FileRecentDialog'/>"
 		"			<separator/>"
 		"			<menuitem action='FileQuit'/>"
 		"		</menu>"
@@ -203,20 +240,54 @@ void Cainteoir::on_open_document()
 		load_document(dialog.get_filename());
 }
 
-void Cainteoir::load_document(const std::string & filename)
+void Cainteoir::on_recent_files_dialog()
+{
+	Gtk::RecentChooserDialog dialog(*this, _("Recent Files"), recentManager);
+	dialog.add_button(_("Select Document"), Gtk::RESPONSE_OK);
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+
+	dialog.set_filter(recentFilter);
+	dialog.set_sort_type(Gtk::RECENT_SORT_MRU);
+
+	const int response = dialog.run();
+	dialog.hide();
+	if (response == Gtk::RESPONSE_OK)
+		load_document(dialog.get_current_uri());
+}
+
+void Cainteoir::on_recent_file()
+{
+	load_document(recentAction->get_current_uri());
+}
+
+void Cainteoir::load_document(std::string filename)
 {
 	doc.m_doc->clear();
-
-	if (cainteoir::parseDocument(filename.c_str(), doc))
+	try
 	{
-		rdf::uri subject(filename, std::string());
+		if (filename.find("file://") == 0)
+			filename.erase(0, 7);
 
-		metadata.clear();
-		metadata.add_metadata(_("Title"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("title")));
-		metadata.add_metadata(_("Author"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("creator")));
-		metadata.add_metadata(_("Publisher"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("publisher")));
-		metadata.add_metadata(_("Description"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("description")));
-		metadata.add_metadata(_("Language"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("language")));
+		if (cainteoir::parseDocument(filename.c_str(), doc))
+		{
+			recentManager->add_item(filename);
+
+			rdf::uri subject(filename, std::string());
+
+			metadata.clear();
+			metadata.add_metadata(_("Title"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("title")));
+			metadata.add_metadata(_("Author"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("creator")));
+			metadata.add_metadata(_("Publisher"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("publisher")));
+			metadata.add_metadata(_("Description"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("description")));
+			metadata.add_metadata(_("Language"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("language")));
+		}
+	}
+	catch (const std::exception & e)
+	{
+		Gtk::MessageDialog dialog(*this, _("Unable to load the document"), false, Gtk::MESSAGE_ERROR);
+		dialog.set_title(_("Open Document"));
+		dialog.set_secondary_text(e.what());
+		dialog.run();
 	}
 }
 

@@ -32,7 +32,7 @@ dnl ================================================================
 dnl GTK+/Gtkmm checks.
 dnl ================================================================
 
-PKG_CHECK_MODULES([GTK], [gtkmm-2.4 >= 2.8.0])
+PKG_CHECK_MODULES([GTK], [gtkmm-2.4 >= 2.10.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 

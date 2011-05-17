@@ -404,7 +404,7 @@ bool Cainteoir::load_document(std::string filename)
 
 		if (cainteoir::parseDocument(filename.c_str(), doc))
 		{
-			recentManager->add_item(filename);
+			recentManager->add_item("file://" + filename);
 
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 

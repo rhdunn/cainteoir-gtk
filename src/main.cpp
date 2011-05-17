@@ -169,6 +169,7 @@ private:
 	Gtk::HBox mediabar;
 	MetadataView metadata;
 
+	Gtk::Alignment progressAlignment;
 	Gtk::ProgressBar progress;
 	Gtk::Label elapsedTime;
 	Gtk::Label totalTime;
@@ -192,6 +193,7 @@ private:
 
 Cainteoir::Cainteoir()
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
+	, progressAlignment(0.5, 0.5, 1.0, 0.0)
 {
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(600, 400);
@@ -245,9 +247,11 @@ Cainteoir::Cainteoir()
 	Gtk::Toolbar * toolbar = (Gtk::Toolbar *)uiManager->get_widget("/ToolBar");
 	toolbar->set_show_arrow(false);
 
+	progressAlignment.add(progress);
+
 	mediabar.pack_start(*toolbar, Gtk::PACK_SHRINK);
 	mediabar.pack_start(elapsedTime, Gtk::PACK_SHRINK);
-	mediabar.pack_start(progress);
+	mediabar.pack_start(progressAlignment);
 	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
 
 	add(box);

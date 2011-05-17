@@ -23,6 +23,7 @@
 #include <cainteoir/document.hpp>
 #include <cainteoir/platform.hpp>
 #include <locale.h>
+#include <map>
 
 #undef foreach_iter
 
@@ -92,59 +93,50 @@ struct document : public cainteoir::document_events
 	std::tr1::shared_ptr<cainteoir::document> m_doc;
 };
 
-class MetadataViewColumns : public Gtk::TreeModelColumnRecord
-{
-public:
-	MetadataViewColumns()
-	{
-		add(name);
-		add(value);
-	}
-
-	Gtk::TreeModelColumn<Glib::ustring> name;
-	Gtk::TreeModelColumn<Glib::ustring> value;
-};
-
-class MetadataView : public Gtk::ScrolledWindow
+class MetadataView : public Gtk::Frame
 {
 public:
 	MetadataView();
 
-	void add_metadata(const Glib::ustring & name, const Glib::ustring & value);
-
-	void clear()
-	{
-		data->clear();
-	}
+	void add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate);
 private:
-	MetadataViewColumns columns;
-	Glib::RefPtr<Gtk::ListStore> data;
-	Gtk::TreeView view;
+	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
+
+	Gtk::Table metadata;
+	std::map<std::string, std::pair<Gtk::Label *, Gtk::Label *> > values;
 };
 
 MetadataView::MetadataView()
+	: metadata(5, 2, false)
 {
-	data = Gtk::ListStore::create(columns);
-	view.set_model(data);
+	set_label(_("Information"));
+	add(metadata);
 
-	view.append_column(_("Name"), columns.name);
-	view.append_column(_("Description"), columns.value);
-
-	set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	add(view);
-
-	add_metadata(_("Title"), "");
-	add_metadata(_("Author"), "");
-	add_metadata(_("Publisher"), "");
-	add_metadata(_("Description"), "");
-	add_metadata(_("Language"), "");
+	create_entry(rdf::dc("title"), _("Title"), 0);
+	create_entry(rdf::dc("creator"), _("Author"), 1);
+	create_entry(rdf::dc("publisher"), _("Publisher"), 2);
+	create_entry(rdf::dc("description"), _("Description"), 3);
+	create_entry(rdf::dc("language"), _("Language"), 4);
 }
 
-void MetadataView::add_metadata(const Glib::ustring & name, const Glib::ustring & value)
+void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
 {
-	Gtk::TreeModel::Row row = *data->append();
-	row[columns.name]  = name;
-	row[columns.value] = value;
+	values[aPredicate.str()].second->set_label(rql::select_value<std::string>(aMetadata, aUri, aPredicate));
+}
+
+void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelText, int row)
+{
+	Gtk::Label * label = Gtk::manage(new Gtk::Label(labelText));
+	Gtk::Label * value = Gtk::manage(new Gtk::Label());
+
+	values[aPredicate.str()] = std::make_pair(label, value);
+
+	label->set_alignment(0, 0);
+	value->set_alignment(0, 0);
+	value->set_line_wrap(true);
+
+	metadata.attach(*label, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
+	metadata.attach(*value, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
 }
 
 class Cainteoir : public Gtk::Window
@@ -166,6 +158,7 @@ private:
 	void updateProgress(double elapsed, double total, double completed);
 
 	Gtk::VBox box;
+	Gtk::VBox content;
 	Gtk::HBox mediabar;
 	MetadataView metadata;
 
@@ -200,6 +193,8 @@ Cainteoir::Cainteoir()
 {
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(600, 400);
+
+	content.set_border_width(6);
 
 	actions = Gtk::ActionGroup::create();
 	uiManager = Gtk::UIManager::create();
@@ -272,10 +267,12 @@ Cainteoir::Cainteoir()
 	mediabar.pack_start(progressAlignment);
 	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
 
+	content.pack_start(mediabar, Gtk::PACK_SHRINK);
+	content.pack_start(metadata);
+
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
-	box.pack_start(mediabar, Gtk::PACK_SHRINK);
-	box.pack_start(metadata);
+	box.pack_start(content);
 
 	updateProgress(0.0, 0.0, 0.0);
 
@@ -408,12 +405,11 @@ bool Cainteoir::load_document(std::string filename)
 
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 
-			metadata.clear();
-			metadata.add_metadata(_("Title"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("title")));
-			metadata.add_metadata(_("Author"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("creator")));
-			metadata.add_metadata(_("Publisher"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("publisher")));
-			metadata.add_metadata(_("Description"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("description")));
-			metadata.add_metadata(_("Language"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("language")));
+			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("title"));
+			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("creator"));
+			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("publisher"));
+			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("description"));
+			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("language"));
 
 			readAction->set_sensitive(true);
 			return true;

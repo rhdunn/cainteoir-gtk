@@ -31,6 +31,19 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
+void format_time(char *s, int n, double seconds)
+{
+	int ms = int(seconds * 100.0) % 100;
+
+	int minutes = floor(seconds / 60.0);
+	seconds = seconds - (minutes * 60.0);
+
+	int hours = floor(minutes / 60.0);
+	minutes = minutes - (hours * 60.0);
+
+	snprintf(s, n, "%02d:%02d:%02d.%02d", hours, minutes, (int)floor(seconds), ms);
+}
+
 void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
 {
 	rql::results formats = rql::select(
@@ -150,10 +163,15 @@ protected:
 
 	bool load_document(std::string filename);
 private:
+	void updateProgress(double elapsed, double total, double completed);
+
 	Gtk::VBox box;
 	Gtk::HBox mediabar;
-	Gtk::ProgressBar progress;
 	MetadataView metadata;
+
+	Gtk::ProgressBar progress;
+	Gtk::Label elapsedTime;
+	Gtk::Label totalTime;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;
@@ -224,15 +242,16 @@ Cainteoir::Cainteoir()
 		"</ui>");
 
 	mediabar.pack_start(*uiManager->get_widget("/ToolBar"));
+	mediabar.pack_start(elapsedTime, Gtk::PACK_SHRINK);
 	mediabar.pack_start(progress, Gtk::PACK_EXPAND_WIDGET, 4);
+	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
 
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
 	box.pack_start(mediabar, Gtk::PACK_SHRINK);
 	box.pack_start(metadata);
 
-	progress.set_fraction(0.0);
-	progress.set_text("0.00%");
+	updateProgress(0.0, 0.0, 0.0);
 
 	show_all_children();
 
@@ -312,7 +331,7 @@ void Cainteoir::on_read()
 	recentAction->set_sensitive(false);
 	recentDialogAction->set_sensitive(false);
 
-	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 250);
+	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 50);
 }
 
 void Cainteoir::on_stop()
@@ -324,19 +343,14 @@ bool Cainteoir::on_speaking()
 {
 	if (speech->is_speaking())
 	{
-		char percentage[20];
-		sprintf(percentage, "%0.2f%%", speech->completed());
-
-		progress.set_text(percentage);
-		progress.set_fraction(speech->completed() / 100.0);
+		updateProgress(speech->elapsedTime(), speech->totalTime(), speech->completed());
 		return true;
 	}
 
 	speech.reset();
 	out.reset();
 
-	progress.set_fraction(0.0);
-	progress.set_text("0.00%");
+	updateProgress(0.0, 0.0, 0.0);
 
 	readAction->set_visible(true);
 	stopAction->set_visible(false);
@@ -388,6 +402,23 @@ bool Cainteoir::load_document(std::string filename)
 	}
 
 	return false;
+}
+
+void Cainteoir::updateProgress(double elapsed, double total, double completed)
+{
+	char percentage[20];
+	char elapsed_time[80];
+	char total_time[80];
+
+	sprintf(percentage, "%0.2f%%", completed);
+	format_time(elapsed_time, 80, elapsed);
+	format_time(total_time, 80, total);
+
+	progress.set_text(percentage);
+	progress.set_fraction(completed / 100.0);
+
+	elapsedTime.set_text(elapsed_time);
+	totalTime.set_text(total_time);
 }
 
 int main(int argc, char ** argv)

@@ -116,7 +116,7 @@ MetadataView::MetadataView()
 	view.append_column(_("Name"), columns.name);
 	view.append_column(_("Description"), columns.value);
 
-	set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	add(view);
 
 	add_metadata(_("Title"), "");

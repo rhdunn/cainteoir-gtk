@@ -73,9 +73,10 @@ struct document : public cainteoir::document_events
 		m_doc->add(aText);
 	}
 
+	std::tr1::shared_ptr<const rdf::uri> subject;
 	rdf::graph m_metadata;
-	std::tr1::shared_ptr<cainteoir::document> m_doc;
 	cainteoir::tts::engines tts;
+	std::tr1::shared_ptr<cainteoir::document> m_doc;
 };
 
 class MetadataViewColumns : public Gtk::TreeModelColumnRecord
@@ -141,8 +142,13 @@ protected:
 	void on_open_document();
 	void on_recent_files_dialog();
 	void on_recent_file();
+	void on_quit();
+	void on_read();
+	void on_stop();
 
-	void load_document(std::string filename);
+	bool on_speaking();
+
+	bool load_document(std::string filename);
 private:
 	Gtk::VBox box;
 	MetadataView metadata;
@@ -153,8 +159,15 @@ private:
 	Gtk::RecentFilter recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
 	Glib::RefPtr<Gtk::RecentAction> recentAction;
+	Glib::RefPtr<Gtk::Action> recentDialogAction;
+
+	Glib::RefPtr<Gtk::Action> readAction;
+	Glib::RefPtr<Gtk::Action> stopAction;
+	Glib::RefPtr<Gtk::Action> openAction;
 
 	document doc;
+	std::tr1::shared_ptr<cainteoir::tts::speech> speech;
+	std::tr1::shared_ptr<cainteoir::audio> out;
 };
 
 Cainteoir::Cainteoir()
@@ -169,14 +182,16 @@ Cainteoir::Cainteoir()
 	create_recent_filter(recentFilter, doc.m_metadata);
 
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
-	actions->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	actions->add(Gtk::Action::create("FileRecentDialog", _("Recent Files _Dialog")), sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
-	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::hide));
+	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
+	actions->add(recentAction = Gtk::RecentAction::create("FileRecentFiles", _("_Recent Files")));
+	actions->add(recentDialogAction = Gtk::Action::create("FileRecentDialog", _("Recent Files _Dialog")), sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
+	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::on_quit));
 
-	recentAction = Gtk::RecentAction::create("FileRecentFiles", _("_Recent Files"));
+	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
+	actions->add(readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read));
+	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
+
 	recentAction->signal_item_activated().connect(sigc::mem_fun(*this, &Cainteoir::on_recent_file));
-	actions->add(recentAction);
-
 	recentAction->set_show_numbers(true);
 	recentAction->set_sort_type(Gtk::RECENT_SORT_MRU);
 	recentAction->set_filter(recentFilter);
@@ -194,9 +209,15 @@ Cainteoir::Cainteoir()
 		"			<separator/>"
 		"			<menuitem action='FileQuit'/>"
 		"		</menu>"
+		"		<menu action='ReaderMenu'>"
+		"			<menuitem action='ReaderRead'/>"
+		"			<menuitem action='ReaderStop'/>"
+		"		</menu>"
 		"	</menubar>"
 		"	<toolbar  name='ToolBar'>"
 		"		<toolitem action='FileOpen'/>"
+		"		<toolitem action='ReaderRead'/>"
+		"		<toolitem action='ReaderStop'/>"
 		"	</toolbar>"
 		"</ui>");
 
@@ -206,6 +227,9 @@ Cainteoir::Cainteoir()
 	box.pack_start(metadata);
 
 	show_all_children();
+
+	readAction->set_sensitive(false);
+	stopAction->set_visible(false);
 }
 
 void Cainteoir::on_open_document()
@@ -260,9 +284,63 @@ void Cainteoir::on_recent_file()
 	load_document(recentAction->get_current_uri());
 }
 
-void Cainteoir::load_document(std::string filename)
+void Cainteoir::on_quit()
 {
+	if (speech)
+		speech->stop();
+
+	hide();
+}
+
+void Cainteoir::on_read()
+{
+	out = cainteoir::open_audio_device(NULL, "pulse", 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
+	speech = doc.tts.speak(doc.m_doc, out, 0);
+
+	readAction->set_visible(false);
+	stopAction->set_visible(true);
+
+	openAction->set_sensitive(false);
+	recentAction->set_sensitive(false);
+	recentDialogAction->set_sensitive(false);
+
+	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 250);
+}
+
+void Cainteoir::on_stop()
+{
+	speech->stop();
+}
+
+bool Cainteoir::on_speaking()
+{
+	if (speech->is_speaking())
+	{
+		return true;
+	}
+
+	speech.reset();
+	out.reset();
+
+	readAction->set_visible(true);
+	stopAction->set_visible(false);
+
+	openAction->set_sensitive(true);
+	recentAction->set_sensitive(true);
+	recentDialogAction->set_sensitive(true);
+
+	return false;
+}
+
+bool Cainteoir::load_document(std::string filename)
+{
+	if (speech) return false;
+
+	readAction->set_sensitive(false);
+
 	doc.m_doc->clear();
+	doc.subject.reset();
+
 	try
 	{
 		if (filename.find("file://") == 0)
@@ -272,14 +350,17 @@ void Cainteoir::load_document(std::string filename)
 		{
 			recentManager->add_item(filename);
 
-			rdf::uri subject(filename, std::string());
+			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 
 			metadata.clear();
-			metadata.add_metadata(_("Title"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("title")));
-			metadata.add_metadata(_("Author"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("creator")));
-			metadata.add_metadata(_("Publisher"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("publisher")));
-			metadata.add_metadata(_("Description"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("description")));
-			metadata.add_metadata(_("Language"), rql::select_value<std::string>(doc.m_metadata, subject, rdf::dc("language")));
+			metadata.add_metadata(_("Title"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("title")));
+			metadata.add_metadata(_("Author"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("creator")));
+			metadata.add_metadata(_("Publisher"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("publisher")));
+			metadata.add_metadata(_("Description"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("description")));
+			metadata.add_metadata(_("Language"), rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("language")));
+
+			readAction->set_sensitive(true);
+			return true;
 		}
 	}
 	catch (const std::exception & e)
@@ -289,6 +370,8 @@ void Cainteoir::load_document(std::string filename)
 		dialog.set_secondary_text(e.what());
 		dialog.run();
 	}
+
+	return false;
 }
 
 int main(int argc, char ** argv)

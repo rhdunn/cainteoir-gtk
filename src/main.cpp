@@ -154,7 +154,7 @@ public:
 protected:
 	void on_open_document();
 	void on_recent_files_dialog();
-	void on_recent_file();
+	void on_recent_file(Gtk::RecentChooserMenu * recent);
 	void on_quit();
 	void on_read();
 	void on_stop();
@@ -179,8 +179,10 @@ private:
 
 	Gtk::RecentFilter recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
-	Glib::RefPtr<Gtk::RecentAction> recentAction;
+	Glib::RefPtr<Gtk::Action> recentAction;
 	Glib::RefPtr<Gtk::Action> recentDialogAction;
+
+	Gtk::MenuToolButton open;
 
 	Glib::RefPtr<Gtk::Action> readAction;
 	Glib::RefPtr<Gtk::Action> stopAction;
@@ -194,6 +196,7 @@ private:
 Cainteoir::Cainteoir()
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
+	, open(Gtk::Stock::OPEN)
 {
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(600, 400);
@@ -206,18 +209,13 @@ Cainteoir::Cainteoir()
 
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
 	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	actions->add(recentAction = Gtk::RecentAction::create("FileRecentFiles", _("_Recent Files")));
+	actions->add(recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Files")));
 	actions->add(recentDialogAction = Gtk::Action::create("FileRecentDialog", _("Recent Files _Dialog")), sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
 	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::on_quit));
 
 	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
 	actions->add(readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read));
 	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
-
-	recentAction->signal_item_activated().connect(sigc::mem_fun(*this, &Cainteoir::on_recent_file));
-	recentAction->set_show_numbers(true);
-	recentAction->set_sort_type(Gtk::RECENT_SORT_MRU);
-	recentAction->set_filter(recentFilter);
 
 	uiManager->insert_action_group(actions);
 	add_accel_group(uiManager->get_accel_group());
@@ -238,14 +236,33 @@ Cainteoir::Cainteoir()
 		"		</menu>"
 		"	</menubar>"
 		"	<toolbar  name='ToolBar'>"
-		"		<toolitem action='FileOpen'/>"
 		"		<toolitem action='ReaderRead'/>"
 		"		<toolitem action='ReaderStop'/>"
 		"	</toolbar>"
 		"</ui>");
 
-	Gtk::Toolbar * toolbar = (Gtk::Toolbar *)uiManager->get_widget("/ToolBar");
+	Gtk::RecentChooserMenu * recentToolbar = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
+	recentToolbar->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recentToolbar));
+	recentToolbar->set_show_numbers(true);
+	recentToolbar->set_sort_type(Gtk::RECENT_SORT_MRU);
+	recentToolbar->set_filter(recentFilter);
+	recentToolbar->set_limit(6);
+
+	Gtk::Toolbar * toolbar = dynamic_cast<Gtk::Toolbar *>(uiManager->get_widget("/ToolBar"));
 	toolbar->set_show_arrow(false);
+
+	open.set_menu(*recentToolbar);
+	toolbar->insert(open, 0);
+
+	Gtk::RecentChooserMenu * recentMenu = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
+	recentMenu->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recentMenu));
+	recentMenu->set_show_numbers(true);
+	recentMenu->set_sort_type(Gtk::RECENT_SORT_MRU);
+	recentMenu->set_filter(recentFilter);
+	recentMenu->set_limit(6);
+
+	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
+	openRecent->set_submenu(*recentMenu);
 
 	progressAlignment.add(progress);
 
@@ -314,9 +331,9 @@ void Cainteoir::on_recent_files_dialog()
 		load_document(dialog.get_current_uri());
 }
 
-void Cainteoir::on_recent_file()
+void Cainteoir::on_recent_file(Gtk::RecentChooserMenu * recent)
 {
-	load_document(recentAction->get_current_uri());
+	load_document(recent->get_current_uri());
 }
 
 void Cainteoir::on_quit()

@@ -251,6 +251,7 @@ Cainteoir::Cainteoir()
 	Gtk::Toolbar * toolbar = dynamic_cast<Gtk::Toolbar *>(uiManager->get_widget("/ToolBar"));
 	toolbar->set_show_arrow(false);
 
+	open.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	open.set_menu(*recentToolbar);
 	toolbar->insert(open, 0);
 

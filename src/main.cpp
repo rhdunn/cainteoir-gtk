@@ -121,7 +121,34 @@ MetadataView::MetadataView()
 
 void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
 {
-	values[aPredicate.str()].second->set_label(rql::select_value<std::string>(aMetadata, aUri, aPredicate));
+	rql::results selection = rql::select(aMetadata, rql::subject, aUri);
+	for(auto query = selection.begin(), last = selection.end(); query != last; ++query)
+	{
+		const std::string &object = rql::value(*query);
+		if (!object.empty())
+		{
+			if (rql::predicate(*query) == aPredicate)
+				values[aPredicate.str()].second->set_label(object);
+		}
+		else if (rql::predicate(*query) == rdf::dc("creator") && aPredicate == rdf::dc("creator"))
+		{
+			std::string role;
+			std::string author;
+
+			rql::results selection = rql::select(aMetadata, rql::subject, *rql::object(*query).as<rdf::bnode>());
+			for(auto data = selection.begin(), last = selection.end(); data != last; ++data)
+			{
+				const std::string &object = rql::value(*data);
+				if (rql::predicate(*data) == rdf::rdf("value"))
+					author = object;
+				else if (rql::predicate(*data) == rdf::opf("role"))
+					role = object;
+			}
+
+			if (!author.empty() && (role == "aut" || role.empty()))
+				values[aPredicate.str()].second->set_label(author);
+		}
+	}
 }
 
 void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelText, int row)

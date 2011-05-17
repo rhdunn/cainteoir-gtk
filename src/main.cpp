@@ -151,6 +151,8 @@ protected:
 	bool load_document(std::string filename);
 private:
 	Gtk::VBox box;
+	Gtk::HBox mediabar;
+	Gtk::ProgressBar progress;
 	MetadataView metadata;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;
@@ -221,10 +223,16 @@ Cainteoir::Cainteoir()
 		"	</toolbar>"
 		"</ui>");
 
+	mediabar.pack_start(*uiManager->get_widget("/ToolBar"));
+	mediabar.pack_start(progress, Gtk::PACK_EXPAND_WIDGET, 4);
+
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
-	box.pack_start(*uiManager->get_widget("/ToolBar"), Gtk::PACK_SHRINK);
+	box.pack_start(mediabar, Gtk::PACK_SHRINK);
 	box.pack_start(metadata);
+
+	progress.set_fraction(0.0);
+	progress.set_text("0.00%");
 
 	show_all_children();
 
@@ -316,11 +324,19 @@ bool Cainteoir::on_speaking()
 {
 	if (speech->is_speaking())
 	{
+		char percentage[20];
+		sprintf(percentage, "%0.2f%%", speech->completed());
+
+		progress.set_text(percentage);
+		progress.set_fraction(speech->completed() / 100.0);
 		return true;
 	}
 
 	speech.reset();
 	out.reset();
+
+	progress.set_fraction(0.0);
+	progress.set_text("0.00%");
 
 	readAction->set_visible(true);
 	stopAction->set_visible(false);

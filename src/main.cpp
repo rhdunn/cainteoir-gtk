@@ -191,6 +191,7 @@ private:
 };
 
 Cainteoir::Cainteoir()
+	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
 {
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(600, 400);
@@ -241,9 +242,12 @@ Cainteoir::Cainteoir()
 		"	</toolbar>"
 		"</ui>");
 
-	mediabar.pack_start(*uiManager->get_widget("/ToolBar"));
+	Gtk::Toolbar * toolbar = (Gtk::Toolbar *)uiManager->get_widget("/ToolBar");
+	toolbar->set_show_arrow(false);
+
+	mediabar.pack_start(*toolbar, Gtk::PACK_SHRINK);
 	mediabar.pack_start(elapsedTime, Gtk::PACK_SHRINK);
-	mediabar.pack_start(progress, Gtk::PACK_EXPAND_WIDGET, 4);
+	mediabar.pack_start(progress);
 	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
 
 	add(box);

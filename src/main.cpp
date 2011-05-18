@@ -98,6 +98,8 @@ class MetadataView : public Gtk::Frame
 public:
 	MetadataView();
 
+	void clear();
+
 	void add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate);
 private:
 	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
@@ -117,6 +119,12 @@ MetadataView::MetadataView()
 	create_entry(rdf::dc("publisher"), _("Publisher"), 2);
 	create_entry(rdf::dc("description"), _("Description"), 3);
 	create_entry(rdf::dc("language"), _("Language"), 4);
+}
+
+void MetadataView::clear()
+{
+	for(auto item = values.begin(), last = values.end(); item != last; ++item)
+		item->second.second->set_label("");
 }
 
 void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
@@ -420,6 +428,7 @@ bool Cainteoir::load_document(std::string filename)
 
 	doc.m_doc->clear();
 	doc.subject.reset();
+	metadata.clear();
 
 	try
 	{

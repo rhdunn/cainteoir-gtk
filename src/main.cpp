@@ -64,6 +64,60 @@ void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetada
 	}
 }
 
+class settings_value : public std::string
+{
+public:
+	settings_value() {}
+
+	template <typename T>
+	settings_value & operator=(const T & value)
+	{
+		std::ostringstream ss;
+		ss << value;
+		std::string::operator=(ss.str());
+		return *this;
+	}
+
+	template <typename T>
+	T as() const;
+};
+
+template <typename T>
+T settings_value::as() const
+{
+	std::istringstream ss(*this);
+	T value;
+	ss >> value;
+	return value;
+}
+
+template <>
+std::string settings_value::as<std::string>() const
+{
+	return *this;
+}
+
+class application_settings
+{
+public:
+	settings_value & operator()(const std::string & name, const settings_value & default_value = settings_value());
+private:
+	std::map<std::string, settings_value> values;
+};
+
+settings_value & application_settings::operator()(const std::string & name, const settings_value & default_value)
+{
+	for (auto item = values.begin(), last = values.end(); item != last; ++item)
+	{
+		if (item->first == name)
+			return item->second;
+	}
+
+	settings_value & value = values[name];
+	value = default_value;
+	return value;
+}
+
 struct document : public cainteoir::document_events
 {
 	document()
@@ -219,6 +273,7 @@ private:
 	document doc;
 	std::tr1::shared_ptr<cainteoir::tts::speech> speech;
 	std::tr1::shared_ptr<cainteoir::audio> out;
+	application_settings settings;
 };
 
 Cainteoir::Cainteoir()
@@ -323,6 +378,7 @@ void Cainteoir::on_open_document()
 	dialog.set_transient_for(*this);
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+	dialog.set_filename(settings("document.filename").as<std::string>());
 
 	rql::results formats = rql::select(
 		rql::select(doc.m_metadata, rql::predicate, rdf::rdf("type")),
@@ -438,6 +494,7 @@ bool Cainteoir::load_document(std::string filename)
 		if (cainteoir::parseDocument(filename.c_str(), doc))
 		{
 			recentManager->add_item("file://" + filename);
+			settings("document.filename") = filename;
 
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 

@@ -70,6 +70,12 @@ public:
 	settings_value() {}
 
 	template <typename T>
+	settings_value(const T & value)
+	{
+		*this = value;
+	}
+
+	template <typename T>
 	settings_value & operator=(const T & value)
 	{
 		std::ostringstream ss;
@@ -395,10 +401,18 @@ void Cainteoir::on_open_document()
 			rql::select(doc.m_metadata, rql::predicate, rdf::tts("mimetype")),
 			rql::subject, *uri);
 
-		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
-			filter.add_mime_type(rql::value(*mimetype));
+		bool active_filter = false;
+		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
+		{
+			const std::string & mimetype = rql::value(*item);
+			filter.add_mime_type(mimetype);
+			if (settings("document.mimetype", "text/plain").as<std::string>() == mimetype)
+				active_filter = true;
+		}
 
  		dialog.add_filter(filter);
+		if (active_filter)
+			dialog.set_filter(filter);
 	}
 
 	if (dialog.run() == Gtk::RESPONSE_OK)

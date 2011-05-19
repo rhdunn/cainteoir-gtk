@@ -64,54 +64,15 @@ void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetada
 	}
 }
 
-class settings_value : public std::string
-{
-public:
-	settings_value() {}
-
-	template <typename T>
-	settings_value(const T & value)
-	{
-		*this = value;
-	}
-
-	template <typename T>
-	settings_value & operator=(const T & value)
-	{
-		std::ostringstream ss;
-		ss << value;
-		std::string::operator=(ss.str());
-		return *this;
-	}
-
-	template <typename T>
-	T as() const;
-};
-
-template <typename T>
-T settings_value::as() const
-{
-	std::istringstream ss(*this);
-	T value;
-	ss >> value;
-	return value;
-}
-
-template <>
-std::string settings_value::as<std::string>() const
-{
-	return *this;
-}
-
 class application_settings
 {
 public:
-	settings_value & operator()(const std::string & name, const settings_value & default_value = settings_value());
+	rdf::literal & operator()(const std::string & name, const rdf::literal & default_value = rdf::literal());
 private:
-	std::map<std::string, settings_value> values;
+	std::map<std::string, rdf::literal> values;
 };
 
-settings_value & application_settings::operator()(const std::string & name, const settings_value & default_value)
+rdf::literal & application_settings::operator()(const std::string & name, const rdf::literal & default_value)
 {
 	for (auto item = values.begin(), last = values.end(); item != last; ++item)
 	{
@@ -119,7 +80,7 @@ settings_value & application_settings::operator()(const std::string & name, cons
 			return item->second;
 	}
 
-	settings_value & value = values[name];
+	rdf::literal & value = values[name];
 	value = default_value;
 	return value;
 }

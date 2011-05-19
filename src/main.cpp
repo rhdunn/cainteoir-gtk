@@ -390,6 +390,8 @@ void Cainteoir::on_open_document()
 		rql::select(doc.m_metadata, rql::predicate, rdf::rdf("type")),
 		rql::object, rdf::tts("DocumentFormat"));
 
+	std::string default_mimetype = settings("document.mimetype", "text/plain").as<std::string>();
+
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
 		const rdf::uri * uri = rql::subject(*format);
@@ -406,7 +408,7 @@ void Cainteoir::on_open_document()
 		{
 			const std::string & mimetype = rql::value(*item);
 			filter.add_mime_type(mimetype);
-			if (settings("document.mimetype", "text/plain").as<std::string>() == mimetype)
+			if (default_mimetype == mimetype)
 				active_filter = true;
 		}
 
@@ -507,10 +509,14 @@ bool Cainteoir::load_document(std::string filename)
 
 		if (cainteoir::parseDocument(filename.c_str(), doc))
 		{
-			recentManager->add_item("file://" + filename);
-			settings("document.filename") = filename;
-
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
+			recentManager->add_item("file://" + filename);
+
+			std::string mimetype = rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::tts("mimetype"));
+
+			settings("document.filename") = filename;
+			if (!mimetype.empty())
+				settings("document.mimetype") = mimetype;
 
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("title"));
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("creator"));

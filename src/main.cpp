@@ -207,6 +207,8 @@ class Cainteoir : public Gtk::Window
 {
 public:
 	Cainteoir();
+
+	bool load_document(std::string filename);
 protected:
 	void on_open_document();
 	void on_recent_files_dialog();
@@ -216,8 +218,6 @@ protected:
 	void on_stop();
 
 	bool on_speaking();
-
-	bool load_document(std::string filename);
 private:
 	void updateProgress(double elapsed, double total, double completed);
 
@@ -539,6 +539,8 @@ int main(int argc, char ** argv)
 	Gtk::Main app(argc, argv);
 
 	Cainteoir window;
+	if (argc > 1)
+		window.load_document(argv[1]);
 
 	Gtk::Main::run(window);
 

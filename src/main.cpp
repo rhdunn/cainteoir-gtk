@@ -22,6 +22,7 @@
 #include <cainteoir/engines.hpp>
 #include <cainteoir/document.hpp>
 #include <cainteoir/platform.hpp>
+#include <cainteoir/languages.hpp>
 #include <locale.h>
 #include <map>
 
@@ -117,7 +118,7 @@ struct document : public cainteoir::document_events
 class MetadataView : public Gtk::Frame
 {
 public:
-	MetadataView();
+	MetadataView(cainteoir::languages & lang);
 
 	void clear();
 
@@ -127,10 +128,12 @@ private:
 
 	Gtk::Table metadata;
 	std::map<std::string, std::pair<Gtk::Label *, Gtk::Label *> > values;
+	cainteoir::languages & languages;
 };
 
-MetadataView::MetadataView()
+MetadataView::MetadataView(cainteoir::languages & lang)
 	: metadata(5, 2, false)
+	, languages(lang)
 {
 	set_label(_("Information"));
 	add(metadata);
@@ -157,7 +160,12 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 		if (!object.empty())
 		{
 			if (rql::predicate(*query) == aPredicate)
-				values[aPredicate.str()].second->set_label(object);
+			{
+				if (aPredicate == rdf::dc("language"))
+					values[aPredicate.str()].second->set_label(languages(object));
+				else
+					values[aPredicate.str()].second->set_label(object);
+			}
 		}
 		else if (rql::predicate(*query) == rdf::dc("creator") && aPredicate == rdf::dc("creator"))
 		{
@@ -238,6 +246,7 @@ private:
 	Glib::RefPtr<Gtk::Action> openAction;
 
 	document doc;
+	cainteoir::languages languages;
 	std::tr1::shared_ptr<cainteoir::tts::speech> speech;
 	std::tr1::shared_ptr<cainteoir::audio> out;
 	application_settings settings;
@@ -245,8 +254,10 @@ private:
 
 Cainteoir::Cainteoir()
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
+	, metadata(languages)
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
 	, open(Gtk::Stock::OPEN)
+	, languages("en")
 {
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(600, 400);

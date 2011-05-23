@@ -35,7 +35,7 @@ namespace rql = cainteoir::rdf::query;
 
 void format_time(char *s, int n, double seconds)
 {
-	int ms = int(seconds * 100.0) % 100;
+	int ms = int(seconds * 10.0) % 10;
 
 	int minutes = floor(seconds / 60.0);
 	seconds = seconds - (minutes * 60.0);
@@ -43,7 +43,7 @@ void format_time(char *s, int n, double seconds)
 	int hours = floor(minutes / 60.0);
 	minutes = minutes - (hours * 60.0);
 
-	snprintf(s, n, "%02d:%02d:%02d.%02d", hours, minutes, (int)floor(seconds), ms);
+	snprintf(s, n, "%02d:%02d:%02d.%01d", hours, minutes, (int)floor(seconds), ms);
 }
 
 void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
@@ -433,7 +433,7 @@ void Cainteoir::on_read()
 	recentAction->set_sensitive(false);
 	recentDialogAction->set_sensitive(false);
 
-	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 50);
+	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
 }
 
 void Cainteoir::on_stop()

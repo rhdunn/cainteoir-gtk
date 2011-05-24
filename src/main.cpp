@@ -215,6 +215,7 @@ protected:
 	void on_recent_file(Gtk::RecentChooserMenu * recent);
 	void on_quit();
 	void on_read();
+	void on_record();
 	void on_stop();
 
 	bool on_speaking();
@@ -246,6 +247,7 @@ private:
 
 	Glib::RefPtr<Gtk::Action> readAction;
 	Glib::RefPtr<Gtk::Action> stopAction;
+	Glib::RefPtr<Gtk::Action> recordAction;
 	Glib::RefPtr<Gtk::Action> openAction;
 
 	document doc;
@@ -283,6 +285,7 @@ Cainteoir::Cainteoir()
 	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
 	actions->add(readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read));
 	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
+	actions->add(recordAction = Gtk::Action::create("ReaderRecord", Gtk::Stock::MEDIA_RECORD), sigc::mem_fun(*this, &Cainteoir::on_record));
 
 	uiManager->insert_action_group(actions);
 	add_accel_group(uiManager->get_accel_group());
@@ -300,11 +303,13 @@ Cainteoir::Cainteoir()
 		"		<menu action='ReaderMenu'>"
 		"			<menuitem action='ReaderRead'/>"
 		"			<menuitem action='ReaderStop'/>"
+		"			<menuitem action='ReaderRecord'/>"
 		"		</menu>"
 		"	</menubar>"
 		"	<toolbar  name='ToolBar'>"
 		"		<toolitem action='ReaderRead'/>"
 		"		<toolitem action='ReaderStop'/>"
+		"		<toolitem action='ReaderRecord'/>"
 		"	</toolbar>"
 		"</ui>");
 
@@ -435,6 +440,7 @@ void Cainteoir::on_read()
 
 	readAction->set_visible(false);
 	stopAction->set_visible(true);
+	recordAction->set_sensitive(false);
 
 	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
@@ -444,10 +450,78 @@ void Cainteoir::on_read()
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
 }
 
+void Cainteoir::on_record()
+{
+	// TODO: Generate a default name from the file metadata ($(recording.basepath)/author - title.ogg)
+
+	Gtk::FileChooserDialog dialog(_("Open Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+	dialog.set_transient_for(*this);
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+	dialog.set_filename(settings("recording.filename").as<std::string>());
+
+	rql::results formats = rql::select(
+		rql::select(doc.m_metadata, rql::predicate, rdf::rdf("type")),
+		rql::object, rdf::tts("AudioFormat"));
+
+	std::string default_mimetype = settings("recording.mimetype", "audio/ogg").as<std::string>();
+
+	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
+	{
+		const rdf::uri * uri = rql::subject(*format);
+
+		Gtk::FileFilter filter;
+		filter.set_name(rql::select_value<std::string>(doc.m_metadata, *uri, rdf::dc("title")));
+
+		rql::results mimetypes = rql::select(
+			rql::select(doc.m_metadata, rql::predicate, rdf::tts("mimetype")),
+			rql::subject, *uri);
+
+		bool active_filter = false;
+		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
+		{
+			const std::string & mimetype = rql::value(*item);
+			filter.add_mime_type(mimetype);
+			if (default_mimetype == mimetype)
+				active_filter = true;
+		}
+
+ 		dialog.add_filter(filter);
+		if (active_filter)
+			dialog.set_filter(filter);
+	}
+
+	if (dialog.run() != Gtk::RESPONSE_OK)
+		return;
+
+	// FIXME: Get the correct mimetype for the recording file.
+	// FIXME: Get the correct audio type (wav, ogg, ...) for the recording file.
+
+	std::string filename = dialog.get_filename();
+	std::string mimetype = "audio/ogg";
+	std::string type = "ogg";
+
+	settings("recording.filename") = filename;
+	settings("recordig.mimetype") = mimetype;
+
+	out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
+	speech = doc.tts.speak(doc.m_doc, out, 0);
+
+	readAction->set_visible(false);
+	stopAction->set_visible(true);
+	recordAction->set_sensitive(false);
+
+	openAction->set_sensitive(false);
+	recentAction->set_sensitive(false);
+	recentDialogAction->set_sensitive(false);
+
+	state.set_label(_("recording"));
+	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
+}
+
 void Cainteoir::on_stop()
 {
 	speech->stop();
-	state.set_label(_("stopped"));
 }
 
 bool Cainteoir::on_speaking()
@@ -463,8 +537,11 @@ bool Cainteoir::on_speaking()
 
 	updateProgress(0.0, 0.0, 0.0);
 
+	state.set_label(_("stopped"));
+
 	readAction->set_visible(true);
 	stopAction->set_visible(false);
+	recordAction->set_sensitive(true);
 
 	openAction->set_sensitive(true);
 	recentAction->set_sensitive(true);

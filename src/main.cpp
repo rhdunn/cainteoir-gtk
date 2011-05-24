@@ -218,6 +218,7 @@ protected:
 	void on_record();
 	void on_stop();
 
+	void on_speak(const char * state);
 	bool on_speaking();
 private:
 	void updateProgress(double elapsed, double total, double completed);
@@ -436,18 +437,7 @@ void Cainteoir::on_quit()
 void Cainteoir::on_read()
 {
 	out = cainteoir::open_audio_device(NULL, "pulse", 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
-	speech = doc.tts.speak(doc.m_doc, out, 0);
-
-	readAction->set_visible(false);
-	stopAction->set_visible(true);
-	recordAction->set_sensitive(false);
-
-	openAction->set_sensitive(false);
-	recentAction->set_sensitive(false);
-	recentDialogAction->set_sensitive(false);
-
-	state.set_label(_("reading"));
-	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
+	on_speak(_("reading"));
 }
 
 void Cainteoir::on_record()
@@ -505,6 +495,11 @@ void Cainteoir::on_record()
 	settings("recordig.mimetype") = mimetype;
 
 	out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
+	on_speak(_("recording"));
+}
+
+void Cainteoir::on_speak(const char * status)
+{
 	speech = doc.tts.speak(doc.m_doc, out, 0);
 
 	readAction->set_visible(false);
@@ -515,7 +510,7 @@ void Cainteoir::on_record()
 	recentAction->set_sensitive(false);
 	recentDialogAction->set_sensitive(false);
 
-	state.set_label(_("recording"));
+	state.set_label(status);
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
 }
 

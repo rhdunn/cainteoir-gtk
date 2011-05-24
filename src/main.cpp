@@ -226,6 +226,9 @@ private:
 	Gtk::HBox mediabar;
 	MetadataView metadata;
 
+	Gtk::HBox statusbar;
+	Gtk::Label state;
+
 	Gtk::Alignment progressAlignment;
 	Gtk::ProgressBar progress;
 	Gtk::Label elapsedTime;
@@ -255,6 +258,7 @@ private:
 Cainteoir::Cainteoir()
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
 	, metadata(languages)
+	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
 	, open(Gtk::Stock::OPEN)
 	, languages("en")
@@ -335,8 +339,11 @@ Cainteoir::Cainteoir()
 	mediabar.pack_start(progressAlignment);
 	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
 
+	statusbar.pack_start(state, Gtk::PACK_SHRINK);
+
 	content.pack_start(mediabar, Gtk::PACK_SHRINK);
 	content.pack_start(metadata);
+	content.pack_start(statusbar, Gtk::PACK_SHRINK);
 
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
@@ -433,12 +440,14 @@ void Cainteoir::on_read()
 	recentAction->set_sensitive(false);
 	recentDialogAction->set_sensitive(false);
 
+	state.set_label(_("reading"));
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
 }
 
 void Cainteoir::on_stop()
 {
 	speech->stop();
+	state.set_label(_("stopped"));
 }
 
 bool Cainteoir::on_speaking()

@@ -320,7 +320,7 @@ Cainteoir::Cainteoir()
 
 	open.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	open.set_menu(*recentToolbar);
-	toolbar->insert(open, 0);
+	toolbar->insert(open, -1);
 
 	Gtk::RecentChooserMenu * recentMenu = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
 	recentMenu->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recentMenu));

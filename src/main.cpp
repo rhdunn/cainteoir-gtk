@@ -19,16 +19,13 @@
  */
 
 #include <config.h>
+#include <gtkmm.h>
 #include <cainteoir/engines.hpp>
 #include <cainteoir/document.hpp>
 #include <cainteoir/platform.hpp>
 #include <cainteoir/languages.hpp>
 #include <locale.h>
 #include <map>
-
-#undef foreach_iter
-
-#include <gtkmm.h>
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;

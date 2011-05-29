@@ -112,7 +112,7 @@ struct document : public cainteoir::document_events
 	std::tr1::shared_ptr<cainteoir::document> m_doc;
 };
 
-class MetadataView : public Gtk::Frame
+class MetadataView : public Gtk::VBox
 {
 public:
 	MetadataView(cainteoir::languages & lang);
@@ -124,22 +124,30 @@ private:
 	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
 
 	Gtk::Table metadata;
+	Gtk::Label header;
 	std::map<std::string, std::pair<Gtk::Label *, Gtk::Label *> > values;
 	cainteoir::languages & languages;
 };
 
 MetadataView::MetadataView(cainteoir::languages & lang)
 	: metadata(5, 2, false)
+	, header()
 	, languages(lang)
 {
-	set_label(_("Information"));
-	add(metadata);
+	pack_start(header, Gtk::PACK_SHRINK);
+	pack_start(metadata);
 
-	create_entry(rdf::dc("title"), _("Title"), 0);
-	create_entry(rdf::dc("creator"), _("Author"), 1);
-	create_entry(rdf::dc("publisher"), _("Publisher"), 2);
-	create_entry(rdf::dc("description"), _("Description"), 3);
-	create_entry(rdf::dc("language"), _("Language"), 4);
+	set_border_width(6);
+	metadata.set_border_width(4);
+
+	header.set_alignment(0, 0);
+	header.set_markup(_("<b>Information</b>"));
+
+	create_entry(rdf::dc("title"), _("<i>Title:</i>"), 0);
+	create_entry(rdf::dc("creator"), _("<i>Author:</i>"), 1);
+	create_entry(rdf::dc("publisher"), _("<i>Publisher:</i>"), 2);
+	create_entry(rdf::dc("description"), _("<i>Description:</i>"), 3);
+	create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
 }
 
 void MetadataView::clear()
@@ -187,12 +195,14 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 
 void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelText, int row)
 {
-	Gtk::Label * label = Gtk::manage(new Gtk::Label(labelText));
+	Gtk::Label * label = Gtk::manage(new Gtk::Label());
 	Gtk::Label * value = Gtk::manage(new Gtk::Label());
 
 	values[aPredicate.str()] = std::make_pair(label, value);
 
 	label->set_alignment(0, 0);
+	label->set_markup(labelText);
+
 	value->set_alignment(0, 0);
 	value->set_line_wrap(true);
 

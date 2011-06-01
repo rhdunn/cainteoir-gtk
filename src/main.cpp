@@ -112,7 +112,7 @@ struct document : public cainteoir::document_events
 	std::tr1::shared_ptr<cainteoir::document> m_doc;
 };
 
-class MetadataView : public Gtk::VBox
+class MetadataView : public Gtk::ScrolledWindow
 {
 public:
 	MetadataView(cainteoir::languages & lang);
@@ -123,6 +123,7 @@ public:
 private:
 	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
 
+	Gtk::VBox container;
 	Gtk::Table metadata;
 	Gtk::Label header;
 	std::map<std::string, std::pair<Gtk::Label *, Gtk::Label *> > values;
@@ -134,10 +135,15 @@ MetadataView::MetadataView(cainteoir::languages & lang)
 	, header()
 	, languages(lang)
 {
-	pack_start(header, Gtk::PACK_SHRINK);
-	pack_start(metadata);
+	set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	set_border_width(6);
+	add(container);
+	container.pack_start(header, Gtk::PACK_SHRINK);
+	container.pack_start(metadata);
+
+	((Gtk::Viewport *)get_child())->set_shadow_type(Gtk::SHADOW_NONE);
+
+	container.set_border_width(6);
 	metadata.set_border_width(4);
 
 	header.set_alignment(0, 0);
@@ -274,7 +280,7 @@ Cainteoir::Cainteoir()
 	, languages("en")
 {
 	set_title(_("Cainteoir Text-to-Speech"));
-	set_size_request(600, 400);
+	set_size_request(550, 400);
 
 	content.set_border_width(6);
 

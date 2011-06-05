@@ -27,6 +27,8 @@
 #include <locale.h>
 #include <map>
 
+static const int CHARACTERS_PER_WORD = 6;
+
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
@@ -120,6 +122,8 @@ public:
 	void clear();
 
 	void add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate);
+
+	void add_metadata(const rdf::uri & aPredicate, const char * value);
 private:
 	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
 
@@ -154,6 +158,7 @@ MetadataView::MetadataView(cainteoir::languages & lang)
 	create_entry(rdf::dc("publisher"), _("<i>Publisher:</i>"), 2);
 	create_entry(rdf::dc("description"), _("<i>Description:</i>"), 3);
 	create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
+	create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
 }
 
 void MetadataView::clear()
@@ -197,6 +202,11 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 				values[aPredicate.str()].second->set_label(author);
 		}
 	}
+}
+
+void MetadataView::add_metadata(const rdf::uri & aPredicate, const char * value)
+{
+	values[aPredicate.str()].second->set_label(value);
 }
 
 void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelText, int row)
@@ -589,6 +599,11 @@ bool Cainteoir::load_document(std::string filename)
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("publisher"));
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("description"));
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("language"));
+
+			std::ostringstream length;
+			length << (doc.m_doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
+
+			metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
 			readAction->set_sensitive(true);
 			return true;

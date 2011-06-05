@@ -28,6 +28,7 @@
 #include <map>
 
 static const int CHARACTERS_PER_WORD = 6;
+static const int WORDS_PER_MINUTE = 170;
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
@@ -43,6 +44,11 @@ void format_time(char *s, int n, double seconds)
 	minutes = minutes - (hours * 60.0);
 
 	snprintf(s, n, "%02d:%02d:%02d.%01d", hours, minutes, (int)floor(seconds), ms);
+}
+
+inline double estimate_time(size_t text_length)
+{
+	return (double)text_length / CHARACTERS_PER_WORD / WORDS_PER_MINUTE * 60.0;
 }
 
 void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
@@ -378,7 +384,7 @@ Cainteoir::Cainteoir()
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
 	box.pack_start(content);
 
-	updateProgress(0.0, 0.0, 0.0);
+	updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
 
 	show_all_children();
 
@@ -553,7 +559,7 @@ bool Cainteoir::on_speaking()
 	speech.reset();
 	out.reset();
 
-	updateProgress(0.0, 0.0, 0.0);
+	updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
 
 	state.set_label(_("stopped"));
 
@@ -604,6 +610,8 @@ bool Cainteoir::load_document(std::string filename)
 			length << (doc.m_doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
 
 			metadata.add_metadata(rdf::tts("length"), length.str().c_str());
+
+			updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
 
 			readAction->set_sensitive(true);
 			return true;

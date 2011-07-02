@@ -97,14 +97,14 @@ public:
 	TocModel()
 	{
 		add(title);
-		add(href);
-		add(ref);
+		add(location);
 	}
 
 	Gtk::TreeModelColumn<Glib::ustring> title;
-	Gtk::TreeModelColumn<Glib::ustring> href;
-	Gtk::TreeModelColumn<Glib::ustring> ref;
+	Gtk::TreeModelColumn<rdf::uri> location;
 };
+
+typedef std::pair<const rdf::uri, const rdf::uri> TocSelection;
 
 class TocPane : public Gtk::TreeView
 {
@@ -114,6 +114,22 @@ public:
 	void clear();
 
 	void add(int depth, const rdf::uri &location, const std::string &title);
+
+	TocSelection selection() const
+	{
+		std::vector<Gtk::TreePath> selected = get_selection()->get_selected_rows();
+		switch (selected.size())
+		{
+		case 0:
+			return TocSelection(rdf::uri(), rdf::uri());
+		case 1:
+			return TocSelection((*data->get_iter(selected.front()))[model.location],
+			                    rdf::uri());
+		default:
+			return TocSelection((*data->get_iter(selected.front()))[model.location],
+			                    (*data->get_iter(selected.back()))[model.location]);
+		}
+	}
 private:
 	Gtk::Label header;
 	Gtk::TreeView view;
@@ -127,6 +143,9 @@ TocPane::TocPane()
 	data = Gtk::ListStore::create(model);
 	set_model(data);
 	append_column(_("Contents"), model.title);
+
+	get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+	set_rubber_banding();
 }
 
 void TocPane::clear()
@@ -138,9 +157,12 @@ void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
 {
 	Gtk::TreeModel::Row row = *data->append();
 	row[model.title] = title;
-	row[model.href] = location.ns;
-	row[model.ref] = location.ref;
+	row[model.location] = location;
 }
+
+typedef std::pair<cainteoir::document::list_type::const_iterator,
+                  cainteoir::document::list_type::const_iterator>
+        document_selection;
 
 struct document : public cainteoir::document_events
 {
@@ -170,6 +192,11 @@ struct document : public cainteoir::document_events
 		toc.add(depth, location, title);
 	}
 
+	void anchor(const rdf::uri &location)
+	{
+		m_anchors[location.str()] = m_doc->children().size();
+	}
+
 	void clear()
 	{
 		m_doc->clear();
@@ -177,12 +204,45 @@ struct document : public cainteoir::document_events
 		toc.clear();
 	}
 
+	document_selection selection() const;
+
 	std::tr1::shared_ptr<const rdf::uri> subject;
 	rdf::graph m_metadata;
 	cainteoir::tts::engines tts;
 	std::tr1::shared_ptr<cainteoir::document> m_doc;
+	std::map<std::string, size_t> m_anchors;
 	TocPane toc;
 };
+
+document_selection document::selection() const
+{
+	auto first = m_doc->children().begin();
+	auto last  = m_doc->children().end();
+
+	TocSelection selection = toc.selection();
+
+	if (!selection.first.empty())
+	{
+		auto anchor = m_anchors.find(selection.first.str());
+		if (anchor != m_anchors.end())
+		{
+			first = m_doc->children().begin();
+			std::advance(first, anchor->second);
+		}
+	}
+
+	if (!selection.second.empty())
+	{
+		auto anchor = m_anchors.find(selection.second.str());
+		if (anchor != m_anchors.end())
+		{
+			last = m_doc->children().begin();
+			std::advance(last, anchor->second);
+		}
+	}
+
+	return document_selection(first, last);
+}
 
 class MetadataView : public Gtk::ScrolledWindow
 {
@@ -600,7 +660,8 @@ void Cainteoir::on_record()
 
 void Cainteoir::on_speak(const char * status)
 {
-	speech = doc.tts.speak(doc.m_doc, out, 0);
+	document_selection selection = doc.selection();
+	speech = doc.tts.speak(doc.m_doc, out, selection.first, selection.second);
 
 	readAction->set_visible(false);
 	stopAction->set_visible(true);

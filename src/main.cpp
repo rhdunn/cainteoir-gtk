@@ -694,6 +694,16 @@ bool Cainteoir::load_document(std::string filename)
 			recentManager->add_item("file://" + filename);
 
 			std::string mimetype = rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::tts("mimetype"));
+			std::string title    = rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("title"));
+
+			if (title.empty())
+				set_title(_("Cainteoir Text-to-Speech"));
+			else
+			{
+				char buf[1024];
+				snprintf(buf, sizeof(buf), _("%1$s - Cainteoir Text-to-Speech"), title.c_str());
+				set_title(buf);
+			}
 
 			settings("document.filename") = filename;
 			if (!mimetype.empty())

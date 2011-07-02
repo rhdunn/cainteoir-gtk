@@ -91,6 +91,57 @@ rdf::literal & application_settings::operator()(const std::string & name, const 
 	return value;
 }
 
+class TocModel : public Gtk::TreeModelColumnRecord
+{
+public:
+	TocModel()
+	{
+		add(title);
+		add(href);
+		add(ref);
+	}
+
+	Gtk::TreeModelColumn<Glib::ustring> title;
+	Gtk::TreeModelColumn<Glib::ustring> href;
+	Gtk::TreeModelColumn<Glib::ustring> ref;
+};
+
+class TocPane : public Gtk::TreeView
+{
+public:
+	TocPane();
+
+	void clear();
+
+	void add(int depth, const rdf::uri &location, const std::string &title);
+private:
+	Gtk::Label header;
+	Gtk::TreeView view;
+
+	TocModel model;
+	Glib::RefPtr<Gtk::ListStore> data;
+};
+
+TocPane::TocPane()
+{
+	data = Gtk::ListStore::create(model);
+	set_model(data);
+	append_column(_("Contents"), model.title);
+}
+
+void TocPane::clear()
+{
+	data->clear();
+}
+
+void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
+{
+	Gtk::TreeModel::Row row = *data->append();
+	row[model.title] = title;
+	row[model.href] = location.ns;
+	row[model.ref] = location.ref;
+}
+
 struct document : public cainteoir::document_events
 {
 	document()
@@ -114,10 +165,23 @@ struct document : public cainteoir::document_events
 		m_doc->add(aText);
 	}
 
+	void toc_entry(int depth, const rdf::uri &location, const std::string &title)
+	{
+		toc.add(depth, location, title);
+	}
+
+	void clear()
+	{
+		m_doc->clear();
+		subject.reset();
+		toc.clear();
+	}
+
 	std::tr1::shared_ptr<const rdf::uri> subject;
 	rdf::graph m_metadata;
 	cainteoir::tts::engines tts;
 	std::tr1::shared_ptr<cainteoir::document> m_doc;
+	TocPane toc;
 };
 
 class MetadataView : public Gtk::ScrolledWindow
@@ -255,6 +319,8 @@ private:
 	Gtk::VBox box;
 	Gtk::VBox content;
 	Gtk::HBox mediabar;
+
+	Gtk::HPaned pane;
 	MetadataView metadata;
 
 	Gtk::HBox statusbar;
@@ -296,7 +362,7 @@ Cainteoir::Cainteoir()
 	, languages("en")
 {
 	set_title(_("Cainteoir Text-to-Speech"));
-	set_size_request(550, 400);
+	set_size_request(700, 445);
 
 	content.set_border_width(6);
 
@@ -376,8 +442,13 @@ Cainteoir::Cainteoir()
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 
+	pane.add1(doc.toc);
+	pane.add2(metadata);
+
+	pane.set_position(150);
+
 	content.pack_start(mediabar, Gtk::PACK_SHRINK);
-	content.pack_start(metadata);
+	content.pack_start(pane);
 	content.pack_start(statusbar, Gtk::PACK_SHRINK);
 
 	add(box);
@@ -580,8 +651,7 @@ bool Cainteoir::load_document(std::string filename)
 
 	readAction->set_sensitive(false);
 
-	doc.m_doc->clear();
-	doc.subject.reset();
+	doc.clear();
 	metadata.clear();
 
 	try

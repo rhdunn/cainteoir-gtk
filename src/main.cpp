@@ -160,10 +160,6 @@ void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
 	row[model.location] = location;
 }
 
-typedef std::pair<cainteoir::document::list_type::const_iterator,
-                  cainteoir::document::list_type::const_iterator>
-        document_selection;
-
 struct document : public cainteoir::document_events
 {
 	document()
@@ -194,7 +190,7 @@ struct document : public cainteoir::document_events
 
 	void anchor(const rdf::uri &location)
 	{
-		m_anchors[location.str()] = m_doc->children().size();
+		m_doc->add_anchor(location);
 	}
 
 	void clear()
@@ -204,45 +200,17 @@ struct document : public cainteoir::document_events
 		toc.clear();
 	}
 
-	document_selection selection() const;
+	cainteoir::document::range_type selection() const
+	{
+		return m_doc->children(toc.selection());
+	}
 
 	std::tr1::shared_ptr<const rdf::uri> subject;
 	rdf::graph m_metadata;
 	cainteoir::tts::engines tts;
 	std::tr1::shared_ptr<cainteoir::document> m_doc;
-	std::map<std::string, size_t> m_anchors;
 	TocPane toc;
 };
-
-document_selection document::selection() const
-{
-	auto first = m_doc->children().begin();
-	auto last  = m_doc->children().end();
-
-	TocSelection selection = toc.selection();
-
-	if (!selection.first.empty())
-	{
-		auto anchor = m_anchors.find(selection.first.str());
-		if (anchor != m_anchors.end())
-		{
-			first = m_doc->children().begin();
-			std::advance(first, anchor->second);
-		}
-	}
-
-	if (!selection.second.empty())
-	{
-		auto anchor = m_anchors.find(selection.second.str());
-		if (anchor != m_anchors.end())
-		{
-			last = m_doc->children().begin();
-			std::advance(last, anchor->second);
-		}
-	}
-
-	return document_selection(first, last);
-}
 
 class MetadataView : public Gtk::ScrolledWindow
 {
@@ -660,7 +628,7 @@ void Cainteoir::on_record()
 
 void Cainteoir::on_speak(const char * status)
 {
-	document_selection selection = doc.selection();
+	cainteoir::document::range_type selection = doc.selection();
 	speech = doc.tts.speak(doc.m_doc, out, selection.first, selection.second);
 
 	readAction->set_visible(false);

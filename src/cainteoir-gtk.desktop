@@ -1,0 +1,15 @@
+[Desktop Entry]
+
+Name=Cainteoir
+GenericName=Document Reader
+X-GNOME-FullName=Cainteoir Text-to-Speech
+Comment=Listen to and record text documents
+
+Exec=cainteoir-gtk %f
+Terminal=false
+StartupNotify=true
+
+Type=Application
+
+Categories=AudioVideo;Audio;
+MimeType=text/plain;text/html;application/xhtml+xml;application/epub+zip;text/x-mail;message/rfc822;multipart/related;multipart/mixed;application/rtf;application/x-gzip;

@@ -91,6 +91,9 @@ EXTRA_DIST += ChangeLog
 
 ############################# applications ####################################
 
+desktopdir = $(datadir)/applications
+desktop_DATA = src/cainteoir-gtk.desktop
+
 bin_PROGRAMS += src/cainteoir-gtk
 
 src_cainteoir_gtk_SOURCES = src/main.cpp

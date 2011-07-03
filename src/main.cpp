@@ -126,8 +126,16 @@ public:
 			return TocSelection((*data->get_iter(selected.front()))[model.location],
 			                    rdf::uri());
 		default:
-			return TocSelection((*data->get_iter(selected.front()))[model.location],
-			                    (*data->get_iter(selected.back()))[model.location]);
+			{
+				auto end = data->get_iter(selected.back());
+				++end;
+				if (end == data->children().end())
+					return TocSelection((*data->get_iter(selected.front()))[model.location],
+				                    rdf::uri());
+				else
+					return TocSelection((*data->get_iter(selected.front()))[model.location],
+					                    (*end)[model.location]);
+			}
 		}
 	}
 private:

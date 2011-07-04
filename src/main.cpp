@@ -373,6 +373,9 @@ public:
 
 	bool load_document(std::string filename);
 protected:
+	bool on_window_state_changed(GdkEventWindowState *event);
+	bool on_delete(GdkEventAny *event);
+
 	void on_open_document();
 	void on_recent_files_dialog();
 	void on_recent_file(Gtk::RecentChooserMenu * recent);
@@ -433,7 +436,15 @@ Cainteoir::Cainteoir(const char *filename)
 	, settings(get_user_file("settings.dat"))
 {
 	set_title(_("Cainteoir Text-to-Speech"));
-	set_size_request(700, 445);
+	set_size_request(500, 300);
+
+	resize(settings("window.width",  700).as<int>(), settings("window.height", 445).as<int>());
+	move(settings("window.left", 0).as<int>(), settings("window.top",  0).as<int>());
+	if (settings("window.maximized", "false").as<std::string>() == "true")
+		maximize();
+
+	signal_window_state_event().connect(sigc::mem_fun(*this, &Cainteoir::on_window_state_changed));
+	signal_delete_event().connect(sigc::mem_fun(*this, &Cainteoir::on_delete));
 
 	content.set_border_width(6);
 
@@ -536,6 +547,19 @@ Cainteoir::Cainteoir(const char *filename)
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
 }
 
+bool Cainteoir::on_window_state_changed(GdkEventWindowState *event)
+{
+	settings("window.maximized") = (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) ? "true" : "false";
+	settings.save();
+	return true;
+}
+
+bool Cainteoir::on_delete(GdkEventAny *event)
+{
+	on_quit();
+	return true;
+}
+
 void Cainteoir::on_open_document()
 {
 	Gtk::FileChooserDialog dialog(_("Open Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -603,6 +627,23 @@ void Cainteoir::on_quit()
 {
 	if (speech)
 		speech->stop();
+
+	if (settings("window.maximized", "false").as<std::string>() == "false")
+	{
+		int width = 0;
+		int height = 0;
+		int top = 0;
+		int left = 0;
+
+		get_position(left, top);
+		get_size(width, height);
+
+		settings("window.width")  = width;
+		settings("window.height") = height;
+		settings("window.top")    = top;
+		settings("window.left")   = left;
+		settings.save();
+	}
 
 	hide();
 }

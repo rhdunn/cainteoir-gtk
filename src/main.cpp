@@ -25,13 +25,25 @@
 #include <cainteoir/platform.hpp>
 #include <cainteoir/languages.hpp>
 #include <locale.h>
+#include <fstream>
 #include <map>
+
+#include <sys/stat.h>
+#include <sys/types.h>
 
 static const int CHARACTERS_PER_WORD = 6;
 static const int WORDS_PER_MINUTE = 170;
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
+
+std::string get_user_file(const char * filename)
+{
+	std::string root = getenv("HOME") + std::string("/.cainteoir");
+	mkdir(root.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IROTH);
+
+	return root + "/" + std::string(filename);
+}
 
 void format_time(char *s, int n, double seconds)
 {
@@ -73,10 +85,32 @@ void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetada
 class application_settings
 {
 public:
+	application_settings(const std::string &aFilename);
+
+	void save();
+
 	rdf::literal & operator()(const std::string & name, const rdf::literal & default_value = rdf::literal());
 private:
 	std::map<std::string, rdf::literal> values;
+	std::string filename;
 };
+
+application_settings::application_settings(const std::string &aFilename)
+	: filename(aFilename)
+{
+	std::ifstream is(filename.c_str());
+	std::string key;
+	std::string value;
+	while (std::getline(is, key, '=') && std::getline(is, value))
+		values[key] = rdf::literal(value);
+}
+
+void application_settings::save()
+{
+	std::ofstream os(filename.c_str());
+	for (auto item = values.begin(), last = values.end(); item != last; ++item)
+		os << item->first << '=' << item->second.value << std::endl;
+}
 
 rdf::literal & application_settings::operator()(const std::string & name, const rdf::literal & default_value)
 {
@@ -335,7 +369,7 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 class Cainteoir : public Gtk::Window
 {
 public:
-	Cainteoir();
+	Cainteoir(const char *filename);
 
 	bool load_document(std::string filename);
 protected:
@@ -389,13 +423,14 @@ private:
 	application_settings settings;
 };
 
-Cainteoir::Cainteoir()
+Cainteoir::Cainteoir(const char *filename)
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
 	, metadata(languages)
 	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
 	, open(Gtk::Stock::OPEN)
 	, languages("en")
+	, settings(get_user_file("settings.dat"))
 {
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(700, 445);
@@ -497,6 +532,8 @@ Cainteoir::Cainteoir()
 
 	readAction->set_sensitive(false);
 	stopAction->set_visible(false);
+
+	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
 }
 
 void Cainteoir::on_open_document()
@@ -629,6 +666,7 @@ void Cainteoir::on_record()
 
 	settings("recording.filename") = filename;
 	settings("recordig.mimetype") = mimetype;
+	settings.save();
 
 	out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
 	on_speak(_("recording"));
@@ -684,7 +722,7 @@ bool Cainteoir::on_speaking()
 
 bool Cainteoir::load_document(std::string filename)
 {
-	if (speech) return false;
+	if (speech || filename.empty()) return false;
 
 	readAction->set_sensitive(false);
 
@@ -716,6 +754,7 @@ bool Cainteoir::load_document(std::string filename)
 			settings("document.filename") = filename;
 			if (!mimetype.empty())
 				settings("document.mimetype") = mimetype;
+			settings.save();
 
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("title"));
 			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("creator"));
@@ -772,10 +811,7 @@ int main(int argc, char ** argv)
 
 	Gtk::Main app(argc, argv);
 
-	Cainteoir window;
-	if (argc > 1)
-		window.load_document(argv[1]);
-
+	Cainteoir window(argc > 1 ? argv[1] : NULL);
 	Gtk::Main::run(window);
 
 	cainteoir::cleanup();

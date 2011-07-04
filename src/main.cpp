@@ -527,7 +527,7 @@ Cainteoir::Cainteoir(const char *filename)
 	pane.add1(doc.toc);
 	pane.add2(metadata);
 
-	pane.set_position(150);
+	pane.set_position(settings("toc.width", 150).as<int>());
 
 	content.pack_start(mediabar, Gtk::PACK_SHRINK);
 	content.pack_start(pane);
@@ -628,6 +628,7 @@ void Cainteoir::on_quit()
 	if (speech)
 		speech->stop();
 
+	settings("toc.width") = pane.get_position();
 	if (settings("window.maximized", "false").as<std::string>() == "false")
 	{
 		int width = 0;
@@ -642,8 +643,8 @@ void Cainteoir::on_quit()
 		settings("window.height") = height;
 		settings("window.top")    = top;
 		settings("window.left")   = left;
-		settings.save();
 	}
+	settings.save();
 
 	hide();
 }

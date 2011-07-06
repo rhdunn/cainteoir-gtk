@@ -254,51 +254,38 @@ struct document : public cainteoir::document_events
 	TocPane toc;
 };
 
-class MetadataView : public Gtk::ScrolledWindow
+class MetadataView : public Gtk::VBox
 {
 public:
-	MetadataView(cainteoir::languages & lang);
+	MetadataView(cainteoir::languages & lang, const char *label, int rows);
 
 	void clear();
 
 	void add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate);
 
 	void add_metadata(const rdf::uri & aPredicate, const char * value);
-private:
+
 	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
 
-	Gtk::VBox container;
-	Gtk::Table metadata;
+private:
 	Gtk::Label header;
+	Gtk::Table metadata;
 	std::map<std::string, std::pair<Gtk::Label *, Gtk::Label *> > values;
 	cainteoir::languages & languages;
 };
 
-MetadataView::MetadataView(cainteoir::languages & lang)
-	: metadata(5, 2, false)
-	, header()
+MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int rows)
+	: metadata(rows, 2, false)
 	, languages(lang)
 {
-	set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	pack_start(header, Gtk::PACK_SHRINK);
+	pack_start(metadata, Gtk::PACK_SHRINK);
 
-	add(container);
-	container.pack_start(header, Gtk::PACK_SHRINK);
-	container.pack_start(metadata);
-
-	((Gtk::Viewport *)get_child())->set_shadow_type(Gtk::SHADOW_NONE);
-
-	container.set_border_width(6);
+	set_border_width(6);
 	metadata.set_border_width(4);
 
 	header.set_alignment(0, 0);
-	header.set_markup(_("<b>Information</b>"));
-
-	create_entry(rdf::dc("title"), _("<i>Title:</i>"), 0);
-	create_entry(rdf::dc("creator"), _("<i>Author:</i>"), 1);
-	create_entry(rdf::dc("publisher"), _("<i>Publisher:</i>"), 2);
-	create_entry(rdf::dc("description"), _("<i>Description:</i>"), 3);
-	create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
-	create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
+	header.set_markup(label);
 }
 
 void MetadataView::clear()
@@ -394,7 +381,10 @@ private:
 	Gtk::HBox mediabar;
 
 	Gtk::HPaned pane;
-	MetadataView metadata;
+
+	Gtk::ScrolledWindow scrolledView;
+	Gtk::VBox view;
+	MetadataView doc_metadata;
 
 	Gtk::HBox statusbar;
 	Gtk::Label state;
@@ -428,7 +418,7 @@ private:
 
 Cainteoir::Cainteoir(const char *filename)
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
-	, metadata(languages)
+	, doc_metadata(languages, _("<b>Document</b>"), 5)
 	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
 	, open(Gtk::Stock::OPEN)
@@ -524,8 +514,20 @@ Cainteoir::Cainteoir(const char *filename)
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 
+	doc_metadata.create_entry(rdf::dc("title"), _("<i>Title:</i>"), 0);
+	doc_metadata.create_entry(rdf::dc("creator"), _("<i>Author:</i>"), 1);
+	doc_metadata.create_entry(rdf::dc("publisher"), _("<i>Publisher:</i>"), 2);
+	doc_metadata.create_entry(rdf::dc("description"), _("<i>Description:</i>"), 3);
+	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
+	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
+	view.pack_start(doc_metadata, Gtk::PACK_SHRINK);
+
+	scrolledView.add(view);
+	scrolledView.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	((Gtk::Viewport *)scrolledView.get_child())->set_shadow_type(Gtk::SHADOW_NONE);
+
 	pane.add1(doc.toc);
-	pane.add2(metadata);
+	pane.add2(scrolledView);
 
 	pane.set_position(settings("toc.width", 150).as<int>());
 
@@ -769,7 +771,7 @@ bool Cainteoir::load_document(std::string filename)
 	readAction->set_sensitive(false);
 
 	doc.clear();
-	metadata.clear();
+	doc_metadata.clear();
 
 	try
 	{
@@ -798,16 +800,16 @@ bool Cainteoir::load_document(std::string filename)
 				settings("document.mimetype") = mimetype;
 			settings.save();
 
-			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("title"));
-			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("creator"));
-			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("publisher"));
-			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("description"));
-			metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("language"));
+			doc_metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("title"));
+			doc_metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("creator"));
+			doc_metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("publisher"));
+			doc_metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("description"));
+			doc_metadata.add_metadata(doc.m_metadata, *doc.subject, rdf::dc("language"));
 
 			std::ostringstream length;
 			length << (doc.m_doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
 
-			metadata.add_metadata(rdf::tts("length"), length.str().c_str());
+			doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
 			updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
 

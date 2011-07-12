@@ -65,17 +65,17 @@ inline double estimate_time(size_t text_length)
 
 void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
 {
-	rql::results formats = rql::select(
-		rql::select(aMetadata, rql::predicate, rdf::rdf("type")),
-		rql::object, rdf::tts("DocumentFormat"));
+	rql::results formats = rql::select(aMetadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
 		const rdf::uri * uri = rql::subject(*format);
 
-		rql::results mimetypes = rql::select(
-			rql::select(aMetadata, rql::predicate, rdf::tts("mimetype")),
-			rql::subject, *uri);
+		rql::results mimetypes = rql::select(aMetadata,
+			rql::both(rql::matches(rql::predicate, rdf::tts("mimetype")),
+			          rql::matches(rql::subject, *uri)));
 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
 			filter.add_mime_type(rql::value(*mimetype));
@@ -296,7 +296,7 @@ void MetadataView::clear()
 
 void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
 {
-	rql::results selection = rql::select(aMetadata, rql::subject, aUri);
+	rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, aUri));
 	for(auto query = selection.begin(), last = selection.end(); query != last; ++query)
 	{
 		const std::string &object = rql::value(*query);
@@ -315,7 +315,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 			std::string role;
 			std::string author;
 
-			rql::results selection = rql::select(aMetadata, rql::subject, *rql::object(*query).as<rdf::bnode>());
+			rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, *rql::object(*query).as<rdf::bnode>()));
 			for(auto data = selection.begin(), last = selection.end(); data != last; ++data)
 			{
 				const std::string &object = rql::value(*data);
@@ -570,22 +570,20 @@ void Cainteoir::on_open_document()
 	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	dialog.set_filename(settings("document.filename").as<std::string>());
 
-	rql::results formats = rql::select(
-		rql::select(doc.m_metadata, rql::predicate, rdf::rdf("type")),
-		rql::object, rdf::tts("DocumentFormat"));
+	rql::results formats = rql::select(doc.m_metadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
 	std::string default_mimetype = settings("document.mimetype", "text/plain").as<std::string>();
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		const rdf::uri * uri = rql::subject(*format);
+		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
 		Gtk::FileFilter filter;
-		filter.set_name(rql::select_value<std::string>(doc.m_metadata, *uri, rdf::dc("title")));
+		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
 
-		rql::results mimetypes = rql::select(
-			rql::select(doc.m_metadata, rql::predicate, rdf::tts("mimetype")),
-			rql::subject, *uri);
+		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
 		bool active_filter = false;
 		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
@@ -667,22 +665,20 @@ void Cainteoir::on_record()
 	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	dialog.set_filename(settings("recording.filename").as<std::string>());
 
-	rql::results formats = rql::select(
-		rql::select(doc.m_metadata, rql::predicate, rdf::rdf("type")),
-		rql::object, rdf::tts("AudioFormat"));
+	rql::results formats = rql::select(doc.m_metadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object, rdf::tts("AudioFormat"))));
 
 	std::string default_mimetype = settings("recording.mimetype", "audio/ogg").as<std::string>();
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		const rdf::uri * uri = rql::subject(*format);
+		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
 		Gtk::FileFilter filter;
-		filter.set_name(rql::select_value<std::string>(doc.m_metadata, *uri, rdf::dc("title")));
+		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
 
-		rql::results mimetypes = rql::select(
-			rql::select(doc.m_metadata, rql::predicate, rdf::tts("mimetype")),
-			rql::subject, *uri);
+		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
 		bool active_filter = false;
 		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
@@ -783,8 +779,9 @@ bool Cainteoir::load_document(std::string filename)
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 			recentManager->add_item("file://" + filename);
 
-			std::string mimetype = rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::tts("mimetype"));
-			std::string title    = rql::select_value<std::string>(doc.m_metadata, *doc.subject, rdf::dc("title"));
+			rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, *doc.subject));
+			std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
+			std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
 			if (title.empty())
 				set_title(_("Cainteoir Text-to-Speech"));

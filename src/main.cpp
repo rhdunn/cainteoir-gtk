@@ -314,11 +314,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 			}
 			else
 			{
-				rql::results selection;
-				if (object.as<rdf::bnode>())
-					selection = rql::select(aMetadata, rql::matches(rql::subject, *object.as<rdf::bnode>()));
-				else if (object.as<rdf::uri>())
-					selection = rql::select(aMetadata, rql::matches(rql::subject, *object.as<rdf::uri>()));
+				rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, object));
 
 				if (rql::predicate(*query).as<rdf::uri>()->ref == "creator" && aPredicate == rdf::dc("creator"))
 				{
@@ -603,7 +599,7 @@ void Cainteoir::on_open_document()
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, *rql::subject(*format).as<rdf::uri>()));
+		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
 		Gtk::FileFilter filter;
 		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
@@ -698,7 +694,7 @@ void Cainteoir::on_record()
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, *rql::subject(*format).as<rdf::uri>()));
+		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
 		Gtk::FileFilter filter;
 		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));

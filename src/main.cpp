@@ -603,7 +603,7 @@ void Cainteoir::on_open_document()
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
+		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, *rql::subject(*format).as<rdf::uri>()));
 
 		Gtk::FileFilter filter;
 		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
@@ -698,7 +698,7 @@ void Cainteoir::on_record()
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
+		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, *rql::subject(*format).as<rdf::uri>()));
 
 		Gtk::FileFilter filter;
 		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));

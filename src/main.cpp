@@ -422,7 +422,6 @@ private:
 	Gtk::RecentFilter recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
 	Glib::RefPtr<Gtk::Action> recentAction;
-	Glib::RefPtr<Gtk::Action> recentDialogAction;
 
 	Gtk::MenuToolButton open;
 
@@ -469,7 +468,6 @@ Cainteoir::Cainteoir(const char *filename)
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
 	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	actions->add(recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Files")));
-	actions->add(recentDialogAction = Gtk::Action::create("FileRecentDialog", _("Recent Files _Dialog")), sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
 	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::on_quit));
 
 	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
@@ -486,7 +484,6 @@ Cainteoir::Cainteoir(const char *filename)
 		"		<menu action='FileMenu'>"
 		"			<menuitem action='FileOpen'/>"
 		"			<menuitem action='FileRecentFiles'/>"
-		"			<menuitem action='FileRecentDialog'/>"
 		"			<separator/>"
 		"			<menuitem action='FileQuit'/>"
 		"		</menu>"
@@ -732,7 +729,6 @@ void Cainteoir::on_speak(const char * status)
 	open.set_sensitive(false);
 	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
-	recentDialogAction->set_sensitive(false);
 
 	state.set_label(status);
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
@@ -765,7 +761,6 @@ bool Cainteoir::on_speaking()
 	open.set_sensitive(true);
 	openAction->set_sensitive(true);
 	recentAction->set_sensitive(true);
-	recentDialogAction->set_sensitive(true);
 
 	return false;
 }
@@ -854,12 +849,23 @@ void Cainteoir::updateProgress(double elapsed, double total, double completed)
 
 Gtk::Menu *Cainteoir::create_file_chooser_menu()
 {
-	Gtk::RecentChooserMenu * recent = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
+	Gtk::RecentChooserMenu *recent = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
+
 	recent->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recent));
 	recent->set_show_numbers(true);
 	recent->set_sort_type(Gtk::RECENT_SORT_MRU);
 	recent->set_filter(recentFilter);
 	recent->set_limit(6);
+
+	Gtk::MenuItem *separator = Gtk::manage(new Gtk::SeparatorMenuItem());
+	recent->append(*separator);
+	separator->show();
+
+	Gtk::MenuItem *more = Gtk::manage(new Gtk::MenuItem(_("_More..."), true));
+	more->signal_activate().connect(sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
+	recent->append(*more);
+	more->show();
+
 	return recent;
 }
 

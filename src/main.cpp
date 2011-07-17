@@ -396,6 +396,7 @@ protected:
 	bool on_speaking();
 private:
 	void updateProgress(double elapsed, double total, double completed);
+	Gtk::Menu *create_file_chooser_menu();
 
 	Gtk::VBox box;
 	Gtk::VBox content;
@@ -502,29 +503,15 @@ Cainteoir::Cainteoir(const char *filename)
 		"	</toolbar>"
 		"</ui>");
 
-	Gtk::RecentChooserMenu * recentToolbar = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
-	recentToolbar->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recentToolbar));
-	recentToolbar->set_show_numbers(true);
-	recentToolbar->set_sort_type(Gtk::RECENT_SORT_MRU);
-	recentToolbar->set_filter(recentFilter);
-	recentToolbar->set_limit(6);
-
 	Gtk::Toolbar * toolbar = dynamic_cast<Gtk::Toolbar *>(uiManager->get_widget("/ToolBar"));
 	toolbar->set_show_arrow(false);
 
 	open.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	open.set_menu(*recentToolbar);
+	open.set_menu(*create_file_chooser_menu());
 	toolbar->insert(open, -1);
 
-	Gtk::RecentChooserMenu * recentMenu = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
-	recentMenu->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recentMenu));
-	recentMenu->set_show_numbers(true);
-	recentMenu->set_sort_type(Gtk::RECENT_SORT_MRU);
-	recentMenu->set_filter(recentFilter);
-	recentMenu->set_limit(6);
-
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
-	openRecent->set_submenu(*recentMenu);
+	openRecent->set_submenu(*create_file_chooser_menu());
 
 	progressAlignment.add(progress);
 
@@ -863,6 +850,17 @@ void Cainteoir::updateProgress(double elapsed, double total, double completed)
 
 	elapsedTime.set_text(elapsed_time);
 	totalTime.set_text(total_time);
+}
+
+Gtk::Menu *Cainteoir::create_file_chooser_menu()
+{
+	Gtk::RecentChooserMenu * recent = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
+	recent->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recent));
+	recent->set_show_numbers(true);
+	recent->set_sort_type(Gtk::RECENT_SORT_MRU);
+	recent->set_filter(recentFilter);
+	recent->set_limit(6);
+	return recent;
 }
 
 int main(int argc, char ** argv)

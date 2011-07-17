@@ -627,7 +627,7 @@ void Cainteoir::on_open_document()
 void Cainteoir::on_recent_files_dialog()
 {
 	Gtk::RecentChooserDialog dialog(*this, _("Recent Files"), recentManager);
-	dialog.add_button(_("Select Document"), Gtk::RESPONSE_OK);
+	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
 	dialog.set_filter(recentFilter);
@@ -683,7 +683,7 @@ void Cainteoir::on_record()
 	Gtk::FileChooserDialog dialog(_("Record Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(_("Record"), Gtk::RESPONSE_OK);
+	dialog.add_button(Gtk::Stock::MEDIA_RECORD, Gtk::RESPONSE_OK);
 	dialog.set_filename(settings("recording.filename").as<std::string>());
 
 	rql::results formats = rql::select(doc.m_metadata,

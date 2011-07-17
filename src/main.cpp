@@ -32,10 +32,10 @@
 #include <sys/types.h>
 
 static const int CHARACTERS_PER_WORD = 6;
-static const int WORDS_PER_MINUTE = 170;
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
+namespace tts = cainteoir::tts;
 
 std::string get_user_file(const char * filename)
 {
@@ -58,9 +58,9 @@ void format_time(char *s, int n, double seconds)
 	snprintf(s, n, "%02d:%02d:%02d.%01d", hours, minutes, (int)floor(seconds), ms);
 }
 
-inline double estimate_time(size_t text_length)
+inline double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parameter> aRate)
 {
-	return (double)text_length / CHARACTERS_PER_WORD / WORDS_PER_MINUTE * 60.0;
+	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
 }
 
 void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
@@ -560,7 +560,7 @@ Cainteoir::Cainteoir(const char *filename)
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
 	box.pack_start(content);
 
-	updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
+	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	show_all_children();
 
@@ -766,7 +766,7 @@ bool Cainteoir::on_speaking()
 	speech.reset();
 	out.reset();
 
-	updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
+	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	state.set_label(_("stopped"));
 
@@ -829,7 +829,7 @@ bool Cainteoir::load_document(std::string filename)
 
 			doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
-			updateProgress(0.0, estimate_time(doc.m_doc->text_length()), 0.0);
+			updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 			readAction->set_sensitive(true);
 			return true;

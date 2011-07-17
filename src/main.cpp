@@ -680,10 +680,10 @@ void Cainteoir::on_record()
 {
 	// TODO: Generate a default name from the file metadata ($(recording.basepath)/author - title.ogg)
 
-	Gtk::FileChooserDialog dialog(_("Open Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+	Gtk::FileChooserDialog dialog(_("Record Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+	dialog.add_button(_("Record"), Gtk::RESPONSE_OK);
 	dialog.set_filename(settings("recording.filename").as<std::string>());
 
 	rql::results formats = rql::select(doc.m_metadata,

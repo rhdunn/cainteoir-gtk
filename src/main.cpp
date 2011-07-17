@@ -742,6 +742,7 @@ void Cainteoir::on_speak(const char * status)
 	stopAction->set_visible(true);
 	recordAction->set_sensitive(false);
 
+	open.set_sensitive(false);
 	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
 	recentDialogAction->set_sensitive(false);
@@ -774,6 +775,7 @@ bool Cainteoir::on_speaking()
 	stopAction->set_visible(false);
 	recordAction->set_sensitive(true);
 
+	open.set_sensitive(true);
 	openAction->set_sensitive(true);
 	recentAction->set_sensitive(true);
 	recentDialogAction->set_sensitive(true);

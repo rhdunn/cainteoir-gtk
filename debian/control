@@ -1,0 +1,21 @@
+Source: cainteoir-gtk
+Section: sound
+Priority: extra
+Maintainer: Reece H. Dunn <msclrhd@gmail.com>
+Build-Depends: debhelper (>= 7.0.50~),
+               autoconf, automake, libtool, autopoint, gettext,
+               libcainteoir-dev
+Standards-Version: 3.9.1
+Vcs-Git: git://github.com/rhdunn/cainteoir-gtk.git
+Vcs-browser: https://github.com/rhdunn/cainteoir-gtk
+Homepage: http://rhdunn.github.com/cainteoir
+
+Package: cainteoir-gtk
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Graphical text-to-speech document reader and recorder.
+ Read and record different document formats (such as ePub and HTML) to various
+ audio output formats (such as PulseAudio, WAV and OGG/Vorbis).
+ .
+ This package provides the graphical front end for the Cainteoir Text-to-Speech
+ engine.

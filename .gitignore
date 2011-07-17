@@ -64,7 +64,7 @@ po/stamp-po
 
 # debian output:
 
-debian/tmp/
+debian/cainteoir-gtk/
 
 debian/*.debhelper.log
 debian/*.substvars

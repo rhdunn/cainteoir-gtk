@@ -101,6 +101,8 @@ src_cainteoir_gtk_SOURCES = \
 	src/settings.cpp \
 	src/toc.hpp \
 	src/toc.cpp \
+	src/voice_selection.hpp \
+	src/voice_selection.cpp \
 	src/main.cpp
 
 EXTRA_DIST += ${man1_MANS}

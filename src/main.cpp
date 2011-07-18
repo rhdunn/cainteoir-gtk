@@ -37,6 +37,8 @@ namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
 
+#include "toc.hpp"
+
 std::string get_user_file(const char * filename)
 {
 	std::string root = getenv("HOME") + std::string("/.cainteoir");
@@ -225,80 +227,6 @@ void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
 	parameterView.attach(*item.units, 2, 3, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
 
 	parameters.push_back(item);
-}
-
-class TocModel : public Gtk::TreeModelColumnRecord
-{
-public:
-	TocModel()
-	{
-		add(title);
-		add(location);
-	}
-
-	Gtk::TreeModelColumn<Glib::ustring> title;
-	Gtk::TreeModelColumn<rdf::uri> location;
-};
-
-typedef std::pair<const rdf::uri, const rdf::uri> TocSelection;
-
-class TocPane : public Gtk::TreeView
-{
-public:
-	TocPane();
-
-	void clear();
-
-	void add(int depth, const rdf::uri &location, const std::string &title);
-
-	TocSelection selection() const
-	{
-		std::vector<Gtk::TreePath> selected = get_selection()->get_selected_rows();
-		switch (selected.size())
-		{
-		case 0:
-			return TocSelection(rdf::uri(), rdf::uri());
-		case 1:
-			return TocSelection((*data->get_iter(selected.front()))[model.location],
-			                    rdf::uri());
-		default:
-			{
-				auto end = data->get_iter(selected.back());
-				++end;
-				if (end == data->children().end())
-					return TocSelection((*data->get_iter(selected.front()))[model.location],
-				                    rdf::uri());
-				else
-					return TocSelection((*data->get_iter(selected.front()))[model.location],
-					                    (*end)[model.location]);
-			}
-		}
-	}
-private:
-	TocModel model;
-	Glib::RefPtr<Gtk::ListStore> data;
-};
-
-TocPane::TocPane()
-{
-	data = Gtk::ListStore::create(model);
-	set_model(data);
-	append_column(_("Contents"), model.title);
-
-	get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
-	set_rubber_banding();
-}
-
-void TocPane::clear()
-{
-	data->clear();
-}
-
-void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
-{
-	Gtk::TreeModel::Row row = *data->append();
-	row[model.title] = title;
-	row[model.location] = location;
 }
 
 struct document : public cainteoir::document_events

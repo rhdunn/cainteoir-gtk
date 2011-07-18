@@ -25,8 +25,6 @@
 #include <cainteoir/platform.hpp>
 #include <cainteoir/languages.hpp>
 #include <locale.h>
-#include <fstream>
-#include <map>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -37,6 +35,7 @@ namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
 
+#include "settings.hpp"
 #include "toc.hpp"
 
 std::string get_user_file(const char * filename)
@@ -82,49 +81,6 @@ void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetada
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
 			filter.add_mime_type(rql::value(*mimetype));
 	}
-}
-
-class application_settings
-{
-public:
-	application_settings(const std::string &aFilename);
-
-	void save();
-
-	rdf::literal & operator()(const std::string & name, const rdf::literal & default_value = rdf::literal());
-private:
-	std::map<std::string, rdf::literal> values;
-	std::string filename;
-};
-
-application_settings::application_settings(const std::string &aFilename)
-	: filename(aFilename)
-{
-	std::ifstream is(filename.c_str());
-	std::string key;
-	std::string value;
-	while (std::getline(is, key, '=') && std::getline(is, value))
-		values[key] = rdf::literal(value);
-}
-
-void application_settings::save()
-{
-	std::ofstream os(filename.c_str());
-	for (auto item = values.begin(), last = values.end(); item != last; ++item)
-		os << item->first << '=' << item->second.value << std::endl;
-}
-
-rdf::literal & application_settings::operator()(const std::string & name, const rdf::literal & default_value)
-{
-	for (auto item = values.begin(), last = values.end(); item != last; ++item)
-	{
-		if (item->first == name)
-			return item->second;
-	}
-
-	rdf::literal & value = values[name];
-	value = default_value;
-	return value;
 }
 
 struct VoiceParameter

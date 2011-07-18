@@ -97,6 +97,8 @@ desktop_DATA = src/cainteoir-gtk.desktop
 bin_PROGRAMS += src/cainteoir-gtk
 
 src_cainteoir_gtk_SOURCES = \
+	src/settings.hpp \
+	src/settings.cpp \
 	src/toc.hpp \
 	src/toc.cpp \
 	src/main.cpp

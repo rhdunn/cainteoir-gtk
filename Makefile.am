@@ -101,6 +101,7 @@ src_cainteoir_gtk_SOURCES = \
 	src/settings.cpp \
 	src/toc.hpp \
 	src/toc.cpp \
+	src/document.hpp \
 	src/voice_selection.hpp \
 	src/voice_selection.cpp \
 	src/main.cpp

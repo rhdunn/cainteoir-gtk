@@ -125,6 +125,108 @@ rdf::literal & application_settings::operator()(const std::string & name, const 
 	return value;
 }
 
+struct VoiceParameter
+{
+	tts::parameter::type type;
+	Gtk::Label  *label;
+	Gtk::HScale *param;
+	Gtk::Label  *units;
+};
+
+class VoiceSelectionView : public Gtk::VBox
+{
+public:
+	VoiceSelectionView(tts::engines &aEngines);
+	
+	void show();
+protected:
+	void apply_settings();
+private:
+	void create_entry(tts::parameter::type, int row);
+
+	std::list<VoiceParameter> parameters;
+	tts::engines *mEngines;
+
+	Gtk::Label header;
+	Gtk::Table parameterView;
+
+	Gtk::HButtonBox buttons;
+	Gtk::Button apply;
+};
+
+VoiceSelectionView::VoiceSelectionView(tts::engines &aEngines)
+	: mEngines(&aEngines)
+	, parameterView(5, 3, false)
+	, apply(_("_Apply"), true)
+{
+	buttons.add(apply);
+	buttons.set_layout(Gtk::BUTTONBOX_START);
+
+	pack_start(header, Gtk::PACK_SHRINK);
+	pack_start(parameterView);
+	pack_start(buttons, Gtk::PACK_SHRINK);
+
+	set_border_width(6);
+	parameterView.set_border_width(4);
+
+	header.set_alignment(0, 0);
+	header.set_markup(_("<b>Voice Settings</b>"));
+
+	create_entry(tts::parameter::rate, 0);
+	create_entry(tts::parameter::volume, 1);
+	create_entry(tts::parameter::pitch, 2);
+	create_entry(tts::parameter::pitch_range, 3);
+
+	apply.signal_clicked().connect(sigc::mem_fun(*this, &VoiceSelectionView::apply_settings));
+}
+
+void VoiceSelectionView::show()
+{
+	foreach_iter (item, parameters)
+	{
+		std::tr1::shared_ptr<tts::parameter> parameter = mEngines->parameter(item->type);
+
+		item->param->set_range(parameter->minimum(), parameter->maximum());
+		item->param->set_value(parameter->value());
+
+		item->label->set_markup(parameter->name());
+		item->units->set_markup(parameter->units());
+	}
+
+	Gtk::VBox::show();
+}
+
+void VoiceSelectionView::apply_settings()
+{
+	foreach_iter (item, parameters)
+	{
+		mEngines->parameter(item->type)->set_value(item->param->get_value());
+	}
+}
+
+void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
+{
+	VoiceParameter item;
+	item.type = aParameter;
+
+	item.param = Gtk::manage(new Gtk::HScale());
+	item.param->set_increments(1.0, 5.0);
+	item.param->set_value_pos(Gtk::POS_RIGHT);
+	item.param->set_digits(0);
+
+	item.label = Gtk::manage(new Gtk::Label(""));
+	item.label->set_alignment(0, 0.5);
+
+	item.units = Gtk::manage(new Gtk::Label(""));
+	item.units->set_alignment(0, 0.5);
+
+	parameterView.attach(*item.label, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
+	parameterView.attach(*item.param, 1, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL, 4, 4);
+	parameterView.attach(*item.units, 2, 3, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
+
+	parameters.push_back(item);
+}
+
 class TocModel : public Gtk::TreeModelColumnRecord
 {
 public:
@@ -173,9 +275,6 @@ public:
 		}
 	}
 private:
-	Gtk::Label header;
-	Gtk::TreeView view;
-
 	TocModel model;
 	Glib::RefPtr<Gtk::ListStore> data;
 };
@@ -394,6 +493,14 @@ protected:
 
 	void on_speak(const char * state);
 	bool on_speaking();
+
+	enum view_t
+	{
+		metadata,
+		voice_selection,
+	};
+
+	void switch_view(int aView);
 private:
 	void updateProgress(double elapsed, double total, double completed);
 	Gtk::Menu *create_file_chooser_menu();
@@ -407,6 +514,7 @@ private:
 	Gtk::ScrolledWindow scrolledView;
 	Gtk::VBox view;
 	MetadataView doc_metadata;
+	VoiceSelectionView voiceSelection;
 
 	Gtk::HBox statusbar;
 	Gtk::Label state;
@@ -440,6 +548,7 @@ private:
 Cainteoir::Cainteoir(const char *filename)
 	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
 	, doc_metadata(languages, _("<b>Document</b>"), 5)
+	, voiceSelection(doc.tts)
 	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
 	, open(Gtk::Stock::OPEN)
@@ -470,6 +579,10 @@ Cainteoir::Cainteoir(const char *filename)
 	actions->add(recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Files")));
 	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::on_quit));
 
+	actions->add(Gtk::Action::create("ViewMenu", _("_View")));
+	actions->add(Gtk::Action::create("ViewMetadata", _("_Information")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), metadata));
+	actions->add(Gtk::Action::create("SelectVoice", _("_Select Voice")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), voice_selection));
+
 	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
 	actions->add(readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read));
 	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
@@ -487,10 +600,15 @@ Cainteoir::Cainteoir(const char *filename)
 		"			<separator/>"
 		"			<menuitem action='FileQuit'/>"
 		"		</menu>"
+		"		<menu action='ViewMenu'>"
+		"			<menuitem action='ViewMetadata'/>"
+		"		</menu>"
 		"		<menu action='ReaderMenu'>"
 		"			<menuitem action='ReaderRead'/>"
 		"			<menuitem action='ReaderStop'/>"
 		"			<menuitem action='ReaderRecord'/>"
+		"			<separator/>"
+		"			<menuitem action='SelectVoice'/>"
 		"		</menu>"
 		"	</menubar>"
 		"	<toolbar  name='ToolBar'>"
@@ -525,7 +643,9 @@ Cainteoir::Cainteoir(const char *filename)
 	doc_metadata.create_entry(rdf::dc("description"), _("<i>Description:</i>"), 3);
 	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
 	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
+
 	view.pack_start(doc_metadata, Gtk::PACK_SHRINK);
+	view.pack_start(voiceSelection, Gtk::PACK_SHRINK);
 
 	scrolledView.add(view);
 	scrolledView.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -547,6 +667,7 @@ Cainteoir::Cainteoir(const char *filename)
 	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	show_all_children();
+	switch_view(settings("cainteoir.active-view",  metadata).as<int>());
 
 	readAction->set_sensitive(false);
 	stopAction->set_visible(false);
@@ -867,6 +988,25 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 	more->show();
 
 	return recent;
+}
+
+void Cainteoir::switch_view(int aView)
+{
+	switch (aView)
+	{
+	case voice_selection:
+		doc_metadata.hide();
+		voiceSelection.show();
+		break;
+	default: // metadata
+		aView = metadata;
+		doc_metadata.show();
+		voiceSelection.hide();
+		break;
+	}
+
+	settings("cainteoir.active-view") = aView;
+	settings.save();
 }
 
 int main(int argc, char ** argv)

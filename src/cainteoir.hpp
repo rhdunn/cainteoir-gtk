@@ -21,6 +21,13 @@
 #ifndef CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 #define CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 
+#include <cainteoir/languages.hpp>
+
+#include "settings.hpp"
+#include "document.hpp"
+#include "voice_selection.hpp"
+#include "metadata.hpp"
+
 class Cainteoir : public Gtk::Window
 {
 public:

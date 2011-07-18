@@ -21,9 +21,6 @@
 #include <config.h>
 #include <gtkmm.h>
 #include <cainteoir/platform.hpp>
-#include <cainteoir/metadata.hpp>
-
-namespace rdf = cainteoir::rdf;
 
 #include "toc.hpp"
 

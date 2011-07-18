@@ -21,6 +21,10 @@
 #ifndef CAINTEOIRGTK_SRC_TOC_HPP
 #define CAINTEOIRGTK_SRC_TOC_HPP
 
+#include <cainteoir/metadata.hpp>
+
+namespace rdf = cainteoir::rdf;
+
 class TocModel : public Gtk::TreeModelColumnRecord
 {
 public:

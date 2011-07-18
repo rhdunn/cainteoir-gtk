@@ -21,6 +21,12 @@
 #ifndef CAINTEOIRGTK_SRC_METADATA_HPP
 #define CAINTEOIRGTK_SRC_METADATA_HPP
 
+#include <map>
+#include <cainteoir/languages.hpp>
+#include <cainteoir/metadata.hpp>
+
+namespace rdf = cainteoir::rdf;
+
 class MetadataView : public Gtk::VBox
 {
 public:

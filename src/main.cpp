@@ -21,18 +21,7 @@
 #include <config.h>
 #include <gtkmm.h>
 #include <cainteoir/platform.hpp>
-#include <cainteoir/engines.hpp>
-#include <cainteoir/document.hpp>
-#include <cainteoir/languages.hpp>
-#include <locale.h>
 
-namespace rdf = cainteoir::rdf;
-namespace tts = cainteoir::tts;
-
-#include "settings.hpp"
-#include "document.hpp"
-#include "voice_selection.hpp"
-#include "metadata.hpp"
 #include "cainteoir.hpp"
 
 int main(int argc, char ** argv)

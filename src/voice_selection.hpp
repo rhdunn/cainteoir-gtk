@@ -21,6 +21,10 @@
 #ifndef CAINTEOIRGTK_SRC_VOICESELECTION_HPP
 #define CAINTEOIRGTK_SRC_VOICESELECTION_HPP
 
+#include <cainteoir/engines.hpp>
+
+namespace tts = cainteoir::tts;
+
 struct VoiceParameter
 {
 	tts::parameter::type type;

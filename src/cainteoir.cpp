@@ -20,25 +20,16 @@
 
 #include <config.h>
 #include <gtkmm.h>
-#include <cainteoir/engines.hpp>
-#include <cainteoir/document.hpp>
 #include <cainteoir/platform.hpp>
-#include <cainteoir/languages.hpp>
+
+#include "cainteoir.hpp"
 
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static const int CHARACTERS_PER_WORD = 6;
-
-namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
-namespace tts = cainteoir::tts;
 
-#include "settings.hpp"
-#include "document.hpp"
-#include "voice_selection.hpp"
-#include "metadata.hpp"
-#include "cainteoir.hpp"
+static const int CHARACTERS_PER_WORD = 6;
 
 static std::string get_user_file(const char * filename)
 {

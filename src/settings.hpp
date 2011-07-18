@@ -22,6 +22,9 @@
 #define CAINTEOIRGTK_SRC_SETTINGS_HPP
 
 #include <map>
+#include <cainteoir/metadata.hpp>
+
+namespace rdf = cainteoir::rdf;
 
 class application_settings
 {

@@ -21,9 +21,6 @@
 #include <config.h>
 #include <gtkmm.h>
 #include <cainteoir/platform.hpp>
-#include <cainteoir/engines.hpp>
-
-namespace tts = cainteoir::tts;
 
 #include "voice_selection.hpp"
 

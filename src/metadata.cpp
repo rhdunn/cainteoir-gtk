@@ -21,13 +21,10 @@
 #include <config.h>
 #include <gtkmm.h>
 #include <cainteoir/platform.hpp>
-#include <cainteoir/metadata.hpp>
-#include <cainteoir/languages.hpp>
-
-namespace rdf = cainteoir::rdf;
-namespace rql = cainteoir::rdf::query;
 
 #include "metadata.hpp"
+
+namespace rql = cainteoir::rdf::query;
 
 MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int rows)
 	: metadata(rows, 2, false)

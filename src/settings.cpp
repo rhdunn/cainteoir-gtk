@@ -22,8 +22,6 @@
 #include <cainteoir/metadata.hpp>
 #include <fstream>
 
-namespace rdf = cainteoir::rdf;
-
 #include "settings.hpp"
 
 application_settings::application_settings(const std::string &aFilename)

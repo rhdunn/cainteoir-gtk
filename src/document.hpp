@@ -21,6 +21,9 @@
 #ifndef CAINTEOIRGTK_SRC_DOCUMENT_HPP
 #define CAINTEOIRGTK_SRC_DOCUMENT_HPP
 
+#include <cainteoir/document.hpp>
+#include <cainteoir/engines.hpp>
+
 #include "toc.hpp"
 
 struct document : public cainteoir::document_events

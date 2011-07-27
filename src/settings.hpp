@@ -1,4 +1,4 @@
-/* Cainteoir Gtk Application.
+/* Application Settings
  *
  * Copyright (C) 2011 Reece H. Dunn
  *
@@ -18,25 +18,25 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtkmm.h>
-#include <cainteoir/platform.hpp>
+#ifndef CAINTEOIRGTK_SRC_SETTINGS_HPP
+#define CAINTEOIRGTK_SRC_SETTINGS_HPP
 
-#include "cainteoir.hpp"
+#include <map>
+#include <cainteoir/metadata.hpp>
 
-int main(int argc, char ** argv)
+namespace rdf = cainteoir::rdf;
+
+class application_settings
 {
-	cainteoir::initialise();
+public:
+	application_settings(const std::string &aFilename);
 
-	setlocale(LC_MESSAGES, "");
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	textdomain(PACKAGE);
+	void save();
 
-	Gtk::Main app(argc, argv);
+	rdf::literal & operator()(const std::string & name, const rdf::literal & default_value = rdf::literal());
+private:
+	std::map<std::string, rdf::literal> values;
+	std::string filename;
+};
 
-	Cainteoir window(argc > 1 ? argv[1] : NULL);
-	Gtk::Main::run(window);
-
-	cainteoir::cleanup();
-	return 0;
-}
+#endif

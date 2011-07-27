@@ -1,4 +1,4 @@
-/* Cainteoir Gtk Application.
+/* Voice Selection View
  *
  * Copyright (C) 2011 Reece H. Dunn
  *
@@ -18,25 +18,40 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtkmm.h>
-#include <cainteoir/platform.hpp>
+#ifndef CAINTEOIRGTK_SRC_VOICESELECTION_HPP
+#define CAINTEOIRGTK_SRC_VOICESELECTION_HPP
 
-#include "cainteoir.hpp"
+#include <cainteoir/engines.hpp>
 
-int main(int argc, char ** argv)
+namespace tts = cainteoir::tts;
+
+struct VoiceParameter
 {
-	cainteoir::initialise();
+	tts::parameter::type type;
+	Gtk::Label  *label;
+	Gtk::HScale *param;
+	Gtk::Label  *units;
+};
 
-	setlocale(LC_MESSAGES, "");
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	textdomain(PACKAGE);
+class VoiceSelectionView : public Gtk::VBox
+{
+public:
+	VoiceSelectionView(tts::engines &aEngines);
+	
+	void show();
+protected:
+	void apply_settings();
+private:
+	void create_entry(tts::parameter::type, int row);
 
-	Gtk::Main app(argc, argv);
+	std::list<VoiceParameter> parameters;
+	tts::engines *mEngines;
 
-	Cainteoir window(argc > 1 ? argv[1] : NULL);
-	Gtk::Main::run(window);
+	Gtk::Label header;
+	Gtk::Table parameterView;
 
-	cainteoir::cleanup();
-	return 0;
-}
+	Gtk::HButtonBox buttons;
+	Gtk::Button apply;
+};
+
+#endif

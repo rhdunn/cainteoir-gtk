@@ -96,7 +96,19 @@ desktop_DATA = src/cainteoir-gtk.desktop
 
 bin_PROGRAMS += src/cainteoir-gtk
 
-src_cainteoir_gtk_SOURCES = src/main.cpp
+src_cainteoir_gtk_SOURCES = \
+	src/settings.hpp \
+	src/settings.cpp \
+	src/toc.hpp \
+	src/toc.cpp \
+	src/document.hpp \
+	src/voice_selection.hpp \
+	src/voice_selection.cpp \
+	src/metadata.hpp \
+	src/metadata.cpp \
+	src/cainteoir.hpp \
+	src/cainteoir.cpp \
+	src/main.cpp
 
 EXTRA_DIST += ${man1_MANS}
 

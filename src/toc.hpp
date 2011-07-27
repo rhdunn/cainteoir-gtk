@@ -1,4 +1,4 @@
-/* Cainteoir Gtk Application.
+/* Table of Content Side Pane
  *
  * Copyright (C) 2011 Reece H. Dunn
  *
@@ -18,25 +18,41 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtkmm.h>
-#include <cainteoir/platform.hpp>
+#ifndef CAINTEOIRGTK_SRC_TOC_HPP
+#define CAINTEOIRGTK_SRC_TOC_HPP
 
-#include "cainteoir.hpp"
+#include <cainteoir/metadata.hpp>
 
-int main(int argc, char ** argv)
+namespace rdf = cainteoir::rdf;
+
+class TocModel : public Gtk::TreeModelColumnRecord
 {
-	cainteoir::initialise();
+public:
+	TocModel()
+	{
+		add(title);
+		add(location);
+	}
 
-	setlocale(LC_MESSAGES, "");
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	textdomain(PACKAGE);
+	Gtk::TreeModelColumn<Glib::ustring> title;
+	Gtk::TreeModelColumn<rdf::uri> location;
+};
 
-	Gtk::Main app(argc, argv);
+typedef std::pair<const rdf::uri, const rdf::uri> TocSelection;
 
-	Cainteoir window(argc > 1 ? argv[1] : NULL);
-	Gtk::Main::run(window);
+class TocPane : public Gtk::TreeView
+{
+public:
+	TocPane();
 
-	cainteoir::cleanup();
-	return 0;
-}
+	void clear();
+
+	void add(int depth, const rdf::uri &location, const std::string &title);
+
+	TocSelection selection() const;
+private:
+	TocModel model;
+	Glib::RefPtr<Gtk::ListStore> data;
+};
+
+#endif

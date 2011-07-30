@@ -97,8 +97,6 @@ Cainteoir::Cainteoir(const char *filename)
 	signal_window_state_event().connect(sigc::mem_fun(*this, &Cainteoir::on_window_state_changed));
 	signal_delete_event().connect(sigc::mem_fun(*this, &Cainteoir::on_delete));
 
-	content.set_border_width(6);
-
 	create_recent_filter(recentFilter, doc.m_metadata);
 
 	actions = Gtk::ActionGroup::create();
@@ -187,13 +185,11 @@ Cainteoir::Cainteoir(const char *filename)
 
 	pane.set_position(settings("toc.width", 150).as<int>());
 
-	content.pack_start(mediabar, Gtk::PACK_SHRINK);
-	content.pack_start(pane);
-	content.pack_start(statusbar, Gtk::PACK_SHRINK);
-
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
-	box.pack_start(content);
+	box.pack_start(mediabar, Gtk::PACK_SHRINK);
+	box.pack_start(pane);
+	box.pack_start(statusbar, Gtk::PACK_SHRINK);
 
 	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 

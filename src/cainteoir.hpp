@@ -62,7 +62,6 @@ private:
 	Gtk::Menu *create_file_chooser_menu();
 
 	Gtk::VBox box;
-	Gtk::VBox content;
 	Gtk::HBox mediabar;
 
 	Gtk::HPaned pane;

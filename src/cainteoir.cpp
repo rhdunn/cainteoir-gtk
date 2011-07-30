@@ -82,7 +82,10 @@ Cainteoir::Cainteoir(const char *filename)
 	, voiceSelection(doc.tts)
 	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
-	, open(Gtk::Stock::OPEN)
+	, readButton(Gtk::Stock::MEDIA_PLAY)
+	, stopButton(Gtk::Stock::MEDIA_STOP)
+	, recordButton(Gtk::Stock::MEDIA_RECORD)
+	, openButton(Gtk::Stock::OPEN)
 	, languages("en")
 	, settings(get_user_file("settings.dat"))
 {
@@ -117,6 +120,15 @@ Cainteoir::Cainteoir(const char *filename)
 	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
 	actions->add(recordAction = Gtk::Action::create("ReaderRecord", Gtk::Stock::MEDIA_RECORD), sigc::mem_fun(*this, &Cainteoir::on_record));
 
+	readButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_read));
+	stopButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_stop));
+	recordButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_record));
+
+	readButton.set_border_width(0);
+	stopButton.set_border_width(0);
+	recordButton.set_border_width(0);
+	openButton.set_border_width(0);
+
 	uiManager->insert_action_group(actions);
 	add_accel_group(uiManager->get_accel_group());
 
@@ -140,26 +152,20 @@ Cainteoir::Cainteoir(const char *filename)
 		"			<menuitem action='SelectVoice'/>"
 		"		</menu>"
 		"	</menubar>"
-		"	<toolbar  name='ToolBar'>"
-		"		<toolitem action='ReaderRead'/>"
-		"		<toolitem action='ReaderStop'/>"
-		"		<toolitem action='ReaderRecord'/>"
-		"	</toolbar>"
 		"</ui>");
 
-	Gtk::Toolbar * toolbar = dynamic_cast<Gtk::Toolbar *>(uiManager->get_widget("/ToolBar"));
-	toolbar->set_show_arrow(false);
-
-	open.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	open.set_menu(*create_file_chooser_menu());
-	toolbar->insert(open, -1);
+	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
+	openButton.set_menu(*create_file_chooser_menu());
 
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
 	openRecent->set_submenu(*create_file_chooser_menu());
 
 	progressAlignment.add(progress);
 
-	mediabar.pack_start(*toolbar, Gtk::PACK_SHRINK);
+	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);
+	mediabar.pack_start(stopButton, Gtk::PACK_SHRINK);
+	mediabar.pack_start(recordButton, Gtk::PACK_SHRINK);
+	mediabar.pack_start(openButton, Gtk::PACK_SHRINK);
 	mediabar.pack_start(elapsedTime, Gtk::PACK_SHRINK);
 	mediabar.pack_start(progressAlignment);
 	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
@@ -198,6 +204,9 @@ Cainteoir::Cainteoir(const char *filename)
 
 	readAction->set_sensitive(false);
 	stopAction->set_visible(false);
+
+	readButton.set_sensitive(false);
+	stopButton.set_visible(false);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
 }
@@ -374,7 +383,11 @@ void Cainteoir::on_speak(const char * status)
 	stopAction->set_visible(true);
 	recordAction->set_sensitive(false);
 
-	open.set_sensitive(false);
+	readButton.set_visible(false);
+	stopButton.set_visible(true);
+	recordButton.set_sensitive(false);
+
+	openButton.set_sensitive(false);
 	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
 
@@ -406,7 +419,11 @@ bool Cainteoir::on_speaking()
 	stopAction->set_visible(false);
 	recordAction->set_sensitive(true);
 
-	open.set_sensitive(true);
+	readButton.set_visible(true);
+	stopButton.set_visible(false);
+	recordButton.set_sensitive(true);
+
+	openButton.set_sensitive(true);
 	openAction->set_sensitive(true);
 	recentAction->set_sensitive(true);
 
@@ -418,6 +435,7 @@ bool Cainteoir::load_document(std::string filename)
 	if (speech || filename.empty()) return false;
 
 	readAction->set_sensitive(false);
+	readButton.set_sensitive(false);
 
 	doc.clear();
 	doc_metadata.clear();
@@ -464,6 +482,7 @@ bool Cainteoir::load_document(std::string filename)
 			updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 			readAction->set_sensitive(true);
+			readButton.set_sensitive(true);
 			return true;
 		}
 	}

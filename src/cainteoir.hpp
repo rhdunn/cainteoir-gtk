@@ -86,7 +86,10 @@ private:
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
 	Glib::RefPtr<Gtk::Action> recentAction;
 
-	Gtk::MenuToolButton open;
+	Gtk::ToolButton readButton;
+	Gtk::ToolButton stopButton;
+	Gtk::ToolButton recordButton;
+	Gtk::MenuToolButton openButton;
 
 	Glib::RefPtr<Gtk::Action> readAction;
 	Glib::RefPtr<Gtk::Action> stopAction;

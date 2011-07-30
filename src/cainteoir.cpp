@@ -160,6 +160,7 @@ Cainteoir::Cainteoir(const char *filename)
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
 	openRecent->set_submenu(*create_file_chooser_menu());
 
+	progress.set_show_text(true);
 	progressAlignment.add(progress);
 
 	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);

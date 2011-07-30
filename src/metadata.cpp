@@ -121,6 +121,7 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 
 	value->set_alignment(0, 0);
 	value->set_line_wrap(true);
+	value->set_width_chars(40);
 
 	metadata.attach(*label, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
 	metadata.attach(*value, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);

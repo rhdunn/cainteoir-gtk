@@ -57,7 +57,7 @@ static double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parame
 	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
 }
 
-static void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
+static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const rdf::graph & aMetadata)
 {
 	rql::results formats = rql::select(aMetadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
@@ -72,7 +72,7 @@ static void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & 
 			          rql::matches(rql::subject, *uri)));
 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
-			filter.add_mime_type(rql::value(*mimetype));
+			filter->add_mime_type(rql::value(*mimetype));
 	}
 }
 
@@ -99,11 +99,11 @@ Cainteoir::Cainteoir(const char *filename)
 
 	content.set_border_width(6);
 
+	create_recent_filter(recentFilter, doc.m_metadata);
+
 	actions = Gtk::ActionGroup::create();
 	uiManager = Gtk::UIManager::create();
 	recentManager = Gtk::RecentManager::get_default();
-
-	create_recent_filter(recentFilter, doc.m_metadata);
 
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
 	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
@@ -237,8 +237,8 @@ void Cainteoir::on_open_document()
 	{
 		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
-		Gtk::FileFilter filter;
-		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
+		GtkObjectRef<Gtk::FileFilter> filter;
+		filter->set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
 
 		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
@@ -246,7 +246,7 @@ void Cainteoir::on_open_document()
 		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
 		{
 			const std::string & mimetype = rql::value(*item);
-			filter.add_mime_type(mimetype);
+			filter->add_mime_type(mimetype);
 			if (default_mimetype == mimetype)
 				active_filter = true;
 		}
@@ -332,8 +332,8 @@ void Cainteoir::on_record()
 	{
 		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
-		Gtk::FileFilter filter;
-		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
+		GtkObjectRef<Gtk::FileFilter> filter;
+		filter->set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
 
 		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
@@ -341,7 +341,7 @@ void Cainteoir::on_record()
 		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
 		{
 			const std::string & mimetype = rql::value(*item);
-			filter.add_mime_type(mimetype);
+			filter->add_mime_type(mimetype);
 			if (default_mimetype == mimetype)
 				active_filter = true;
 		}

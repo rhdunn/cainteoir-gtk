@@ -27,6 +27,7 @@
 #include "document.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
+#include "gtkobjectref.hpp"
 
 class Cainteoir : public Gtk::Window
 {
@@ -82,7 +83,7 @@ private:
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;
 
-	Gtk::RecentFilter recentFilter;
+	GtkObjectRef<Gtk::RecentFilter> recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
 	Glib::RefPtr<Gtk::Action> recentAction;
 

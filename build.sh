@@ -15,18 +15,33 @@ dodist() {
 		( popd && exit 1 )
 }
 
-dodebsrc() {
-	debuild -S -sa || exit 1
-	lintian -Ivi ../${PACKAGE}_*.dsc
-}
-
-dodeb() {
-	debuild -us -uc || exit 1
-	lintian -Ivi ../${PACKAGE}_*.dsc
+builddeb() {
+	DIST=$1
+	shift
+	sed -i -e "s/) unstable;/~${DIST}1) ${DIST};/" debian/changelog
+	if [[ -e debian/$DIST.patch ]] ; then
+		patch -f -p1 -i debian/$DIST.patch || touch builddeb.failed
+	fi
+	if [[ ! -e builddeb.failed ]] ; then
+		echo "... building debian packages ($@) ..."
+		debuild $@ || touch builddeb.failed
+	fi
+	if [[ ! -e builddeb.failed ]] ; then
+		echo "... validating debian packages ..."
+		lintian -Ivi ../${PACKAGE}_*.dsc || touch builddeb.failed
+	fi
+	if [[ -e debian/$DIST.patch ]] ; then
+		patch -Rf -p1 -i debian/$DIST.patch || touch builddeb.failed
+	fi
+	sed -i -e "s/~${DIST}1) ${DIST};/) unstable;/" debian/changelog
+	if [[ -e builddeb.failed ]] ; then
+		rm builddeb.failed
+		exit 1
+	fi
 }
 
 dorelease() {
-	debuild -S -sa || exit 1
+	buildeb -S -sa || exit 1
 	sudo pbuilder build ../${PACKAGE}_*.dsc || exit 1
 	lintian -Ivi ../${PACKAGE}_*.dsc
 }
@@ -50,13 +65,9 @@ doppa() {
 	#
 	# In addition to this, it is advised that a version identifier is used for ppa
 	# files, so a "~<distro-name>1" is appended.
-
-	DISTRO=$1
-	sed -i -e "s/) unstable;/~${DISTRO}1) ${DISTRO};/" debian/changelog
-	dodebsrc || (sed -i -e "s/~${DISTRO}1) ${DISTRO};/) unstable;/" debian/changelog && exit 1)
-	sed -i -e "s/~${DISTRO}1) ${DISTRO};/) unstable;/" debian/changelog
-
-	dput ppa:msclrhd-gmail/cainteoir ../${PACKAGE}_*~${DISTRO}1_source.changes
+	DIST=$1
+	builddeb $DIST -S -sa || exit 1
+	dput ppa:msclrhd-gmail/cainteoir ../${PACKAGE}_*~${DIST}1_source.changes
 }
 
 doallppa() {
@@ -67,12 +78,12 @@ doallppa() {
 }
 
 case "$1" in
+	allppa)    doallppa ;;
 	clean)     doclean ;;
-	deb)       dodeb ;;
-	debsrc)    dodebsrc ;;
+	deb)       builddeb $2 -us -uc ;;
+	debsrc)    builddeb $2 -S -sa ;;
 	dist)      dodist ;;
 	ppa)       doppa $2 ;;
-	allppa)    doallppa ;;
 	release)   dorelease ;;
 	install)   doinstall ;;
 	uninstall) douninstall ;;
@@ -81,13 +92,14 @@ case "$1" in
 
 where <command> is one of:
 
+    allppa         Publish to the Cainteoir Text-to-Speech Ubuntu PPA for all supported distributions.
     clean          Clean the build tree and generated files.
-    deb            Create a (development build) debian binary package.
-    debsrc         Create a debian source package.
+    deb <dist>     Create a (development build) debian binary package.
+    debsrc <dist>  Create a debian source package.
     dist           Create (and test) a distribution source tarball.
     help           Show this help screen.
     install        Installs the built debian packages.
-    ppa            Publish to the Cainteoir Text-to-Speech Ubuntu PPA.
+    ppa <dist>     Publish to the Cainteoir Text-to-Speech Ubuntu PPA for <dist>.
     release        Create a (release build) debian binary package.
     uninstall      Uninstalls the debian packages installed by 'install'.
 
@@ -95,7 +107,7 @@ To publish in source form (for GNU/Linux distributions), run:
     `basename $0` dist
 
 To build and install locally on a Debian system, run:
-    `basename $0` deb
+    `basename $0` deb <dist-name>
     `basename $0` install
 
 To publish to Debian, run:
@@ -103,7 +115,7 @@ To publish to Debian, run:
 
 To publish to the Ubuntu PPA for a specific distribution, run:
     `basename $0` release
-    `basename $0` ppa <distro-name>
+    `basename $0` ppa <dist-name>
 "
 		;;
 esac

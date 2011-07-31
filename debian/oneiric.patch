@@ -1,0 +1,11 @@
+diff --git a/debian/rules b/debian/rules
+index 35477d8..a9f81fc 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -19,3 +19,6 @@ configure:
+ 
+ build: configure
+ 	dh build
++
++override_dh_auto_configure:
++	dh_auto_configure -- --with-gtk3

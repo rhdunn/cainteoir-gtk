@@ -183,11 +183,14 @@ Cainteoir::Cainteoir(const char *filename)
 	view.pack_start(doc_metadata, Gtk::PACK_SHRINK);
 	view.pack_start(voiceSelection, Gtk::PACK_SHRINK);
 
+	scrolledTocPane.add(doc.toc);
+	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+
 	scrolledView.add(view);
 	scrolledView.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	((Gtk::Viewport *)scrolledView.get_child())->set_shadow_type(Gtk::SHADOW_NONE);
 
-	pane.add1(doc.toc);
+	pane.add1(scrolledTocPane);
 	pane.add2(scrolledView);
 
 	pane.set_position(settings("toc.width", 150).as<int>());

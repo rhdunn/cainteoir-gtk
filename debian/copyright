@@ -2,7 +2,7 @@ Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?revision
 Upstream-Name: cainteoir-engine
 Upstream-Contact: Reece H. Dunn <msclrhd@gmail.com>
 Maintainer: Reece H. Dunn <msclrhd@gmail.com>
-Source: https://github.com/rhdunn/cainteoir-engine
+Source: https://github.com/rhdunn/cainteoir-gtk
 
 Files: *
 Copyright: 2010-2011 Reece H. Dunn <msclrhd@gmail.com>

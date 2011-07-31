@@ -57,7 +57,7 @@ static double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parame
 	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
 }
 
-static void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & aMetadata)
+static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const rdf::graph & aMetadata)
 {
 	rql::results formats = rql::select(aMetadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
@@ -72,7 +72,7 @@ static void create_recent_filter(Gtk::RecentFilter & filter, const rdf::graph & 
 			          rql::matches(rql::subject, *uri)));
 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
-			filter.add_mime_type(rql::value(*mimetype));
+			filter->add_mime_type(rql::value(*mimetype));
 	}
 }
 
@@ -82,7 +82,10 @@ Cainteoir::Cainteoir(const char *filename)
 	, voiceSelection(doc.tts)
 	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
-	, open(Gtk::Stock::OPEN)
+	, readButton(Gtk::Stock::MEDIA_PLAY)
+	, stopButton(Gtk::Stock::MEDIA_STOP)
+	, recordButton(Gtk::Stock::MEDIA_RECORD)
+	, openButton(Gtk::Stock::OPEN)
 	, languages("en")
 	, settings(get_user_file("settings.dat"))
 {
@@ -97,13 +100,11 @@ Cainteoir::Cainteoir(const char *filename)
 	signal_window_state_event().connect(sigc::mem_fun(*this, &Cainteoir::on_window_state_changed));
 	signal_delete_event().connect(sigc::mem_fun(*this, &Cainteoir::on_delete));
 
-	content.set_border_width(6);
+	create_recent_filter(recentFilter, doc.m_metadata);
 
 	actions = Gtk::ActionGroup::create();
 	uiManager = Gtk::UIManager::create();
 	recentManager = Gtk::RecentManager::get_default();
-
-	create_recent_filter(recentFilter, doc.m_metadata);
 
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
 	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
@@ -118,6 +119,15 @@ Cainteoir::Cainteoir(const char *filename)
 	actions->add(readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read));
 	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
 	actions->add(recordAction = Gtk::Action::create("ReaderRecord", Gtk::Stock::MEDIA_RECORD), sigc::mem_fun(*this, &Cainteoir::on_record));
+
+	readButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_read));
+	stopButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_stop));
+	recordButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_record));
+
+	readButton.set_border_width(0);
+	stopButton.set_border_width(0);
+	recordButton.set_border_width(0);
+	openButton.set_border_width(0);
 
 	uiManager->insert_action_group(actions);
 	add_accel_group(uiManager->get_accel_group());
@@ -142,26 +152,23 @@ Cainteoir::Cainteoir(const char *filename)
 		"			<menuitem action='SelectVoice'/>"
 		"		</menu>"
 		"	</menubar>"
-		"	<toolbar  name='ToolBar'>"
-		"		<toolitem action='ReaderRead'/>"
-		"		<toolitem action='ReaderStop'/>"
-		"		<toolitem action='ReaderRecord'/>"
-		"	</toolbar>"
 		"</ui>");
 
-	Gtk::Toolbar * toolbar = dynamic_cast<Gtk::Toolbar *>(uiManager->get_widget("/ToolBar"));
-	toolbar->set_show_arrow(false);
-
-	open.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	open.set_menu(*create_file_chooser_menu());
-	toolbar->insert(open, -1);
+	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
+	openButton.set_menu(*create_file_chooser_menu());
 
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
 	openRecent->set_submenu(*create_file_chooser_menu());
 
+#if GTK_MAJOR_VERSION >= 3
+	progress.set_show_text(true);
+#endif
 	progressAlignment.add(progress);
 
-	mediabar.pack_start(*toolbar, Gtk::PACK_SHRINK);
+	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);
+	mediabar.pack_start(stopButton, Gtk::PACK_SHRINK);
+	mediabar.pack_start(recordButton, Gtk::PACK_SHRINK);
+	mediabar.pack_start(openButton, Gtk::PACK_SHRINK);
 	mediabar.pack_start(elapsedTime, Gtk::PACK_SHRINK);
 	mediabar.pack_start(progressAlignment);
 	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
@@ -178,22 +185,23 @@ Cainteoir::Cainteoir(const char *filename)
 	view.pack_start(doc_metadata, Gtk::PACK_SHRINK);
 	view.pack_start(voiceSelection, Gtk::PACK_SHRINK);
 
+	scrolledTocPane.add(doc.toc);
+	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+
 	scrolledView.add(view);
 	scrolledView.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	((Gtk::Viewport *)scrolledView.get_child())->set_shadow_type(Gtk::SHADOW_NONE);
 
-	pane.add1(doc.toc);
+	pane.add1(scrolledTocPane);
 	pane.add2(scrolledView);
 
 	pane.set_position(settings("toc.width", 150).as<int>());
 
-	content.pack_start(mediabar, Gtk::PACK_SHRINK);
-	content.pack_start(pane);
-	content.pack_start(statusbar, Gtk::PACK_SHRINK);
-
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
-	box.pack_start(content);
+	box.pack_start(mediabar, Gtk::PACK_SHRINK);
+	box.pack_start(pane);
+	box.pack_start(statusbar, Gtk::PACK_SHRINK);
 
 	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
@@ -202,6 +210,9 @@ Cainteoir::Cainteoir(const char *filename)
 
 	readAction->set_sensitive(false);
 	stopAction->set_visible(false);
+
+	readButton.set_sensitive(false);
+	stopButton.set_visible(false);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
 }
@@ -237,8 +248,8 @@ void Cainteoir::on_open_document()
 	{
 		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
-		Gtk::FileFilter filter;
-		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
+		GtkObjectRef<Gtk::FileFilter> filter;
+		filter->set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
 
 		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
@@ -246,7 +257,7 @@ void Cainteoir::on_open_document()
 		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
 		{
 			const std::string & mimetype = rql::value(*item);
-			filter.add_mime_type(mimetype);
+			filter->add_mime_type(mimetype);
 			if (default_mimetype == mimetype)
 				active_filter = true;
 		}
@@ -332,8 +343,8 @@ void Cainteoir::on_record()
 	{
 		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
-		Gtk::FileFilter filter;
-		filter.set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
+		GtkObjectRef<Gtk::FileFilter> filter;
+		filter->set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
 
 		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
@@ -341,7 +352,7 @@ void Cainteoir::on_record()
 		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
 		{
 			const std::string & mimetype = rql::value(*item);
-			filter.add_mime_type(mimetype);
+			filter->add_mime_type(mimetype);
 			if (default_mimetype == mimetype)
 				active_filter = true;
 		}
@@ -378,7 +389,11 @@ void Cainteoir::on_speak(const char * status)
 	stopAction->set_visible(true);
 	recordAction->set_sensitive(false);
 
-	open.set_sensitive(false);
+	readButton.set_visible(false);
+	stopButton.set_visible(true);
+	recordButton.set_sensitive(false);
+
+	openButton.set_sensitive(false);
 	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
 
@@ -410,7 +425,11 @@ bool Cainteoir::on_speaking()
 	stopAction->set_visible(false);
 	recordAction->set_sensitive(true);
 
-	open.set_sensitive(true);
+	readButton.set_visible(true);
+	stopButton.set_visible(false);
+	recordButton.set_sensitive(true);
+
+	openButton.set_sensitive(true);
 	openAction->set_sensitive(true);
 	recentAction->set_sensitive(true);
 
@@ -422,6 +441,7 @@ bool Cainteoir::load_document(std::string filename)
 	if (speech || filename.empty()) return false;
 
 	readAction->set_sensitive(false);
+	readButton.set_sensitive(false);
 
 	doc.clear();
 	doc_metadata.clear();
@@ -468,6 +488,7 @@ bool Cainteoir::load_document(std::string filename)
 			updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 			readAction->set_sensitive(true);
+			readButton.set_sensitive(true);
 			return true;
 		}
 	}

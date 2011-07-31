@@ -14,6 +14,8 @@ AM_GNU_GETTEXT_VERSION(0.18)
 
 LT_INIT
 
+AC_ARG_WITH([gtk3], AS_HELP_STRING([--with-gtk3], [Build with the Gnome 3 libraries.]))
+
 dnl ================================================================
 dnl Program checks.
 dnl ================================================================
@@ -32,7 +34,14 @@ dnl ================================================================
 dnl GTK+/Gtkmm checks.
 dnl ================================================================
 
-PKG_CHECK_MODULES([GTK], [gtkmm-2.4 >= 2.10.0])
+AS_IF([test "x$with_gtk3" = "xyes"], [
+    PKG_CHECK_MODULES([GTK], [gtkmm-3.0 >= 3.0.0])
+    gtkver="3.0"
+], [
+    PKG_CHECK_MODULES([GTK], [gtkmm-2.4 >= 2.10.0])
+    gtkver="2.4"
+])
+
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
@@ -46,6 +55,8 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 
     Configuration for Cainteoir Text-to-Speech Gtk front-end complete.
+
+        GTK+/Gnome Library version     ${gtkver}
 
         Source code location:          ${srcdir}
         Compiler:                      ${CXX}

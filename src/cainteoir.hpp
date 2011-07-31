@@ -27,6 +27,7 @@
 #include "document.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
+#include "gtkobjectref.hpp"
 
 class Cainteoir : public Gtk::Window
 {
@@ -61,10 +62,11 @@ private:
 	Gtk::Menu *create_file_chooser_menu();
 
 	Gtk::VBox box;
-	Gtk::VBox content;
 	Gtk::HBox mediabar;
 
 	Gtk::HPaned pane;
+
+	Gtk::ScrolledWindow scrolledTocPane;
 
 	Gtk::ScrolledWindow scrolledView;
 	Gtk::VBox view;
@@ -82,11 +84,14 @@ private:
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;
 
-	Gtk::RecentFilter recentFilter;
+	GtkObjectRef<Gtk::RecentFilter> recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;
 	Glib::RefPtr<Gtk::Action> recentAction;
 
-	Gtk::MenuToolButton open;
+	Gtk::ToolButton readButton;
+	Gtk::ToolButton stopButton;
+	Gtk::ToolButton recordButton;
+	Gtk::MenuToolButton openButton;
 
 	Glib::RefPtr<Gtk::Action> readAction;
 	Glib::RefPtr<Gtk::Action> stopAction;

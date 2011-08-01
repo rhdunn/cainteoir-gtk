@@ -327,7 +327,7 @@ void Cainteoir::on_record()
 {
 	// TODO: Generate a default name from the file metadata ($(recording.basepath)/author - title.ogg)
 
-	Gtk::FileChooserDialog dialog(_("Record Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+	Gtk::FileChooserDialog dialog(_("Record Document"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_transient_for(*this);
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::MEDIA_RECORD, Gtk::RESPONSE_OK);

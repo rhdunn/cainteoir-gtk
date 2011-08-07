@@ -1,6 +1,12 @@
+cainteoir-gtk (0.1-1) unstable; urgency=low
+ 
+  * Depend on libcainteoir0 to link against the shared library.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Fri, 07 Aug 2011 17:00:00 +0000
+
 cainteoir-gtk (0.1) unstable; urgency=low
  
   * Initial upstream release.
  
- -- Reece H. Dunn <msclrhd@gmail.com>  Fri, 15 Jul 2011 14:14:00 +0000
+ -- Reece H. Dunn <msclrhd@gmail.com>  Fri, 07 Aug 2011 17:00:00 +0000
 

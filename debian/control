@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Reece H. Dunn <msclrhd@gmail.com>
 Build-Depends: debhelper (>= 7.0.50~),
                autoconf, automake, libtool, autopoint, gettext, pkg-config,
-               libcainteoir-dev, libgtkmm-2.4-dev (>= 2.10)
+               libcainteoir0, libcainteoir-dev, libgtkmm-2.4-dev (>= 2.10)
 Standards-Version: 3.9.1
 Vcs-Git: git://github.com/rhdunn/cainteoir-gtk.git
 Vcs-browser: https://github.com/rhdunn/cainteoir-gtk

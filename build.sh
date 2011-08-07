@@ -41,8 +41,8 @@ builddeb() {
 }
 
 dorelease() {
-	buildeb -S -sa || exit 1
-	sudo pbuilder build ../${PACKAGE}_*.dsc || exit 1
+	builddeb $1 -S -sa || exit 1
+	(sudo pbuilder build ../${PACKAGE}_*.dsc 2>&1 || exit 1) | tee release.log
 	lintian -Ivi ../${PACKAGE}_*.dsc
 }
 
@@ -84,7 +84,7 @@ case "$1" in
 	debsrc)    builddeb $2 -S -sa ;;
 	dist)      dodist ;;
 	ppa)       doppa $2 ;;
-	release)   dorelease ;;
+	release)   dorelease $2 ;;
 	install)   doinstall ;;
 	uninstall) douninstall ;;
 	help|*)

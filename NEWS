@@ -1,0 +1,10 @@
+
+-------------------------------------------------------------------------------
+VERSION 0.1 -- Sunday August 7th 2011 [Aug 2011]
+
+cainteoir-gtk:
+  *  read and record text documents, reporting progress;
+  *  view document metadata and table of contents;
+  *  select the start and end chapter from the table of contents;
+  *  view and edit voice speed, pitch and volume.
+

@@ -42,7 +42,7 @@ builddeb() {
 
 dorelease() {
 	builddeb $1 -S -sa || exit 1
-	(sudo pbuilder build ../${PACKAGE}_*.dsc 2>&1 || exit 1) | tee release.log
+	(sudo pbuilder build ../${PACKAGE}_*.dsc 2>&1 || exit 1) | tee ../${PACKAGE}_build.log
 	lintian -Ivi ../${PACKAGE}_*.dsc
 }
 

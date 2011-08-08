@@ -71,8 +71,7 @@ doppa() {
 }
 
 doallppa() {
-	# NOTE: lucid is missing the autopoint package
-	for DISTRO in maverick natty oneiric ; do
+	for DISTRO in lucid maverick natty oneiric ; do
 		doppa ${DISTRO}
 	done
 }

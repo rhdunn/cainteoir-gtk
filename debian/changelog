@@ -1,8 +1,14 @@
+cainteoir-gtk (0.1-2) unstable; urgency=low
+ 
+  * Fix building with gtk3 on oneiric.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Mon, 08 Aug 2011 18:51:00 +0000
+
 cainteoir-gtk (0.1-1) unstable; urgency=low
  
   * Depend on libcainteoir0 to link against the shared library.
  
- -- Reece H. Dunn <msclrhd@gmail.com>  Fri, 07 Aug 2011 17:00:00 +0000
+ -- Reece H. Dunn <msclrhd@gmail.com>  Sun, 07 Aug 2011 17:00:00 +0000
 
 cainteoir-gtk (0.1) unstable; urgency=low
  

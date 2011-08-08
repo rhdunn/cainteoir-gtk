@@ -1,5 +1,5 @@
 diff --git a/debian/control b/debian/control
-index 620cdd8..022542a 100644
+index 33d6e0f..a2d419d 100644
 --- a/debian/control
 +++ b/debian/control
 @@ -4,7 +4,7 @@ Priority: extra
@@ -12,10 +12,18 @@ index 620cdd8..022542a 100644
  Vcs-Git: git://github.com/rhdunn/cainteoir-gtk.git
  Vcs-browser: https://github.com/rhdunn/cainteoir-gtk
 diff --git a/debian/rules b/debian/rules
-index 35477d8..a9f81fc 100755
+index 35477d8..4e3f77e 100755
 --- a/debian/rules
 +++ b/debian/rules
-@@ -19,3 +19,6 @@ configure:
+@@ -12,10 +12,13 @@
+ configure:
+ 	dh_testdir
+ 	./autogen.sh
+-	dh_auto_configure
++	dh_auto_configure -- --with-gtk3
+ 
+ %:
+ 	dh $@
  
  build: configure
  	dh build

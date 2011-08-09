@@ -39,7 +39,7 @@ struct document : public cainteoir::document_events
 		m_metadata.push_back(aStatement);
 	}
 
-	const rdf::bnode genid()
+	const rdf::uri genid()
 	{
 		return m_metadata.genid();
 	}

@@ -53,7 +53,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 	{
 		if (rql::predicate(*query).as<rdf::uri>()->ns == rdf::dc || rql::predicate(*query).as<rdf::uri>()->ns == rdf::dcterms)
 		{
-			rdf::any_type object = rql::object(*query);
+			rdf::resource object = rql::object(*query);
 			if (object.as<rdf::literal>())
 			{
 				if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)

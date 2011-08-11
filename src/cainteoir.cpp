@@ -451,7 +451,7 @@ bool Cainteoir::load_document(std::string filename)
 		if (filename.find("file://") == 0)
 			filename.erase(0, 7);
 
-		if (cainteoir::parseDocument(filename.c_str(), doc))
+		if (cainteoir::parseDocument(filename.c_str(), doc, doc.m_metadata))
 		{
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 			recentManager->add_item("file://" + filename);

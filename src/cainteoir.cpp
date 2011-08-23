@@ -113,6 +113,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	actions->add(Gtk::Action::create("ViewMenu", _("_View")));
 	actions->add(Gtk::Action::create("ViewMetadata", _("_Information")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), metadata));
+	actions->add(Gtk::Action::create("ViewIPA", _("_Phonemes")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), phoneme));
 	actions->add(Gtk::Action::create("SelectVoice", _("_Select Voice")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), voice_selection));
 
 	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
@@ -143,6 +144,7 @@ Cainteoir::Cainteoir(const char *filename)
 		"		</menu>"
 		"		<menu action='ViewMenu'>"
 		"			<menuitem action='ViewMetadata'/>"
+		"			<menuitem action='ViewIPA'/>"
 		"		</menu>"
 		"		<menu action='ReaderMenu'>"
 		"			<menuitem action='ReaderRead'/>"
@@ -184,6 +186,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	view.pack_start(doc_metadata, Gtk::PACK_SHRINK);
 	view.pack_start(voiceSelection, Gtk::PACK_SHRINK);
+	view.pack_start(ipa, Gtk::PACK_SHRINK);
 
 	scrolledTocPane.add(doc.toc);
 	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -544,16 +547,21 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 
 void Cainteoir::switch_view(int aView)
 {
+	doc_metadata.hide();
+	voiceSelection.hide();
+	ipa.hide();
+
 	switch (aView)
 	{
 	case voice_selection:
-		doc_metadata.hide();
 		voiceSelection.show();
 		break;
-	default: // metadata
-		aView = metadata;
+	case metadata:
 		doc_metadata.show();
-		voiceSelection.hide();
+		break;
+	default:
+		aView = phoneme;
+		ipa.show();
 		break;
 	}
 

@@ -106,6 +106,8 @@ src_cainteoir_gtk_SOURCES = \
 	src/voice_selection.cpp \
 	src/metadata.hpp \
 	src/metadata.cpp \
+	src/ipa.hpp \
+	src/ipa.cpp \
 	src/cainteoir.hpp \
 	src/cainteoir.cpp \
 	src/main.cpp

@@ -27,6 +27,7 @@
 #include "document.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
+#include "ipa.hpp"
 #include "gtkobjectref.hpp"
 
 class Cainteoir : public Gtk::Window
@@ -54,6 +55,7 @@ protected:
 	{
 		metadata,
 		voice_selection,
+		phoneme,
 	};
 
 	void switch_view(int aView);
@@ -72,6 +74,7 @@ private:
 	Gtk::VBox view;
 	MetadataView doc_metadata;
 	VoiceSelectionView voiceSelection;
+	PhonemeView ipa;
 
 	Gtk::HBox statusbar;
 	Gtk::Label state;

@@ -77,7 +77,7 @@ private:
 	Gtk::Label state;
 
 	Gtk::Alignment progressAlignment;
-	Gtk::ProgressBar progress;
+	GtkWidget *progress;
 	Gtk::Label elapsedTime;
 	Gtk::Label totalTime;
 

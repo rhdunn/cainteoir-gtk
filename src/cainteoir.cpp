@@ -160,10 +160,13 @@ Cainteoir::Cainteoir(const char *filename)
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
 	openRecent->set_submenu(*create_file_chooser_menu());
 
+	progress = gtk_progress_bar_new();
+
 #if GTK_MAJOR_VERSION >= 3
-	progress.set_show_text(true);
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), true);
 #endif
-	progressAlignment.add(progress);
+
+	gtk_container_add(GTK_CONTAINER(progressAlignment.gobj()), progress);
 
 	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);
 	mediabar.pack_start(stopButton, Gtk::PACK_SHRINK);
@@ -513,8 +516,8 @@ void Cainteoir::updateProgress(double elapsed, double total, double completed)
 	format_time(elapsed_time, 80, elapsed);
 	format_time(total_time, 80, total);
 
-	progress.set_text(percentage);
-	progress.set_fraction(completed / 100.0);
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), percentage);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), completed / 100.0);
 
 	elapsedTime.set_text(elapsed_time);
 	totalTime.set_text(total_time);

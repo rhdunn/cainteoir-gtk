@@ -27,17 +27,20 @@
 namespace rql = cainteoir::rdf::query;
 
 MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int rows)
-	: metadata(rows, 2, false)
-	, languages(lang)
+	: languages(lang)
 {
-	pack_start(header, Gtk::PACK_SHRINK);
-	pack_start(metadata, Gtk::PACK_SHRINK);
+	layout = gtk_vbox_new(FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
 
-	set_border_width(6);
-	metadata.set_border_width(4);
+	header = gtk_label_new("");
+	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
+	gtk_label_set_markup(GTK_LABEL(header), label);
 
-	header.set_alignment(0, 0);
-	header.set_markup(label);
+	metadata = gtk_table_new(rows, 2, FALSE);
+	gtk_container_set_border_width(GTK_CONTAINER(metadata), 4);
+
+	gtk_box_pack_start(GTK_BOX(layout), header,   FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(layout), metadata, FALSE, FALSE, 0);
 }
 
 void MetadataView::clear()
@@ -123,6 +126,6 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 	gtk_label_set_line_wrap(GTK_LABEL(value), true);
 	gtk_label_set_width_chars(GTK_LABEL(value), 40);
 
-	gtk_table_attach(GTK_TABLE(metadata.gobj()), label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
-	gtk_table_attach(GTK_TABLE(metadata.gobj()), value, 1, 2, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
+	gtk_table_attach(GTK_TABLE(metadata), label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
+	gtk_table_attach(GTK_TABLE(metadata), value, 1, 2, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
 }

@@ -161,12 +161,11 @@ Cainteoir::Cainteoir(const char *filename)
 	openRecent->set_submenu(*create_file_chooser_menu());
 
 	progress = gtk_progress_bar_new();
+	gtk_container_add(GTK_CONTAINER(progressAlignment.gobj()), progress);
 
 #if GTK_MAJOR_VERSION >= 3
-	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), true);
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
 #endif
-
-	gtk_container_add(GTK_CONTAINER(progressAlignment.gobj()), progress);
 
 	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);
 	mediabar.pack_start(stopButton, Gtk::PACK_SHRINK);
@@ -185,8 +184,8 @@ Cainteoir::Cainteoir(const char *filename)
 	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
 	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
 
-	view.pack_start(doc_metadata, Gtk::PACK_SHRINK);
-	view.pack_start(voiceSelection, Gtk::PACK_SHRINK);
+	gtk_box_pack_start(GTK_BOX(view.gobj()), doc_metadata.gobj(),   FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(view.gobj()), GTK_WIDGET(voiceSelection.gobj()), FALSE, FALSE, 0);
 
 	scrolledTocPane.add(doc.toc);
 	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -547,7 +546,7 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 
 void Cainteoir::switch_view(int aView)
 {
-	doc_metadata.hide();
+	gtk_widget_hide(doc_metadata.gobj());
 	voiceSelection.hide();
 
 	switch (aView)
@@ -558,7 +557,7 @@ void Cainteoir::switch_view(int aView)
 	case metadata:
 	default:
 		aView = metadata;
-		doc_metadata.show();
+		gtk_widget_show(doc_metadata.gobj());
 		break;
 	}
 

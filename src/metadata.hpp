@@ -27,10 +27,12 @@
 
 namespace rdf = cainteoir::rdf;
 
-class MetadataView : public Gtk::VBox
+class MetadataView
 {
 public:
 	MetadataView(cainteoir::languages & lang, const char *label, int rows);
+
+	GtkWidget *gobj() { return layout; }
 
 	void clear();
 
@@ -41,8 +43,9 @@ public:
 	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
 
 private:
-	Gtk::Label header;
-	Gtk::Table metadata;
+	GtkWidget *layout;
+	GtkWidget *header;
+	GtkWidget *metadata;
 	std::map<std::string, std::pair<GtkWidget *, GtkWidget *> > values;
 	cainteoir::languages & languages;
 };

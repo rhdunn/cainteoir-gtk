@@ -43,7 +43,7 @@ public:
 private:
 	Gtk::Label header;
 	Gtk::Table metadata;
-	std::map<std::string, std::pair<Gtk::Label *, Gtk::Label *> > values;
+	std::map<std::string, std::pair<GtkWidget *, GtkWidget *> > values;
 	cainteoir::languages & languages;
 };
 

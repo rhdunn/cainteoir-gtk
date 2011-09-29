@@ -43,7 +43,7 @@ MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int r
 void MetadataView::clear()
 {
 	for(auto item = values.begin(), last = values.end(); item != last; ++item)
-		item->second.second->set_label("");
+		gtk_label_set_label(GTK_LABEL(item->second.second), "");
 }
 
 void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
@@ -59,9 +59,9 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 				if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
 				{
 					if (aPredicate == rdf::dc("language"))
-						values[aPredicate.str()].second->set_label(languages(rql::value(object)));
+						gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), languages(rql::value(object)).c_str());
 					else
-						values[aPredicate.str()].second->set_label(rql::value(object));
+						gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), rql::value(object).c_str());
 				}
 			}
 			else
@@ -83,7 +83,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 					}
 
 					if (!author.empty() && (role == "aut" || role.empty()))
-						values[aPredicate.str()].second->set_label(author);
+						gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), author.c_str());
 				}
 				else if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
 				{
@@ -93,9 +93,9 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 						if (rql::predicate(*data) == rdf::rdf("value"))
 						{
 							if (aPredicate == rdf::dc("language"))
-								values[aPredicate.str()].second->set_label(languages(object));
+								gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), languages(object).c_str());
 							else
-								values[aPredicate.str()].second->set_label(object);
+								gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), object.c_str());
 						}
 					}
 				}
@@ -106,23 +106,23 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 
 void MetadataView::add_metadata(const rdf::uri & aPredicate, const char * value)
 {
-	values[aPredicate.str()].second->set_label(value);
+	gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), value);
 }
 
 void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelText, int row)
 {
-	Gtk::Label * label = Gtk::manage(new Gtk::Label());
-	Gtk::Label * value = Gtk::manage(new Gtk::Label());
+	GtkWidget *label = gtk_label_new("");
+	GtkWidget *value = gtk_label_new("");
 
 	values[aPredicate.str()] = std::make_pair(label, value);
 
-	label->set_alignment(0, 0);
-	label->set_markup(labelText);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
+	gtk_label_set_markup(GTK_LABEL(label), labelText);
 
-	value->set_alignment(0, 0);
-	value->set_line_wrap(true);
-	value->set_width_chars(40);
+	gtk_misc_set_alignment(GTK_MISC(value), 0, 0);
+	gtk_label_set_line_wrap(GTK_LABEL(value), true);
+	gtk_label_set_width_chars(GTK_LABEL(value), 40);
 
-	metadata.attach(*label, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
-	metadata.attach(*value, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
+	gtk_table_attach(GTK_TABLE(metadata.gobj()), label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
+	gtk_table_attach(GTK_TABLE(metadata.gobj()), value, 1, 2, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
 }

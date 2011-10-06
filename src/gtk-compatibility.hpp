@@ -1,4 +1,4 @@
-/* Gtkmm 2 and 3 compatibility helper.
+/* Gtkmm 2 and 3 compatibility helpers.
  *
  * Copyright (C) 2011 Reece H. Dunn
  *
@@ -18,8 +18,8 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAINTEOIRGTK_SRC_GTKOBJECTREF_HPP
-#define CAINTEOIRGTK_SRC_GTKOBJECTREF_HPP
+#ifndef CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
+#define CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
 
 /** @brief Gtkmm 2 and 3 compatibility helper.
   *

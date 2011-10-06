@@ -27,7 +27,7 @@
 #include "document.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
-#include "gtkobjectref.hpp"
+#include "gtk-compatibility.hpp"
 
 class Cainteoir : public Gtk::Window
 {

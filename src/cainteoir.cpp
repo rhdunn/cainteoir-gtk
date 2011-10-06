@@ -162,10 +162,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	progress = gtk_progress_bar_new();
 	gtk_container_add(GTK_CONTAINER(progressAlignment.gobj()), progress);
-
-#if GTK_MAJOR_VERSION >= 3
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
-#endif
 
 	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);
 	mediabar.pack_start(stopButton, Gtk::PACK_SHRINK);

@@ -32,7 +32,7 @@ class MetadataView
 public:
 	MetadataView(cainteoir::languages & lang, const char *label, int rows);
 
-	GtkWidget *gobj() { return layout; }
+	operator GtkWidget *() { return layout; }
 
 	void clear();
 

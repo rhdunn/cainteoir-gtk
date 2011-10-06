@@ -184,7 +184,7 @@ Cainteoir::Cainteoir(const char *filename)
 	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
 	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
 
-	gtk_box_pack_start(GTK_BOX(view.gobj()), doc_metadata.gobj(),   FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(view.gobj()), doc_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(view.gobj()), GTK_WIDGET(voiceSelection.gobj()), FALSE, FALSE, 0);
 
 	scrolledTocPane.add(doc.toc);
@@ -546,7 +546,7 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 
 void Cainteoir::switch_view(int aView)
 {
-	gtk_widget_hide(doc_metadata.gobj());
+	gtk_widget_hide(doc_metadata);
 	voiceSelection.hide();
 
 	switch (aView)
@@ -557,7 +557,7 @@ void Cainteoir::switch_view(int aView)
 	case metadata:
 	default:
 		aView = metadata;
-		gtk_widget_show(doc_metadata.gobj());
+		gtk_widget_show(doc_metadata);
 		break;
 	}
 

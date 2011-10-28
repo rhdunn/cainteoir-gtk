@@ -273,17 +273,21 @@ void Cainteoir::on_open_document()
 
 void Cainteoir::on_recent_files_dialog()
 {
-	Gtk::RecentChooserDialog dialog(*this, _("Recent Files"), recentManager);
-	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), GTK_WINDOW(gobj()),
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
+		NULL);
+	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_FILTER(recentFilter->gobj()));
+	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
 
-	dialog.set_filter(recentFilter);
-	dialog.set_sort_type(Gtk::RECENT_SORT_MRU);
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+	{
+		GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(dialog));
+		load_document(gtk_recent_info_get_uri(info));
+		gtk_recent_info_unref(info);
+	}
 
-	const int response = dialog.run();
-	dialog.hide();
-	if (response == Gtk::RESPONSE_OK)
-		load_document(dialog.get_current_uri());
+	gtk_widget_destroy(dialog);
 }
 
 void Cainteoir::on_recent_file(Gtk::RecentChooserMenu * recent)

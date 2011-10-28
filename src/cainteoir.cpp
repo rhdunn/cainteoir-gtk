@@ -77,8 +77,7 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 }
 
 Cainteoir::Cainteoir(const char *filename)
-	: mediabar(Gtk::ORIENTATION_HORIZONTAL, 4)
-	, doc_metadata(languages, _("<b>Document</b>"), 5)
+	: doc_metadata(languages, _("<b>Document</b>"), 5)
 	, voiceSelection(doc.tts)
 	, state(_("stopped"))
 	, progressAlignment(0.5, 0.5, 1.0, 0.0)
@@ -164,13 +163,14 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_container_add(GTK_CONTAINER(progressAlignment.gobj()), progress);
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
 
-	mediabar.pack_start(readButton, Gtk::PACK_SHRINK);
-	mediabar.pack_start(stopButton, Gtk::PACK_SHRINK);
-	mediabar.pack_start(recordButton, Gtk::PACK_SHRINK);
-	mediabar.pack_start(openButton, Gtk::PACK_SHRINK);
-	mediabar.pack_start(elapsedTime, Gtk::PACK_SHRINK);
-	mediabar.pack_start(progressAlignment);
-	mediabar.pack_start(totalTime, Gtk::PACK_SHRINK);
+	mediabar = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 4);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(elapsedTime.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(progressAlignment.gobj()), TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(totalTime.gobj()), FALSE, FALSE, 0);
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 
@@ -198,7 +198,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
-	box.pack_start(mediabar, Gtk::PACK_SHRINK);
+	gtk_box_pack_start(GTK_BOX(box.gobj()), mediabar, FALSE, FALSE, 0);
 	box.pack_start(pane);
 	box.pack_start(statusbar, Gtk::PACK_SHRINK);
 

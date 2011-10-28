@@ -76,7 +76,7 @@ private:
 	Gtk::HBox statusbar;
 	Gtk::Label state;
 
-	Gtk::Alignment progressAlignment;
+	GtkWidget *progressAlignment;
 	GtkWidget *progress;
 	Gtk::Label elapsedTime;
 	Gtk::Label totalTime;

@@ -164,14 +164,17 @@ Cainteoir::Cainteoir(const char *filename)
 	progressAlignment = gtk_alignment_new(0.5, 0.5, 1.0, 1.0);
 	gtk_container_add(GTK_CONTAINER(progressAlignment), progress);
 
+	elapsedTime = gtk_label_new("00:00:00.0");
+	totalTime   = gtk_label_new("00:00:00.0");
+
 	mediabar = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(elapsedTime.gobj()), FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(mediabar), elapsedTime, FALSE, FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(mediabar), progressAlignment, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(totalTime.gobj()), FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(mediabar), totalTime, FALSE, FALSE, 4);
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 
@@ -522,8 +525,8 @@ void Cainteoir::updateProgress(double elapsed, double total, double completed)
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), percentage);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), completed / 100.0);
 
-	elapsedTime.set_text(elapsed_time);
-	totalTime.set_text(total_time);
+	gtk_label_set_text(GTK_LABEL(elapsedTime), elapsed_time);
+	gtk_label_set_text(GTK_LABEL(totalTime), total_time);
 }
 
 Gtk::Menu *Cainteoir::create_file_chooser_menu()

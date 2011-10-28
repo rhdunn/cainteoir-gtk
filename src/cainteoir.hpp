@@ -78,8 +78,8 @@ private:
 
 	GtkWidget *progressAlignment;
 	GtkWidget *progress;
-	Gtk::Label elapsedTime;
-	Gtk::Label totalTime;
+	GtkWidget *elapsedTime;
+	GtkWidget *totalTime;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;

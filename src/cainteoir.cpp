@@ -106,7 +106,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	actions->add(Gtk::Action::create("FileMenu", _("_File")));
 	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	actions->add(recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Files")));
+	actions->add(recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Documents")));
 	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::on_quit));
 
 	actions->add(Gtk::Action::create("ViewMenu", _("_View")));
@@ -503,7 +503,7 @@ bool Cainteoir::load_document(std::string filename)
 	}
 	catch (const std::exception & e)
 	{
-		Gtk::MessageDialog dialog(*this, _("Unable to load the document"), false, Gtk::MESSAGE_ERROR);
+		Gtk::MessageDialog dialog(*this, _("Unable to open the document"), false, Gtk::MESSAGE_ERROR);
 		dialog.set_title(_("Open Document"));
 		dialog.set_secondary_text(e.what());
 		dialog.run();
@@ -543,7 +543,7 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 	recent->append(*separator);
 	separator->show();
 
-	Gtk::MenuItem *more = Gtk::manage(new Gtk::MenuItem(_("_More..."), true));
+	Gtk::MenuItem *more = Gtk::manage(new Gtk::MenuItem(_("_More Documents..."), true));
 	more->signal_activate().connect(sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
 	recent->append(*more);
 	more->show();

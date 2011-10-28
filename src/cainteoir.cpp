@@ -168,9 +168,9 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(elapsedTime.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(elapsedTime.gobj()), FALSE, FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(progressAlignment.gobj()), TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(totalTime.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(totalTime.gobj()), FALSE, FALSE, 4);
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 

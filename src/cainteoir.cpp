@@ -292,7 +292,9 @@ void Cainteoir::on_recent_files_dialog()
 
 void Cainteoir::on_recent_file(Gtk::RecentChooserMenu * recent)
 {
-	load_document(recent->get_current_uri());
+	GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(recent->gobj()));
+	load_document(gtk_recent_info_get_uri_display(info));
+	gtk_recent_info_unref(info);
 }
 
 void Cainteoir::on_quit()

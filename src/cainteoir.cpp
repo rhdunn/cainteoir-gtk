@@ -283,7 +283,7 @@ void Cainteoir::on_recent_files_dialog()
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
 		GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(dialog));
-		load_document(gtk_recent_info_get_uri(info));
+		load_document(gtk_recent_info_get_uri_display(info));
 		gtk_recent_info_unref(info);
 	}
 

@@ -29,7 +29,7 @@
 struct document : public cainteoir::document_events
 {
 	document()
-		: tts(m_metadata)
+		: tts(m_metadata, cainteoir::text_support)
 		, m_doc(new cainteoir::document())
 	{
 	}

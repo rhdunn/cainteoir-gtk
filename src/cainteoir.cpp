@@ -167,14 +167,17 @@ Cainteoir::Cainteoir(const char *filename)
 	elapsedTime = gtk_label_new("00:00:00.0");
 	totalTime   = gtk_label_new("00:00:00.0");
 
-	mediabar = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 4);
+	mediabar_box = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 4);
+	gtk_box_pack_start(GTK_BOX(mediabar_box), elapsedTime, FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(mediabar_box), progressAlignment, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar_box), totalTime, FALSE, FALSE, 4);
+
+	mediabar = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), elapsedTime, FALSE, FALSE, 4);
-	gtk_box_pack_start(GTK_BOX(mediabar), progressAlignment, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), totalTime, FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(mediabar_box), TRUE, TRUE, 0);
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 

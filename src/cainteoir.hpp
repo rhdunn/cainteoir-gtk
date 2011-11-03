@@ -63,6 +63,7 @@ private:
 
 	Gtk::VBox box;
 	GtkWidget *mediabar;
+	GtkWidget *mediabar_box;
 
 	Gtk::HPaned pane;
 

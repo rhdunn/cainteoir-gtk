@@ -27,6 +27,7 @@
 #include "document.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
+#include "timebar.hpp"
 #include "gtk-compatibility.hpp"
 
 class Cainteoir : public Gtk::Window
@@ -63,7 +64,7 @@ private:
 
 	Gtk::VBox box;
 	GtkWidget *mediabar;
-	GtkWidget *mediabar_box;
+	TimeBar timebar;
 
 	Gtk::HPaned pane;
 
@@ -76,11 +77,6 @@ private:
 
 	Gtk::HBox statusbar;
 	Gtk::Label state;
-
-	GtkWidget *progressAlignment;
-	GtkWidget *progress;
-	GtkWidget *elapsedTime;
-	GtkWidget *totalTime;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;

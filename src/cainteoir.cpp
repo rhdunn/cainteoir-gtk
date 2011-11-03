@@ -39,19 +39,6 @@ static std::string get_user_file(const char * filename)
 	return root + "/" + std::string(filename);
 }
 
-static void format_time(char *s, int n, double seconds)
-{
-	int ms = int(seconds * 10.0) % 10;
-
-	int minutes = floor(seconds / 60.0);
-	seconds = seconds - (minutes * 60.0);
-
-	int hours = floor(minutes / 60.0);
-	minutes = minutes - (hours * 60.0);
-
-	snprintf(s, n, "%02d:%02d:%02d.%01d", hours, minutes, (int)floor(seconds), ms);
-}
-
 static double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parameter> aRate)
 {
 	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
@@ -158,26 +145,12 @@ Cainteoir::Cainteoir(const char *filename)
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
 	openRecent->set_submenu(*create_file_chooser_menu());
 
-	progress = gtk_progress_bar_new();
-	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
-
-	progressAlignment = gtk_alignment_new(0.5, 0.5, 1.0, 1.0);
-	gtk_container_add(GTK_CONTAINER(progressAlignment), progress);
-
-	elapsedTime = gtk_label_new("00:00:00.0");
-	totalTime   = gtk_label_new("00:00:00.0");
-
-	mediabar_box = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 4);
-	gtk_box_pack_start(GTK_BOX(mediabar_box), elapsedTime, FALSE, FALSE, 4);
-	gtk_box_pack_start(GTK_BOX(mediabar_box), progressAlignment, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar_box), totalTime, FALSE, FALSE, 4);
-
 	mediabar = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(mediabar_box), TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(mediabar), timebar, TRUE, TRUE, 0);
 
 	statusbar.pack_start(state, Gtk::PACK_SHRINK);
 
@@ -209,7 +182,7 @@ Cainteoir::Cainteoir(const char *filename)
 	box.pack_start(pane);
 	box.pack_start(statusbar, Gtk::PACK_SHRINK);
 
-	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
+	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	show_all_children();
 	switch_view(settings("cainteoir.active-view",  metadata).as<int>());
@@ -422,14 +395,14 @@ bool Cainteoir::on_speaking()
 {
 	if (speech->is_speaking())
 	{
-		updateProgress(speech->elapsedTime(), speech->totalTime(), speech->completed());
+		timebar.update(speech->elapsedTime(), speech->totalTime(), speech->completed());
 		return true;
 	}
 
 	speech.reset();
 	out.reset();
 
-	updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
+	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	state.set_label(_("stopped"));
 
@@ -497,7 +470,7 @@ bool Cainteoir::load_document(std::string filename)
 
 			doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
-			updateProgress(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
+			timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 			readAction->set_sensitive(true);
 			readButton.set_sensitive(true);
@@ -513,23 +486,6 @@ bool Cainteoir::load_document(std::string filename)
 	}
 
 	return false;
-}
-
-void Cainteoir::updateProgress(double elapsed, double total, double completed)
-{
-	char percentage[20];
-	char elapsed_time[80];
-	char total_time[80];
-
-	sprintf(percentage, "%0.2f%%", completed);
-	format_time(elapsed_time, 80, elapsed);
-	format_time(total_time, 80, total);
-
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), percentage);
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), completed / 100.0);
-
-	gtk_label_set_text(GTK_LABEL(elapsedTime), elapsed_time);
-	gtk_label_set_text(GTK_LABEL(totalTime), total_time);
 }
 
 Gtk::Menu *Cainteoir::create_file_chooser_menu()

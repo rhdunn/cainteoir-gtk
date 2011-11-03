@@ -111,7 +111,7 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 		else if (rql::predicate(*statement) == rdf::tts("frequency"))
 			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(*statement).c_str(), -1);
 		else if (rql::predicate(*statement) == rdf::tts("channels"))
-			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement).c_str(), -1);
+			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement) == "1" ? _("mono") : _("stereo"), -1);
 	}
 }
 

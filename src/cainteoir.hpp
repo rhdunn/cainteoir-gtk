@@ -70,10 +70,9 @@ private:
 
 	Gtk::ScrolledWindow scrolledTocPane;
 
-	Gtk::ScrolledWindow scrolledView;
 	Gtk::VBox view;
 	MetadataView doc_metadata;
-	VoiceSelectionView voiceSelection;
+	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
 	Gtk::HBox statusbar;
 	Gtk::Label state;

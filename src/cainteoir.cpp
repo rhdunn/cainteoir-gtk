@@ -65,15 +65,16 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 
 Cainteoir::Cainteoir(const char *filename)
 	: doc_metadata(languages, _("<b>Document</b>"), 5)
-	, voiceSelection(doc.tts)
+	, languages("en")
 	, state(_("stopped"))
 	, readButton(Gtk::Stock::MEDIA_PLAY)
 	, stopButton(Gtk::Stock::MEDIA_STOP)
 	, recordButton(Gtk::Stock::MEDIA_RECORD)
 	, openButton(Gtk::Stock::OPEN)
-	, languages("en")
 	, settings(get_user_file("settings.dat"))
 {
+	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(doc.tts, doc.m_metadata, languages));
+
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(500, 300);
 
@@ -162,17 +163,13 @@ Cainteoir::Cainteoir(const char *filename)
 	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
 
 	gtk_box_pack_start(GTK_BOX(view.gobj()), doc_metadata, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(view.gobj()), GTK_WIDGET(voiceSelection.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(view.gobj()), GTK_WIDGET(voiceSelection->gobj()), FALSE, FALSE, 0);
 
 	scrolledTocPane.add(doc.toc);
 	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	scrolledView.add(view);
-	scrolledView.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	((Gtk::Viewport *)scrolledView.get_child())->set_shadow_type(Gtk::SHADOW_NONE);
-
 	pane.add1(scrolledTocPane);
-	pane.add2(scrolledView);
+	pane.add2(view);
 
 	pane.set_position(settings("toc.width", 150).as<int>());
 
@@ -513,12 +510,12 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 void Cainteoir::switch_view(int aView)
 {
 	gtk_widget_hide(doc_metadata);
-	voiceSelection.hide();
+	voiceSelection->hide();
 
 	switch (aView)
 	{
 	case voice_selection:
-		voiceSelection.show();
+		voiceSelection->show();
 		break;
 	case metadata:
 	default:

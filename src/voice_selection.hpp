@@ -22,8 +22,25 @@
 #define CAINTEOIRGTK_SRC_VOICESELECTION_HPP
 
 #include <cainteoir/engines.hpp>
+#include <cainteoir/languages.hpp>
 
+namespace rdf = cainteoir::rdf;
+namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
+
+class VoiceList
+{
+public:
+	VoiceList(rdf::graph &aMetadata, cainteoir::languages &languages);
+
+	operator GtkWidget *() { return layout; }
+
+	void add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages);
+private:
+	GtkWidget *layout;
+	GtkTreeStore *store;
+	GtkWidget *tree;
+};
 
 struct VoiceParameter
 {
@@ -36,13 +53,16 @@ struct VoiceParameter
 class VoiceSelectionView : public Gtk::VBox
 {
 public:
-	VoiceSelectionView(tts::engines &aEngines);
-	
+	VoiceSelectionView(tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
+
 	void show();
 protected:
 	void apply_settings();
 private:
 	void create_entry(tts::parameter::type, int row);
+
+	Gtk::Label voices_header;
+	VoiceList voices;
 
 	std::list<VoiceParameter> parameters;
 	tts::engines *mEngines;

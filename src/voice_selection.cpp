@@ -24,20 +24,107 @@
 
 #include "voice_selection.hpp"
 
-VoiceSelectionView::VoiceSelectionView(tts::engines &aEngines)
+enum VoiceListColumns
+{
+	VLC_VOICE,
+	VLC_ENGINE,
+	VLC_LANGUAGE,
+	VLC_GENDER,
+	VLC_AGE,
+	VLC_FREQUENCY,
+	VLC_CHANNELS,
+	VLC_COUNT // number of columns
+};
+
+const char * columns[VLC_COUNT] = {
+	_("Voice"),
+	_("Engine"),
+	_("Language"),
+	_("Gender"),
+	_("Age"),
+	_("Frequency (Hz)"),
+	_("Channels"),
+};
+
+VoiceList::VoiceList(rdf::graph &aMetadata, cainteoir::languages &languages)
+{
+	store = gtk_tree_store_new(VLC_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	tree  = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+
+	for (int i = 0; i < VLC_COUNT; ++i)
+	{
+		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(columns[i], renderer, "text", i, NULL);
+		gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	}
+
+	rql::results voicelist = rql::select(aMetadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object, rdf::tts("Voice"))));
+
+	foreach_iter(voice, voicelist)
+	{
+		const rdf::uri *uri = rql::subject(*voice);
+		if (uri)
+		{
+			rql::results statements = rql::select(aMetadata, rql::matches(rql::subject, *uri));
+			add_voice(aMetadata, statements, languages);
+		}
+	}
+
+	layout = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(layout), tree);
+
+	// FIXME: The scrolled treeview takes up a minimal height, so set a default
+	// height to make it useable. The height should be calculated dynamically
+	// so the treeview fills the content area.
+	gtk_widget_set_size_request(layout, -1, 258);
+}
+
+void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages)
+{
+	GtkTreeIter row;
+	gtk_tree_store_append(store, &row, NULL);
+
+	foreach_iter(statement, voice)
+	{
+		if (rql::predicate(*statement) == rdf::tts("name"))
+			gtk_tree_store_set(store, &row, VLC_VOICE, rql::value(*statement).c_str(), -1);
+		else if (rql::predicate(*statement) == rdf::tts("voiceOf"))
+		{
+			std::string engine = rql::select_value<std::string>(aMetadata,
+				rql::both(rql::matches(rql::subject,   rql::object(*statement)),
+				          rql::matches(rql::predicate, rdf::tts("name"))));
+			gtk_tree_store_set(store, &row, VLC_ENGINE, engine.c_str(), -1);
+		}
+		else if (rql::predicate(*statement) == rdf::dc("language"))
+			gtk_tree_store_set(store, &row, VLC_LANGUAGE, languages(rql::value(*statement)).c_str(), -1);
+		else if (rql::predicate(*statement) == rdf::tts("gender"))
+		{
+			if (rql::object(*statement) == rdf::tts("male"))
+				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
+			else if (rql::object(*statement) == rdf::tts("female"))
+				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
+		}
+		else if (rql::predicate(*statement) == rdf::tts("age"))
+			gtk_tree_store_set(store, &row, VLC_AGE, rql::value(*statement).c_str(), -1);
+		else if (rql::predicate(*statement) == rdf::tts("frequency"))
+			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(*statement).c_str(), -1);
+		else if (rql::predicate(*statement) == rdf::tts("channels"))
+			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement).c_str(), -1);
+	}
+}
+
+VoiceSelectionView::VoiceSelectionView(tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
 	: mEngines(&aEngines)
+	, voices(aMetadata, languages)
 	, parameterView(5, 3, false)
 	, apply(_("_Apply"), true)
 {
-	buttons.add(apply);
-	buttons.set_layout(Gtk::BUTTONBOX_START);
-
-	pack_start(header, Gtk::PACK_SHRINK);
-	pack_start(parameterView);
-	pack_start(buttons, Gtk::PACK_SHRINK);
-
 	set_border_width(6);
-	parameterView.set_border_width(4);
+
+	voices_header.set_alignment(0, 0);
+	voices_header.set_markup(_("<b>Voices</b>"));
 
 	header.set_alignment(0, 0);
 	header.set_markup(_("<b>Voice Settings</b>"));
@@ -46,6 +133,15 @@ VoiceSelectionView::VoiceSelectionView(tts::engines &aEngines)
 	create_entry(tts::parameter::volume, 1);
 	create_entry(tts::parameter::pitch, 2);
 	create_entry(tts::parameter::pitch_range, 3);
+
+	buttons.add(apply);
+	buttons.set_layout(Gtk::BUTTONBOX_START);
+
+	pack_start(voices_header, Gtk::PACK_SHRINK);
+	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
+	pack_start(header, Gtk::PACK_SHRINK);
+	pack_start(parameterView, Gtk::PACK_SHRINK, 12);
+	pack_start(buttons, Gtk::PACK_SHRINK);
 
 	apply.signal_clicked().connect(sigc::mem_fun(*this, &VoiceSelectionView::apply_settings));
 }

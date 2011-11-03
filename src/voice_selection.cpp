@@ -46,16 +46,36 @@ const char * columns[VLC_COUNT] = {
 	_("Channels"),
 };
 
-VoiceList::VoiceList(rdf::graph &aMetadata, cainteoir::languages &languages)
+void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
 {
-	store = gtk_tree_store_new(VLC_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-	tree  = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	application_settings &settings = *(application_settings *)data;
 
+	settings("voicelist.sort.column") = gtk_tree_view_column_get_sort_column_id(column);
+	settings("voicelist.sort.order")  = (int)gtk_tree_view_column_get_sort_order(column);
+}
+
+VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages)
+	: settings(aSettings)
+{
+	int         sort_column = settings("voicelist.sort.column", 0).as<int>();
+	GtkSortType sort_order  = (GtkSortType)settings("voicelist.sort.order",  GTK_SORT_ASCENDING).as<int>();
+
+	store = gtk_tree_store_new(VLC_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), sort_column, sort_order);
+
+	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	for (int i = 0; i < VLC_COUNT; ++i)
 	{
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(columns[i], renderer, "text", i, NULL);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+		gtk_tree_view_column_set_sort_column_id(column, i);
+		g_signal_connect(column, "clicked", G_CALLBACK(on_voice_list_column_clicked), &settings);
+		if (i == sort_column)
+		{
+			gtk_tree_view_column_set_sort_indicator(column, TRUE);
+			gtk_tree_view_column_set_sort_order(column, sort_order);
+		}
 	}
 
 	rql::results voicelist = rql::select(aMetadata,
@@ -115,9 +135,9 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 	}
 }
 
-VoiceSelectionView::VoiceSelectionView(tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
+VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
 	: mEngines(&aEngines)
-	, voices(aMetadata, languages)
+	, voices(settings, aMetadata, languages)
 	, parameterView(5, 3, false)
 	, apply(_("_Apply"), true)
 {

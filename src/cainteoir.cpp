@@ -73,7 +73,7 @@ Cainteoir::Cainteoir(const char *filename)
 	, openButton(Gtk::Stock::OPEN)
 	, settings(get_user_file("settings.dat"))
 {
-	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(doc.tts, doc.m_metadata, languages));
+	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, doc.tts, doc.m_metadata, languages));
 
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(500, 300);

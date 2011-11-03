@@ -24,6 +24,8 @@
 #include <cainteoir/engines.hpp>
 #include <cainteoir/languages.hpp>
 
+#include "settings.hpp"
+
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
@@ -31,7 +33,7 @@ namespace tts = cainteoir::tts;
 class VoiceList
 {
 public:
-	VoiceList(rdf::graph &aMetadata, cainteoir::languages &languages);
+	VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages);
 
 	operator GtkWidget *() { return layout; }
 
@@ -40,6 +42,7 @@ private:
 	GtkWidget *layout;
 	GtkTreeStore *store;
 	GtkWidget *tree;
+	application_settings &settings;
 };
 
 struct VoiceParameter
@@ -53,7 +56,7 @@ struct VoiceParameter
 class VoiceSelectionView : public Gtk::VBox
 {
 public:
-	VoiceSelectionView(tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
+	VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
 
 	void show();
 protected:

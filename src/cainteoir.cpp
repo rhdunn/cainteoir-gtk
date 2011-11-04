@@ -174,8 +174,8 @@ Cainteoir::Cainteoir(const char *filename)
 
 	view = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, NULL);
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
+	views[metadata]        = gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, NULL);
+	views[voice_selection] = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
 
 	pane = gtk_hpaned_new();
 	gtk_paned_add1(GTK_PANED(pane), doc.toc);
@@ -539,7 +539,7 @@ void Cainteoir::switch_view(int aView)
 	if (aView == voice_selection)
 		voiceSelection->show();
 
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(view), aView);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(view), views[aView]);
 
 	settings("cainteoir.active-view") = aView;
 	settings.save();

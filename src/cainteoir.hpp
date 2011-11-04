@@ -55,6 +55,7 @@ protected:
 	{
 		metadata,
 		voice_selection,
+		n_views,
 	};
 
 	void switch_voice(const rdf::uri &voice);
@@ -69,6 +70,7 @@ private:
 
 	GtkWidget *pane;
 	GtkWidget *view;
+	int views[n_views];
 
 	MetadataView doc_metadata;
 	MetadataView voice_metadata;

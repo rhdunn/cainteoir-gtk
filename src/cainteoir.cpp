@@ -65,6 +65,8 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 
 Cainteoir::Cainteoir(const char *filename)
 	: doc_metadata(languages, _("<b>Document</b>"), 5)
+	, voice_metadata(languages, _("<b>Voice</b>"), 2)
+	, engine_metadata(languages, _("<b>Engine</b>"), 2)
 	, languages("en")
 	, state(_("stopped"))
 	, readButton(Gtk::Stock::MEDIA_PLAY)
@@ -162,9 +164,20 @@ Cainteoir::Cainteoir(const char *filename)
 	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
 	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
 
+	voice_metadata.create_entry(rdf::tts("name"), _("<i>Name:</i>"), 0);
+	voice_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 1);
+
+	engine_metadata.create_entry(rdf::tts("name"), _("<i>Name:</i>"), 0);
+	engine_metadata.create_entry(rdf::tts("version"), _("<i>Version:</i>"), 1);
+
+	metadata_view = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
+
 	view = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), doc_metadata, NULL);
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, NULL);
 	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
 
 	scrolledTocPane.add(doc.toc);
@@ -193,6 +206,7 @@ Cainteoir::Cainteoir(const char *filename)
 	stopButton.set_visible(false);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
+	switch_voice(doc.tts.voice());
 }
 
 bool Cainteoir::on_window_state_changed(GdkEventWindowState *event)
@@ -507,6 +521,27 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 	more->show();
 
 	return recent;
+}
+
+void Cainteoir::switch_voice(const rdf::uri &voice)
+{
+	voice_metadata.add_metadata(doc.m_metadata, voice, rdf::tts("name"));
+	voice_metadata.add_metadata(doc.m_metadata, voice, rdf::dc("language"));
+
+	foreach_iter(statement, rql::select(doc.m_metadata, rql::matches(rql::subject, voice)))
+	{
+		if (rql::predicate(*statement) == rdf::tts("voiceOf"))
+		{
+			const rdf::uri *engine = rql::object(*statement);
+			if (engine)
+			{
+				engine_metadata.add_metadata(doc.m_metadata, *engine, rdf::tts("name"));
+				engine_metadata.add_metadata(doc.m_metadata, *engine, rdf::tts("version"));
+			}
+		}
+	}
+
+	doc.tts.select_voice(doc.m_metadata, voice);
 }
 
 void Cainteoir::switch_view(int aView)

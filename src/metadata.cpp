@@ -104,6 +104,8 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 				}
 			}
 		}
+		else if (rql::predicate(*query) == aPredicate)
+			add_metadata(aPredicate, rql::value(*query).c_str());
 	}
 }
 

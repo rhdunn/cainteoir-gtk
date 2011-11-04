@@ -57,6 +57,7 @@ protected:
 		voice_selection,
 	};
 
+	void switch_voice(const rdf::uri &voice);
 	void switch_view(int aView);
 private:
 	void updateProgress(double elapsed, double total, double completed);
@@ -72,6 +73,9 @@ private:
 
 	GtkWidget *view;
 	MetadataView doc_metadata;
+	MetadataView voice_metadata;
+	MetadataView engine_metadata;
+	GtkWidget *metadata_view;
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
 	Gtk::HBox statusbar;

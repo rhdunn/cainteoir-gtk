@@ -75,6 +75,7 @@ Cainteoir::Cainteoir(const char *filename)
 	, settings(get_user_file("settings.dat"))
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, doc.tts, doc.m_metadata, languages));
+	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(500, 300);
@@ -537,7 +538,7 @@ void Cainteoir::switch_voice(const rdf::uri &voice)
 void Cainteoir::switch_view(int aView)
 {
 	if (aView == voice_selection)
-		voiceSelection->show();
+		voiceSelection->show(doc.tts.voice());
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(view), views[aView]);
 

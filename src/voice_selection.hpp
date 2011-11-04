@@ -35,14 +35,20 @@ class VoiceList
 public:
 	VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages);
 
-	operator GtkWidget *() { return layout; }
+	void set_voice(const rdf::uri &voice);
 
-	void add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages);
+	const rdf::uri get_voice() const;
+
+	operator GtkWidget *() { return layout; }
 private:
+	void add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages);
+
 	GtkWidget *layout;
 	GtkTreeStore *store;
-	GtkWidget *tree;
+	GtkTreeSelection *selection;
+
 	application_settings &settings;
+	rdf::graph &mMetadata;
 };
 
 struct VoiceParameter
@@ -58,7 +64,9 @@ class VoiceSelectionView : public Gtk::VBox
 public:
 	VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
 
-	void show();
+	void show(const rdf::uri &voice);
+
+	sigc::signal<void, const rdf::uri &> &signal_on_voice_change() { return on_voice_change; }
 protected:
 	void apply_settings();
 private:
@@ -75,6 +83,8 @@ private:
 
 	Gtk::HButtonBox buttons;
 	Gtk::Button apply;
+
+	sigc::signal<void, const rdf::uri &> on_voice_change;
 };
 
 #endif

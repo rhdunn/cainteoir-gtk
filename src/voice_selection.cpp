@@ -152,10 +152,10 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	buttons.add(apply);
 	buttons.set_layout(Gtk::BUTTONBOX_START);
 
-	pack_start(voices_header, Gtk::PACK_SHRINK);
-	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
 	pack_start(header, Gtk::PACK_SHRINK);
 	pack_start(parameterView, Gtk::PACK_SHRINK, 12);
+	pack_start(voices_header, Gtk::PACK_SHRINK);
+	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
 	pack_start(buttons, Gtk::PACK_SHRINK);
 
 	apply.signal_clicked().connect(sigc::mem_fun(*this, &VoiceSelectionView::apply_settings));

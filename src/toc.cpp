@@ -27,11 +27,14 @@
 TocPane::TocPane()
 {
 	data = Gtk::ListStore::create(model);
-	set_model(data);
-	append_column(_("Contents"), model.title);
+	view.set_model(data);
+	view.append_column(_("Contents"), model.title);
 
-	get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
-	set_rubber_banding();
+	view.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+	view.set_rubber_banding();
+
+	layout = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view.gobj()));
 }
 
 void TocPane::clear()
@@ -48,7 +51,7 @@ void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
 
 TocSelection TocPane::selection() const
 {
-	std::vector<Gtk::TreePath> selected = get_selection()->get_selected_rows();
+	std::vector<Gtk::TreePath> selected = view.get_selection()->get_selected_rows();
 	switch (selected.size())
 	{
 	case 0:

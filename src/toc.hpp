@@ -40,10 +40,12 @@ public:
 
 typedef std::pair<const rdf::uri, const rdf::uri> TocSelection;
 
-class TocPane : public Gtk::TreeView
+class TocPane
 {
 public:
 	TocPane();
+
+	operator GtkWidget *() { return layout; }
 
 	void clear();
 
@@ -51,6 +53,8 @@ public:
 
 	TocSelection selection() const;
 private:
+	GtkWidget *layout;
+	Gtk::TreeView view;
 	TocModel model;
 	Glib::RefPtr<Gtk::ListStore> data;
 };

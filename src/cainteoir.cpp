@@ -177,10 +177,7 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, NULL);
 	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
 
-	scrolledTocPane.add(doc.toc);
-	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-
-	gtk_paned_add1(GTK_PANED(pane.gobj()), GTK_WIDGET(scrolledTocPane.gobj()));
+	gtk_paned_add1(GTK_PANED(pane.gobj()), doc.toc);
 	gtk_paned_add2(GTK_PANED(pane.gobj()), view);
 
 	pane.set_position(settings("toc.width", 150).as<int>());

@@ -69,8 +69,6 @@ private:
 
 	Gtk::HPaned pane;
 
-	Gtk::ScrolledWindow scrolledTocPane;
-
 	GtkWidget *view;
 	MetadataView doc_metadata;
 	MetadataView voice_metadata;

@@ -177,15 +177,15 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, NULL);
 	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
 
-	gtk_paned_add1(GTK_PANED(pane.gobj()), doc.toc);
-	gtk_paned_add2(GTK_PANED(pane.gobj()), view);
-
-	pane.set_position(settings("toc.width", 150).as<int>());
+	pane = gtk_hpaned_new();
+	gtk_paned_add1(GTK_PANED(pane), doc.toc);
+	gtk_paned_add2(GTK_PANED(pane), view);
+	gtk_paned_set_position(GTK_PANED(pane), settings("toc.width", 150).as<int>());
 
 	add(box);
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), mediabar, FALSE, FALSE, 0);
-	box.pack_start(pane);
+	gtk_box_pack_start(GTK_BOX(box.gobj()), pane, TRUE, TRUE, 0);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
@@ -287,7 +287,7 @@ void Cainteoir::on_quit()
 	if (speech)
 		speech->stop();
 
-	settings("toc.width") = pane.get_position();
+	settings("toc.width") = gtk_paned_get_position(GTK_PANED(pane));
 	if (settings("window.maximized", "false").as<std::string>() == "false")
 	{
 		int width = 0;

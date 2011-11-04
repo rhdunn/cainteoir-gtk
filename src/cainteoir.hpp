@@ -67,13 +67,14 @@ private:
 	GtkWidget *mediabar;
 	TimeBar timebar;
 
-	Gtk::HPaned pane;
-
+	GtkWidget *pane;
 	GtkWidget *view;
+
 	MetadataView doc_metadata;
 	MetadataView voice_metadata;
 	MetadataView engine_metadata;
 	GtkWidget *metadata_view;
+
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;

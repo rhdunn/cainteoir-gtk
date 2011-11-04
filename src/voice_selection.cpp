@@ -90,6 +90,8 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 	GtkWidget *tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	for (int i = 0; i < VLC_COUNT; ++i)
 	{
+		if (i == VLC_URI) continue;
+
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(columns[i], renderer, "text", i, NULL);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);

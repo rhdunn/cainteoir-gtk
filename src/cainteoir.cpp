@@ -162,14 +162,16 @@ Cainteoir::Cainteoir(const char *filename)
 	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
 	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
 
-	gtk_box_pack_start(GTK_BOX(view.gobj()), doc_metadata, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(view.gobj()), GTK_WIDGET(voiceSelection->gobj()), FALSE, FALSE, 0);
+	view = gtk_notebook_new();
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), doc_metadata, NULL);
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
 
 	scrolledTocPane.add(doc.toc);
 	scrolledTocPane.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	pane.add1(scrolledTocPane);
-	pane.add2(view);
+	gtk_paned_add1(GTK_PANED(pane.gobj()), GTK_WIDGET(scrolledTocPane.gobj()));
+	gtk_paned_add2(GTK_PANED(pane.gobj()), view);
 
 	pane.set_position(settings("toc.width", 150).as<int>());
 
@@ -509,20 +511,10 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 
 void Cainteoir::switch_view(int aView)
 {
-	gtk_widget_hide(doc_metadata);
-	voiceSelection->hide();
-
-	switch (aView)
-	{
-	case voice_selection:
+	if (aView == voice_selection)
 		voiceSelection->show();
-		break;
-	case metadata:
-	default:
-		aView = metadata;
-		gtk_widget_show(doc_metadata);
-		break;
-	}
+
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(view), aView);
 
 	settings("cainteoir.active-view") = aView;
 	settings.save();

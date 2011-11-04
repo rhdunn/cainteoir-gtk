@@ -94,11 +94,6 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 
 	layout = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(layout), tree);
-
-	// FIXME: The scrolled treeview takes up a minimal height, so set a default
-	// height to make it useable. The height should be calculated dynamically
-	// so the treeview fills the content area.
-	gtk_widget_set_size_request(layout, -1, 258);
 }
 
 void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages)

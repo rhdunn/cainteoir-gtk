@@ -70,7 +70,7 @@ private:
 
 	Gtk::ScrolledWindow scrolledTocPane;
 
-	Gtk::VBox view;
+	GtkWidget *view;
 	MetadataView doc_metadata;
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 

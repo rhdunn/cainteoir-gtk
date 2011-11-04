@@ -78,9 +78,6 @@ private:
 	GtkWidget *metadata_view;
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
-	Gtk::HBox statusbar;
-	Gtk::Label state;
-
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;
 

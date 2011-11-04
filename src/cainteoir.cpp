@@ -68,7 +68,6 @@ Cainteoir::Cainteoir(const char *filename)
 	, voice_metadata(languages, _("<b>Voice</b>"), 2)
 	, engine_metadata(languages, _("<b>Engine</b>"), 2)
 	, languages("en")
-	, state(_("stopped"))
 	, readButton(Gtk::Stock::MEDIA_PLAY)
 	, stopButton(Gtk::Stock::MEDIA_STOP)
 	, recordButton(Gtk::Stock::MEDIA_RECORD)
@@ -155,8 +154,6 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), timebar, TRUE, TRUE, 0);
 
-	statusbar.pack_start(state, Gtk::PACK_SHRINK);
-
 	doc_metadata.create_entry(rdf::dc("title"), _("<i>Title:</i>"), 0);
 	doc_metadata.create_entry(rdf::dc("creator"), _("<i>Author:</i>"), 1);
 	doc_metadata.create_entry(rdf::dc("publisher"), _("<i>Publisher:</i>"), 2);
@@ -192,7 +189,6 @@ Cainteoir::Cainteoir(const char *filename)
 	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), mediabar, FALSE, FALSE, 0);
 	box.pack_start(pane);
-	box.pack_start(statusbar, Gtk::PACK_SHRINK);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
@@ -395,7 +391,6 @@ void Cainteoir::on_speak(const char * status)
 	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
 
-	state.set_label(status);
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
 }
 
@@ -416,8 +411,6 @@ bool Cainteoir::on_speaking()
 	out.reset();
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
-
-	state.set_label(_("stopped"));
 
 	readAction->set_visible(true);
 	stopAction->set_visible(false);

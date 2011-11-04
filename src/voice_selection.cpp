@@ -201,9 +201,9 @@ void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
 	item.units = Gtk::manage(new Gtk::Label(""));
 	item.units->set_alignment(0, 0.5);
 
-	parameterView.attach(*item.label, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
-	parameterView.attach(*item.param, 1, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL, 4, 4);
-	parameterView.attach(*item.units, 2, 3, row, row+1, Gtk::FILL, Gtk::FILL, 4, 4);
+	parameterView.attach(*item.label, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 4, 0);
+	parameterView.attach(*item.param, 1, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL, 4, 0);
+	parameterView.attach(*item.units, 2, 3, row, row+1, Gtk::FILL, Gtk::FILL, 4, 0);
 
 	parameters.push_back(item);
 }

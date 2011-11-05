@@ -66,7 +66,7 @@ public:
 
 	void show(const rdf::uri &voice);
 
-	sigc::signal<void, const rdf::uri &> &signal_on_voice_change() { return on_voice_change; }
+	sigc::signal<bool, const rdf::uri &> &signal_on_voice_change() { return on_voice_change; }
 protected:
 	void apply_settings();
 private:
@@ -84,7 +84,7 @@ private:
 	Gtk::HButtonBox buttons;
 	Gtk::Button apply;
 
-	sigc::signal<void, const rdf::uri &> on_voice_change;
+	sigc::signal<bool, const rdf::uri &> on_voice_change;
 };
 
 #endif

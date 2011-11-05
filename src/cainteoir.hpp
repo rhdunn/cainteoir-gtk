@@ -58,7 +58,10 @@ protected:
 		n_views,
 	};
 
-	void switch_voice(const rdf::uri &voice);
+	bool switch_voice(const rdf::uri &voice);
+
+	bool switch_voice_by_language(const std::string &language);
+
 	void switch_view(int aView);
 private:
 	void updateProgress(double elapsed, double total, double completed);

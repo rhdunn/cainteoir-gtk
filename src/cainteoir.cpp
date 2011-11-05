@@ -476,6 +476,16 @@ bool Cainteoir::load_document(std::string filename)
 
 			timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
+			std::string lang = rql::select_value<std::string>(doc.m_metadata,
+				rql::both(rql::matches(rql::subject, *doc.subject),
+				          rql::matches(rql::predicate, rdf::dc("language"))));
+			if (lang.empty())
+				lang = "en";
+
+			if (!switch_voice_by_language(lang) &&
+			    !switch_voice_by_language(lang.substr(0, lang.find('-'))))
+				throw std::runtime_error(_("no voice found for the document's language."));
+
 			readAction->set_sensitive(true);
 			readButton.set_sensitive(true);
 			return true;
@@ -514,7 +524,7 @@ Gtk::Menu *Cainteoir::create_file_chooser_menu()
 	return recent;
 }
 
-void Cainteoir::switch_voice(const rdf::uri &voice)
+bool Cainteoir::switch_voice(const rdf::uri &voice)
 {
 	voice_metadata.add_metadata(doc.m_metadata, voice, rdf::tts("name"));
 	voice_metadata.add_metadata(doc.m_metadata, voice, rdf::dc("language"));
@@ -532,7 +542,37 @@ void Cainteoir::switch_voice(const rdf::uri &voice)
 		}
 	}
 
-	doc.tts.select_voice(doc.m_metadata, voice);
+	return doc.tts.select_voice(doc.m_metadata, voice);
+}
+
+bool Cainteoir::switch_voice_by_language(const std::string &language)
+{
+	rql::results voicelist = rql::select(doc.m_metadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object, rdf::tts("Voice"))));
+
+	foreach_iter(voice, voicelist)
+	{
+		const rdf::uri *uri = rql::subject(*voice);
+		if (uri)
+		{
+			std::string lang = rql::select_value<std::string>(doc.m_metadata,
+				rql::both(rql::matches(rql::subject, *uri),
+				          rql::matches(rql::predicate, rdf::dc("language"))));
+
+			if (lang == language && switch_voice(*uri))
+				return true;
+
+			// Handle specific voices against generic document languages, e.g.
+			// eSpeak has 'pt-pt' and 'pt-br' voices, but no 'pt' voice and the
+			// Project Guttenberg ebooks report portuguese as 'pt'.
+
+			lang = lang.substr(0, lang.find('-'));
+			if (lang == language && switch_voice(*uri))
+				return true;
+		}
+	}
+	return false;
 }
 
 void Cainteoir::switch_view(int aView)

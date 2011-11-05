@@ -482,8 +482,7 @@ bool Cainteoir::load_document(std::string filename)
 			if (lang.empty())
 				lang = "en";
 
-			if (!switch_voice_by_language(lang) &&
-			    !switch_voice_by_language(lang.substr(0, lang.find('-'))))
+			if (!switch_voice_by_language(lang))
 				throw std::runtime_error(_("no voice found for the document's language."));
 
 			readAction->set_sensitive(true);
@@ -547,6 +546,23 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 
 bool Cainteoir::switch_voice_by_language(const std::string &language)
 {
+	std::string language2 = language.substr(0, language.find('-'));
+
+	// Does the current voice support this language? ...
+
+	std::string current = rql::select_value<std::string>(doc.m_metadata,
+		rql::both(rql::matches(rql::subject, doc.tts.voice()),
+		          rql::matches(rql::predicate, rdf::dc("language"))));
+
+	if (current == language || current == language2)
+		return true;
+
+	current = current.substr(0, current.find('-'));
+	if (current == language || current == language2)
+		return true;
+
+	// The current voice does not support this language, so search the available voices ...
+
 	rql::results voicelist = rql::select(doc.m_metadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("Voice"))));
@@ -560,7 +576,7 @@ bool Cainteoir::switch_voice_by_language(const std::string &language)
 				rql::both(rql::matches(rql::subject, *uri),
 				          rql::matches(rql::predicate, rdf::dc("language"))));
 
-			if (lang == language && switch_voice(*uri))
+			if ((lang == language || lang == language2) && switch_voice(*uri))
 				return true;
 
 			// Handle specific voices against generic document languages, e.g.
@@ -568,7 +584,7 @@ bool Cainteoir::switch_voice_by_language(const std::string &language)
 			// Project Guttenberg ebooks report portuguese as 'pt'.
 
 			lang = lang.substr(0, lang.find('-'));
-			if (lang == language && switch_voice(*uri))
+			if ((lang == language || lang == language2) && switch_voice(*uri))
 				return true;
 		}
 	}

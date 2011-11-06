@@ -22,6 +22,7 @@
 #include <gtkmm.h>
 
 #include "timebar.hpp"
+#include "gtk-compatibility.hpp"
 
 static void format_time(char *s, int n, double seconds)
 {

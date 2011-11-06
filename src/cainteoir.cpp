@@ -331,7 +331,7 @@ void Cainteoir::on_record()
 
 	std::string default_mimetype = settings("recording.mimetype", "audio/ogg").as<std::string>();
 
-	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
+	for (auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
 		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
 
@@ -357,19 +357,45 @@ void Cainteoir::on_record()
 	if (dialog.run() != Gtk::RESPONSE_OK)
 		return;
 
-	// FIXME: Get the correct mimetype for the recording file.
-	// FIXME: Get the correct audio type (wav, ogg, ...) for the recording file.
-
 	std::string filename = dialog.get_filename();
-	std::string mimetype = "audio/ogg";
-	std::string type = "ogg";
 
-	settings("recording.filename") = filename;
-	settings("recordig.mimetype") = mimetype;
-	settings.save();
+	std::string::size_type extpos = filename.rfind('.');
+	if (extpos != std::string::npos)
+	{
+		std::string ext = '*' + filename.substr(extpos);
 
-	out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
-	on_speak(_("recording"));
+		rql::results filetypes = rql::select(doc.m_metadata,
+			rql::both(rql::matches(rql::predicate, rdf::tts("extension")),
+			          rql::matches(rql::object, rdf::literal(ext))));
+
+		if (filetypes.size() == 1)
+		{
+			const rdf::uri *uri = rql::subject(filetypes.front());
+			if (uri)
+			{
+				std::string type = rql::select_value<std::string>(doc.m_metadata,
+					rql::both(rql::matches(rql::subject, *uri),
+					          rql::matches(rql::predicate, rdf::tts("name"))));
+
+				std::string mimetype = rql::select_value<std::string>(doc.m_metadata,
+					rql::both(rql::matches(rql::subject, *uri),
+					          rql::matches(rql::predicate, rdf::tts("mimetype"))));
+
+				settings("recording.filename") = filename;
+				settings("recordig.mimetype") = mimetype;
+				settings.save();
+
+				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
+				on_speak(_("recording"));
+				return;
+			}
+		}
+	}
+
+	Gtk::MessageDialog message(*this, _("Unable to record the document"), false, Gtk::MESSAGE_ERROR);
+	message.set_title(_("Record Document"));
+	message.set_secondary_text(_("Unsupported file type."));
+	message.run();
 }
 
 void Cainteoir::on_speak(const char * status)

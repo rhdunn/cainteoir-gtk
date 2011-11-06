@@ -382,7 +382,7 @@ void Cainteoir::on_record()
 					          rql::matches(rql::predicate, rdf::tts("mimetype"))));
 
 				settings("recording.filename") = filename;
-				settings("recordig.mimetype") = mimetype;
+				settings("recording.mimetype") = mimetype;
 				settings.save();
 
 				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());

@@ -329,7 +329,7 @@ void Cainteoir::on_record()
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("AudioFormat"))));
 
-	std::string default_mimetype = settings("recording.mimetype", "audio/ogg").as<std::string>();
+	std::string default_mimetype = settings("recording.mimetype", "audio/x-vorbis+ogg").as<std::string>();
 
 	for (auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{

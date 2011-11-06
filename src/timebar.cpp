@@ -42,15 +42,12 @@ TimeBar::TimeBar()
 	progress = gtk_progress_bar_new();
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
 
-	progressAlignment = gtk_alignment_new(0.5, 0.5, 1.0, 1.0);
-	gtk_container_add(GTK_CONTAINER(progressAlignment), progress);
-
 	elapsedTime = gtk_label_new("00:00:00.0");
 	totalTime   = gtk_label_new("00:00:00.0");
 
 	GtkWidget *hlayout = gtk_hbox_new(FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(hlayout), elapsedTime, FALSE, FALSE, 4);
-	gtk_box_pack_start(GTK_BOX(hlayout), progressAlignment, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hlayout), progress, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hlayout), totalTime, FALSE, FALSE, 4);
 
 	layout = gtk_vbox_new(TRUE, 0);

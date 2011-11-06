@@ -31,8 +31,6 @@ public:
 	void update(double elapsed, double total, double completed);
 private:
 	GtkWidget *layout;
-
-	GtkWidget *progressAlignment;
 	GtkWidget *progress;
 	GtkWidget *elapsedTime;
 	GtkWidget *totalTime;

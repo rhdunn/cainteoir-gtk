@@ -271,7 +271,10 @@ void Cainteoir::on_recent_files_dialog()
 		GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(dialog));
 		gchar *filename = gtk_recent_info_get_uri_display(info);
 		if (filename)
+		{
 			load_document(filename);
+			g_free(filename);
+		}
 		gtk_recent_info_unref(info);
 	}
 
@@ -283,7 +286,10 @@ void Cainteoir::on_recent_file(Gtk::RecentChooserMenu * recent)
 	GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(recent->gobj()));
 	gchar *filename = gtk_recent_info_get_uri_display(info);
 	if (filename)
+	{
 		load_document(filename);
+		g_free(filename);
+	}
 	gtk_recent_info_unref(info);
 }
 

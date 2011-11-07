@@ -263,6 +263,7 @@ void Cainteoir::on_recent_files_dialog()
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
 		NULL);
+	gtk_window_resize(GTK_WINDOW(dialog), 500, 200);
 	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_FILTER(recentFilter->gobj()));
 	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
 

@@ -64,13 +64,8 @@ void TimeBar::update(double elapsed, double total, double completed)
 	format_time(elapsed_time, 80, elapsed);
 	format_time(total_time, 80, total);
 
-	double fraction = completed / 100.0;
-	if (fraction < 0.005)
-	{
-		// Do not show the progress bar on percentages below 0.5%. This is due
-		// to display issues when trying to show fractions below this value.
-		fraction = 0.0;
-	}
+	// Restrict fraction to 0.5% increments:
+	double fraction = long(completed * 2.0) / 200.0;
 
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), percentage);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);

@@ -442,6 +442,15 @@ bool Cainteoir::on_speaking()
 		return true;
 	}
 
+	std::string error = speech->error_message();
+	if (!error.empty())
+	{
+		Gtk::MessageDialog dialog(*this, _("Error speaking the document"), false, Gtk::MESSAGE_ERROR);
+		dialog.set_title(_("Cainteoir Text-to-Speech"));
+		dialog.set_secondary_text(error.c_str());
+		dialog.run();
+	}
+
 	speech.reset();
 	out.reset();
 

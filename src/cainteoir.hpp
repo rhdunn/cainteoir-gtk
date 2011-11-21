@@ -27,7 +27,8 @@
 #include "document.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
-#include "gtkobjectref.hpp"
+#include "timebar.hpp"
+#include "gtk-compatibility.hpp"
 
 class Cainteoir : public Gtk::Window
 {
@@ -54,7 +55,12 @@ protected:
 	{
 		metadata,
 		voice_selection,
+		n_views,
 	};
+
+	bool switch_voice(const rdf::uri &voice);
+
+	bool switch_voice_by_language(const std::string &language);
 
 	void switch_view(int aView);
 private:
@@ -62,24 +68,19 @@ private:
 	Gtk::Menu *create_file_chooser_menu();
 
 	Gtk::VBox box;
-	Gtk::HBox mediabar;
+	GtkWidget *mediabar;
+	TimeBar timebar;
 
-	Gtk::HPaned pane;
+	GtkWidget *pane;
+	GtkWidget *view;
+	int views[n_views];
 
-	Gtk::ScrolledWindow scrolledTocPane;
-
-	Gtk::ScrolledWindow scrolledView;
-	Gtk::VBox view;
 	MetadataView doc_metadata;
-	VoiceSelectionView voiceSelection;
+	MetadataView voice_metadata;
+	MetadataView engine_metadata;
+	GtkWidget *metadata_view;
 
-	Gtk::HBox statusbar;
-	Gtk::Label state;
-
-	Gtk::Alignment progressAlignment;
-	Gtk::ProgressBar progress;
-	Gtk::Label elapsedTime;
-	Gtk::Label totalTime;
+	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
 	Glib::RefPtr<Gtk::UIManager> uiManager;
 	Glib::RefPtr<Gtk::ActionGroup> actions;

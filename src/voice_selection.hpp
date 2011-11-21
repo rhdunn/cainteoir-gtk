@@ -22,8 +22,34 @@
 #define CAINTEOIRGTK_SRC_VOICESELECTION_HPP
 
 #include <cainteoir/engines.hpp>
+#include <cainteoir/languages.hpp>
 
+#include "settings.hpp"
+
+namespace rdf = cainteoir::rdf;
+namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
+
+class VoiceList
+{
+public:
+	VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages);
+
+	void set_voice(const rdf::uri &voice);
+
+	const rdf::uri get_voice() const;
+
+	operator GtkWidget *() { return layout; }
+private:
+	void add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages);
+
+	GtkWidget *layout;
+	GtkTreeStore *store;
+	GtkTreeSelection *selection;
+
+	application_settings &settings;
+	rdf::graph &mMetadata;
+};
 
 struct VoiceParameter
 {
@@ -36,13 +62,18 @@ struct VoiceParameter
 class VoiceSelectionView : public Gtk::VBox
 {
 public:
-	VoiceSelectionView(tts::engines &aEngines);
-	
-	void show();
+	VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
+
+	void show(const rdf::uri &voice);
+
+	sigc::signal<bool, const rdf::uri &> &signal_on_voice_change() { return on_voice_change; }
 protected:
 	void apply_settings();
 private:
 	void create_entry(tts::parameter::type, int row);
+
+	Gtk::Label voices_header;
+	VoiceList voices;
 
 	std::list<VoiceParameter> parameters;
 	tts::engines *mEngines;
@@ -52,6 +83,8 @@ private:
 
 	Gtk::HButtonBox buttons;
 	Gtk::Button apply;
+
+	sigc::signal<bool, const rdf::uri &> on_voice_change;
 };
 
 #endif

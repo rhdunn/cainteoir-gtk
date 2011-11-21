@@ -1,4 +1,4 @@
-/* Metadata View
+/* Time Bar
  *
  * Copyright (C) 2011 Reece H. Dunn
  *
@@ -18,36 +18,22 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAINTEOIRGTK_SRC_METADATA_HPP
-#define CAINTEOIRGTK_SRC_METADATA_HPP
+#ifndef CAINTEOIRGTK_SRC_TIMEBAR_HPP
+#define CAINTEOIRGTK_SRC_TIMEBAR_HPP
 
-#include <map>
-#include <cainteoir/languages.hpp>
-#include <cainteoir/metadata.hpp>
-
-namespace rdf = cainteoir::rdf;
-
-class MetadataView
+class TimeBar
 {
 public:
-	MetadataView(cainteoir::languages & lang, const char *label, int rows);
+	TimeBar();
 
 	operator GtkWidget *() { return layout; }
 
-	void clear();
-
-	void add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate);
-
-	void add_metadata(const rdf::uri & aPredicate, const char * value);
-
-	void create_entry(const rdf::uri & aPredicate, const char * labelText, int row);
-
+	void update(double elapsed, double total, double completed);
 private:
 	GtkWidget *layout;
-	GtkWidget *header;
-	GtkWidget *metadata;
-	std::map<std::string, std::pair<GtkWidget *, GtkWidget *> > values;
-	cainteoir::languages & languages;
+	GtkWidget *progress;
+	GtkWidget *elapsedTime;
+	GtkWidget *totalTime;
 };
 
 #endif

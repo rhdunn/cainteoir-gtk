@@ -1,5 +1,21 @@
 
 -------------------------------------------------------------------------------
+VERSION 0.2 -- Tuesday November 22nd 2011 [Nov 2011]
+
+new functionality:
+  *  display the voices in a voice list and support selecting the voice.
+  *  switch the voice to match the document specified language if different.
+  *  show the voice and engine details in the information/metadata view.
+  *  display an error dialog if an error occurs while speaking.
+  *  make the recent documents dialog wider (for Gtk+ 3).
+
+bug fixes:
+  *  fix progress indicators when using the Radiance and Ambiance themes.
+  *  don't crash if no file is selected from the recent documents UI.
+  *  fix selecting the recorded file format based on file extension (was always Ogg/Vorbis).
+  *  fix opening documents containing spaces.
+
+-------------------------------------------------------------------------------
 VERSION 0.1 -- Sunday August 7th 2011 [Aug 2011]
 
 cainteoir-gtk:
@@ -7,4 +23,3 @@ cainteoir-gtk:
   *  view document metadata and table of contents;
   *  select the start and end chapter from the table of contents;
   *  view and edit voice speed, pitch and volume.
-

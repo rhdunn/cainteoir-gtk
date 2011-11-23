@@ -60,6 +60,12 @@ void TimeBar::update(double elapsed, double total, double completed)
 	char elapsed_time[80];
 	char total_time[80];
 
+	if (completed < 0.0 || completed > 100.0)
+	{
+		fprintf(stderr, "completed progress value out of range [0..100], got: %G\n", completed);
+		return;
+	}
+
 	sprintf(percentage, "%0.2f%%", completed);
 	format_time(elapsed_time, 80, elapsed);
 	format_time(total_time, 80, total);

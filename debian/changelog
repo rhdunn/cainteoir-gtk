@@ -1,3 +1,9 @@
+cainteoir-gtk (0.2) unstable; urgency=low
+ 
+  * Initial upstream release.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Wed, 23 Nov 2011 08:46:00 +0000
+
 cainteoir-gtk (0.1-3) unstable; urgency=low
  
   * Fix building on lucid:

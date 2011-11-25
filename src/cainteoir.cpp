@@ -639,6 +639,9 @@ bool Cainteoir::switch_voice_by_language(const std::string &language)
 
 void Cainteoir::switch_view(int aView)
 {
+	if (aView == gtk_notebook_get_current_page(GTK_NOTEBOOK(view)))
+		return;
+
 	if (aView == voice_selection)
 		voiceSelection->show(doc.tts.voice());
 

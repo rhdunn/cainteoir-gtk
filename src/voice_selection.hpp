@@ -54,15 +54,17 @@ private:
 struct VoiceParameter
 {
 	tts::parameter::type type;
-	Gtk::Label  *label;
-	Gtk::HScale *param;
-	Gtk::Label  *units;
+	GtkWidget *label;
+	GtkWidget *param;
+	GtkWidget *units;
 };
 
-class VoiceSelectionView : public Gtk::VBox
+class VoiceSelectionView
 {
 public:
 	VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
+
+	GtkWidget *gobj() { return layout; }
 
 	void show(const rdf::uri &voice);
 
@@ -72,15 +74,13 @@ protected:
 private:
 	void create_entry(tts::parameter::type, int row);
 
-	Gtk::Label voices_header;
-	VoiceList voices;
+	GtkWidget *layout;
 
 	std::list<VoiceParameter> parameters;
 	tts::engines *mEngines;
 
-	Gtk::Label header;
+	VoiceList voices;
 	Gtk::Table parameterView;
-
 	Gtk::HButtonBox buttons;
 	Gtk::Button apply;
 

@@ -54,7 +54,7 @@ struct document : public cainteoir::document_events
 		toc.add(depth, location, title);
 	}
 
-	void anchor(const rdf::uri &location)
+	void anchor(const rdf::uri &location, const std::string &mimetype)
 	{
 		m_doc->add_anchor(location);
 	}

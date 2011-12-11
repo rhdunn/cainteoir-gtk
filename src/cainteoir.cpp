@@ -528,8 +528,7 @@ bool Cainteoir::load_document(std::string filename)
 			if (lang.empty())
 				lang = "en";
 
-			if (!switch_voice_by_language(lang))
-				throw std::runtime_error(_("no voice found for the document's language."));
+			switch_voice_by_language(lang);
 
 			readAction->set_sensitive(true);
 			readButton.set_sensitive(true);

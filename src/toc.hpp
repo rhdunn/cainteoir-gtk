@@ -47,6 +47,8 @@ public:
 
 	operator GtkWidget *() { return layout; }
 
+	bool empty() const;
+
 	void clear();
 
 	void add(int depth, const rdf::uri &location, const std::string &title);

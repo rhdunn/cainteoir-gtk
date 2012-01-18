@@ -143,10 +143,12 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
-	gtk_widget_set_size_request(doc.toc, 300, 0);
+	GtkWidget *toc = gtk_hbox_new(FALSE, 0);
+	gtk_widget_set_size_request(toc, 300, 0);
+	gtk_box_pack_start(GTK_BOX(toc), doc.toc, TRUE, TRUE, 0);
 
 	GtkWidget *pane = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pane), doc.toc, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), toc, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pane), metadata_view, FALSE, FALSE, 0);
 
 	view = gtk_notebook_new();
@@ -472,6 +474,11 @@ bool Cainteoir::load_document(std::string filename)
 				snprintf(buf, sizeof(buf), _("<b>%1$s</b>"), title.c_str());
 				gtk_label_set_markup(GTK_LABEL(doc_title), buf);
 			}
+
+			if (doc.toc.empty())
+				gtk_widget_hide(doc.toc);
+			else
+				gtk_widget_show(doc.toc);
 
 			settings("document.filename") = filename;
 			if (!mimetype.empty())

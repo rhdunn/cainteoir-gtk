@@ -37,6 +37,12 @@ TocPane::TocPane()
 	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view.gobj()));
 }
 
+bool TocPane::empty() const
+{
+	GtkTreeIter iter;
+	return gtk_tree_model_get_iter_first(GTK_TREE_MODEL(data->gobj()), &iter) == FALSE;
+}
+
 void TocPane::clear()
 {
 	data->clear();

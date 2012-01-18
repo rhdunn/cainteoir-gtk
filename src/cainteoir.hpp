@@ -62,7 +62,6 @@ private:
 	TimeBar timebar;
 
 	GtkWidget *doc_title;
-	GtkWidget *pane;
 	GtkWidget *view;
 
 	MetadataView doc_metadata;

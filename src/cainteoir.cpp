@@ -143,10 +143,11 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
-	pane = gtk_hpaned_new();
-	gtk_paned_add1(GTK_PANED(pane), doc.toc);
-	gtk_paned_add2(GTK_PANED(pane), metadata_view);
-	gtk_paned_set_position(GTK_PANED(pane), settings("toc.width", 150).as<int>());
+	gtk_widget_set_size_request(doc.toc, 300, 0);
+
+	GtkWidget *pane = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), doc.toc, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), metadata_view, FALSE, FALSE, 0);
 
 	view = gtk_notebook_new();
 	//gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
@@ -268,7 +269,6 @@ void Cainteoir::on_quit()
 	if (speech)
 		speech->stop();
 
-	settings("toc.width") = gtk_paned_get_position(GTK_PANED(pane));
 	if (settings("window.maximized", "false").as<std::string>() == "false")
 	{
 		int width = 0;

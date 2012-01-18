@@ -143,19 +143,19 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
-	view = gtk_notebook_new();
-	//gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, gtk_label_new("Document"));
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), gtk_label_new("Voice"));
-
 	pane = gtk_hpaned_new();
 	gtk_paned_add1(GTK_PANED(pane), doc.toc);
-	gtk_paned_add2(GTK_PANED(pane), view);
+	gtk_paned_add2(GTK_PANED(pane), metadata_view);
 	gtk_paned_set_position(GTK_PANED(pane), settings("toc.width", 150).as<int>());
+
+	view = gtk_notebook_new();
+	//gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), pane, gtk_label_new("Document"));
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), gtk_label_new("Voice"));
 
 	add(box);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), topbar, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box.gobj()), pane, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box.gobj()), view, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), bottombar, FALSE, FALSE, 0);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);

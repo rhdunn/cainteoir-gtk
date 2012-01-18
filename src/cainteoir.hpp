@@ -59,7 +59,6 @@ private:
 	Gtk::Menu *create_file_chooser_menu();
 
 	Gtk::VBox box;
-	GtkWidget *mediabar;
 	TimeBar timebar;
 
 	GtkWidget *pane;

@@ -111,13 +111,16 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	openButton.set_menu(*create_file_chooser_menu());
 
-	mediabar = gtk_hbox_new(FALSE, 0);
-	gtk_widget_set_size_request(mediabar, 0, 50);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(mediabar), timebar, TRUE, TRUE, 0);
+	GtkWidget *topbar = gtk_hbox_new(FALSE, 0);
+	gtk_widget_set_size_request(topbar, 0, 50);
+	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
+
+	GtkWidget *bottombar = gtk_hbox_new(FALSE, 0);
+	gtk_widget_set_size_request(bottombar, 0, 60);
+	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottombar), timebar, TRUE, TRUE, 0);
 
 	doc_metadata.create_entry(rdf::dc("title"), _("<i>Title:</i>"), 0);
 	doc_metadata.create_entry(rdf::dc("creator"), _("<i>Author:</i>"), 1);
@@ -148,8 +151,9 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_paned_set_position(GTK_PANED(pane), settings("toc.width", 150).as<int>());
 
 	add(box);
-	gtk_box_pack_start(GTK_BOX(box.gobj()), mediabar, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box.gobj()), topbar, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), pane, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box.gobj()), bottombar, FALSE, FALSE, 0);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 

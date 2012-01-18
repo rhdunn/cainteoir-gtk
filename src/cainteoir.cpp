@@ -90,23 +90,14 @@ Cainteoir::Cainteoir(const char *filename)
 
 	create_recent_filter(recentFilter, doc.m_metadata);
 
-	actions = Gtk::ActionGroup::create();
-	uiManager = Gtk::UIManager::create();
 	recentManager = Gtk::RecentManager::get_default();
 
-	actions->add(Gtk::Action::create("FileMenu", _("_File")));
-	actions->add(openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	actions->add(recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Documents")));
-	actions->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT), sigc::mem_fun(*this, &Cainteoir::on_quit));
+	openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document);
+	recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Documents"));
 
-	actions->add(Gtk::Action::create("ViewMenu", _("_View")));
-	actions->add(Gtk::Action::create("ViewMetadata", _("_Information")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), metadata));
-	actions->add(Gtk::Action::create("SelectVoice", _("_Select Voice")), sigc::bind(sigc::mem_fun(*this, &Cainteoir::switch_view), voice_selection));
-
-	actions->add(Gtk::Action::create("ReaderMenu", _("_Reader")));
-	actions->add(readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read));
-	actions->add(stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop));
-	actions->add(recordAction = Gtk::Action::create("ReaderRecord", Gtk::Stock::MEDIA_RECORD), sigc::mem_fun(*this, &Cainteoir::on_record));
+	readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read);
+	stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop);
+	recordAction = Gtk::Action::create("ReaderRecord", Gtk::Stock::MEDIA_RECORD), sigc::mem_fun(*this, &Cainteoir::on_record);
 
 	readButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_read));
 	stopButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_stop));
@@ -117,36 +108,8 @@ Cainteoir::Cainteoir(const char *filename)
 	recordButton.set_border_width(0);
 	openButton.set_border_width(0);
 
-	uiManager->insert_action_group(actions);
-	add_accel_group(uiManager->get_accel_group());
-
-	uiManager->add_ui_from_string(
-		"<ui>"
-		"	<menubar name='MenuBar'>"
-		"		<menu action='FileMenu'>"
-		"			<menuitem action='FileOpen'/>"
-		"			<menuitem action='FileRecentFiles'/>"
-		"			<separator/>"
-		"			<menuitem action='FileQuit'/>"
-		"		</menu>"
-		"		<menu action='ViewMenu'>"
-		"			<menuitem action='ViewMetadata'/>"
-		"		</menu>"
-		"		<menu action='ReaderMenu'>"
-		"			<menuitem action='ReaderRead'/>"
-		"			<menuitem action='ReaderStop'/>"
-		"			<menuitem action='ReaderRecord'/>"
-		"			<separator/>"
-		"			<menuitem action='SelectVoice'/>"
-		"		</menu>"
-		"	</menubar>"
-		"</ui>");
-
 	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	openButton.set_menu(*create_file_chooser_menu());
-
-	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
-	openRecent->set_submenu(*create_file_chooser_menu());
 
 	mediabar = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_size_request(mediabar, 0, 50);
@@ -175,9 +138,9 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
 	view = gtk_notebook_new();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
-	views[metadata]        = gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, NULL);
-	views[voice_selection] = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), NULL);
+	//gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), metadata_view, gtk_label_new("Document"));
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), gtk_label_new("Voice"));
 
 	pane = gtk_hpaned_new();
 	gtk_paned_add1(GTK_PANED(pane), doc.toc);
@@ -185,14 +148,12 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_paned_set_position(GTK_PANED(pane), settings("toc.width", 150).as<int>());
 
 	add(box);
-	box.pack_start(*uiManager->get_widget("/MenuBar"), Gtk::PACK_SHRINK);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), mediabar, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), pane, TRUE, TRUE, 0);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	show_all_children();
-	switch_view(settings("cainteoir.active-view",  metadata).as<int>());
 
 	readAction->set_sensitive(false);
 	stopAction->set_visible(false);
@@ -587,7 +548,13 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 		}
 	}
 
-	return doc.tts.select_voice(doc.m_metadata, voice);
+	if (doc.tts.select_voice(doc.m_metadata, voice))
+	{
+		voiceSelection->show(doc.tts.voice());
+		return true;
+	}
+
+	return false;
 }
 
 bool Cainteoir::switch_voice_by_language(const std::string &language)
@@ -635,18 +602,4 @@ bool Cainteoir::switch_voice_by_language(const std::string &language)
 		}
 	}
 	return false;
-}
-
-void Cainteoir::switch_view(int aView)
-{
-	if (aView == gtk_notebook_get_current_page(GTK_NOTEBOOK(view)))
-		return;
-
-	if (aView == voice_selection)
-		voiceSelection->show(doc.tts.voice());
-
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(view), views[aView]);
-
-	settings("cainteoir.active-view") = aView;
-	settings.save();
 }

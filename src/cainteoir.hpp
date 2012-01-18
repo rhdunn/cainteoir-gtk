@@ -51,18 +51,9 @@ protected:
 	void on_speak(const char * state);
 	bool on_speaking();
 
-	enum view_t
-	{
-		metadata,
-		voice_selection,
-		n_views,
-	};
-
 	bool switch_voice(const rdf::uri &voice);
 
 	bool switch_voice_by_language(const std::string &language);
-
-	void switch_view(int aView);
 private:
 	void updateProgress(double elapsed, double total, double completed);
 	Gtk::Menu *create_file_chooser_menu();
@@ -73,7 +64,6 @@ private:
 
 	GtkWidget *pane;
 	GtkWidget *view;
-	int views[n_views];
 
 	MetadataView doc_metadata;
 	MetadataView voice_metadata;
@@ -81,9 +71,6 @@ private:
 	GtkWidget *metadata_view;
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
-
-	Glib::RefPtr<Gtk::UIManager> uiManager;
-	Glib::RefPtr<Gtk::ActionGroup> actions;
 
 	GtkObjectRef<Gtk::RecentFilter> recentFilter;
 	Glib::RefPtr<Gtk::RecentManager> recentManager;

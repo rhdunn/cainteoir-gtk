@@ -111,8 +111,11 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	openButton.set_menu(*create_file_chooser_menu());
 
+	doc_title = gtk_label_new("");
+
 	GtkWidget *topbar = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_size_request(topbar, 0, 50);
+	gtk_box_pack_start(GTK_BOX(topbar), doc_title, TRUE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
 
 	GtkWidget *bottombar = gtk_hbox_new(FALSE, 0);
@@ -462,12 +465,12 @@ bool Cainteoir::load_document(std::string filename)
 			std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
 			if (title.empty())
-				set_title(_("Cainteoir Text-to-Speech"));
+				gtk_label_set_markup(GTK_LABEL(doc_title), "");
 			else
 			{
 				char buf[1024];
-				snprintf(buf, sizeof(buf), _("%1$s - Cainteoir Text-to-Speech"), title.c_str());
-				set_title(buf);
+				snprintf(buf, sizeof(buf), _("<b>%1$s</b>"), title.c_str());
+				gtk_label_set_markup(GTK_LABEL(doc_title), buf);
 			}
 
 			settings("document.filename") = filename;

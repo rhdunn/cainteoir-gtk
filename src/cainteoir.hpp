@@ -61,6 +61,7 @@ private:
 	Gtk::VBox box;
 	TimeBar timebar;
 
+	GtkWidget *doc_title;
 	GtkWidget *pane;
 	GtkWidget *view;
 

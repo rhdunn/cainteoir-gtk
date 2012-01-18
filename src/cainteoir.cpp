@@ -148,7 +148,8 @@ Cainteoir::Cainteoir(const char *filename)
 	Gtk::MenuItem * openRecent = dynamic_cast<Gtk::MenuItem *>(uiManager->get_widget("/MenuBar/FileMenu/FileRecentFiles"));
 	openRecent->set_submenu(*create_file_chooser_menu());
 
-	mediabar = gtk_hbox_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	mediabar = gtk_hbox_new(FALSE, 0);
+	gtk_widget_set_size_request(mediabar, 0, 50);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mediabar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);

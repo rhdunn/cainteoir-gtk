@@ -32,6 +32,7 @@ TocPane::TocPane()
 
 	view.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
 	view.set_rubber_banding();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view.gobj()), FALSE);
 
 	layout = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view.gobj()));

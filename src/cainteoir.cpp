@@ -147,6 +147,7 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton.set_menu(*create_file_chooser_menu());
 
 	GtkWidget *navbar = gtk_hbutton_box_new();
+	gtk_widget_set_name(navbar, "navbar");
 
 	GtkWidget *topbar = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_size_request(topbar, 0, 50);
@@ -155,7 +156,7 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
 
 	GtkWidget *bottombar = gtk_hbox_new(FALSE, 0);
-	gtk_widget_set_size_request(bottombar, 0, 60);
+	gtk_widget_set_size_request(bottombar, 0, 50);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);

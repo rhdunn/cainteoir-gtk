@@ -41,6 +41,7 @@ int main(int argc, char ** argv)
 	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 	gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider),
+
 		"GtkNotebook {\n"
 		"	border-style: solid;\n"
 		"	border-top-color: @notebook_border;\n"
@@ -48,9 +49,25 @@ int main(int argc, char ** argv)
 		"	border-bottom-color: @notebook_border;\n"
 		"	border-bottom-width: 1;\n"
 		"}\n"
-		"GtkNotebook, GtkTreeView#toc {\n"
+
+		"GtkNotebook, #toc {\n"
 		"	background-color: @theme_base_color;\n"
 		"}\n"
+
+		"#navbar .button {\n"
+		"	border-radius: 0;\n"
+		"	border-image: none;\n"
+		"	border-style: solid;\n"
+		"	border-width: 1;\n"
+		"	border-color: @notebook_border;\n"
+		"}\n"
+		"#navbar .button:nth-child(first) {\n"
+		"	border-radius: 4 0 0 4;\n"
+		"}\n"
+		"#navbar .button:nth-child(last) {\n"
+		"	border-radius: 0 4 4 0;\n"
+		"}\n"
+
 		, -1, NULL);
 #endif
 

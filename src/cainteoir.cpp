@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -75,6 +75,29 @@ static GtkWidget *create_padded_container(GtkWidget *child, int padding_width, i
 	return top_bottom;
 }
 
+struct NavButtonData
+{
+	GtkWidget *view;
+	int page;
+};
+
+static void on_navbutton_clicked(GtkTreeViewColumn *column, void *data)
+{
+	NavButtonData *navbutton = (NavButtonData *)data;
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(navbutton->view), navbutton->page);
+}
+
+static GtkWidget *create_navbutton(const char *label, GtkWidget *view, int page)
+{
+	NavButtonData *data = g_slice_new(NavButtonData);
+	data->view = view;
+	data->page = page;
+
+	GtkWidget *navbutton = gtk_button_new_with_label(label);
+	g_signal_connect(navbutton, "clicked", G_CALLBACK(on_navbutton_clicked), data);
+	return navbutton;
+}
+
 Cainteoir::Cainteoir(const char *filename)
 	: doc_metadata(languages, _("<b>Document</b>"), 5)
 	, voice_metadata(languages, _("<b>Voice</b>"), 2)
@@ -123,11 +146,12 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	openButton.set_menu(*create_file_chooser_menu());
 
-	doc_title = gtk_label_new("");
+	GtkWidget *navbar = gtk_hbutton_box_new();
 
 	GtkWidget *topbar = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_size_request(topbar, 0, 50);
-	gtk_box_pack_start(GTK_BOX(topbar), doc_title, TRUE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(topbar), gtk_label_new(""), TRUE, TRUE, 0); // stretchy
 	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
 
 	GtkWidget *bottombar = gtk_hbox_new(FALSE, 0);
@@ -164,9 +188,13 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(pane), metadata_view, TRUE, TRUE, 0);
 
 	view = gtk_notebook_new();
-	//gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), gtk_label_new("Document"));
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), gtk_label_new("Voice"));
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
+
+	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), NULL);
+	gtk_box_pack_start(GTK_BOX(navbar), create_navbutton(_("Document"), view, doc_page), FALSE, FALSE, 0);
+
+	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
+	gtk_box_pack_start(GTK_BOX(navbar), create_navbutton(_("Voice"), view, voice_page), FALSE, FALSE, 0);
 
 	add(box);
 	gtk_box_pack_start(GTK_BOX(box.gobj()), topbar, FALSE, FALSE, 0);
@@ -478,6 +506,7 @@ bool Cainteoir::load_document(std::string filename)
 			std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 			std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
+			/*
 			if (title.empty())
 				gtk_label_set_markup(GTK_LABEL(doc_title), "");
 			else
@@ -486,6 +515,7 @@ bool Cainteoir::load_document(std::string filename)
 				snprintf(buf, sizeof(buf), _("<b>%1$s</b>"), title.c_str());
 				gtk_label_set_markup(GTK_LABEL(doc_title), buf);
 			}
+			*/
 
 			if (doc.toc.empty())
 				gtk_widget_hide(doc.toc);

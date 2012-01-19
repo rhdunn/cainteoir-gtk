@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -61,7 +61,6 @@ private:
 	Gtk::VBox box;
 	TimeBar timebar;
 
-	GtkWidget *doc_title;
 	GtkWidget *view;
 
 	MetadataView doc_metadata;

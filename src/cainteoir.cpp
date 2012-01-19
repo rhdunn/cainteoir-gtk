@@ -50,6 +50,7 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
+
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
 		const rdf::uri * uri = rql::subject(*format);
@@ -61,6 +62,17 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
 			filter->add_mime_type(rql::value(*mimetype));
 	}
+}
+
+static GtkWidget *create_padded_container(GtkWidget *child, int padding_width, int padding_height)
+{
+	GtkWidget *left_right = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(left_right), child, TRUE, TRUE, padding_width);
+
+	GtkWidget *top_bottom = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(top_bottom), left_right, TRUE, TRUE, padding_height);
+
+	return top_bottom;
 }
 
 Cainteoir::Cainteoir(const char *filename)
@@ -147,13 +159,13 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_widget_set_size_request(toc, 300, 0);
 	gtk_box_pack_start(GTK_BOX(toc), doc.toc, TRUE, TRUE, 0);
 
-	GtkWidget *pane = gtk_hbox_new(FALSE, 0);
+	GtkWidget *pane = gtk_hbox_new(FALSE, 30);
 	gtk_box_pack_start(GTK_BOX(pane), toc, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pane), metadata_view, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), metadata_view, TRUE, TRUE, 0);
 
 	view = gtk_notebook_new();
 	//gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
-	gtk_notebook_append_page(GTK_NOTEBOOK(view), pane, gtk_label_new("Document"));
+	gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), gtk_label_new("Document"));
 	gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()), gtk_label_new("Voice"));
 
 	add(box);

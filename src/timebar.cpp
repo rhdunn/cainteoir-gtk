@@ -40,7 +40,7 @@ static void format_time(char *s, int n, double seconds)
 TimeBar::TimeBar()
 {
 	progress = gtk_progress_bar_new();
-	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), FALSE);
 
 	elapsedTime = gtk_label_new("00:00:00.0");
 	totalTime   = gtk_label_new("00:00:00.0");
@@ -56,7 +56,6 @@ TimeBar::TimeBar()
 
 void TimeBar::update(double elapsed, double total, double completed)
 {
-	char percentage[20];
 	char elapsed_time[80];
 	char total_time[80];
 
@@ -66,14 +65,12 @@ void TimeBar::update(double elapsed, double total, double completed)
 		return;
 	}
 
-	sprintf(percentage, "%0.2f%%", completed);
 	format_time(elapsed_time, 80, elapsed);
 	format_time(total_time, 80, total);
 
 	// Restrict fraction to 0.5% increments:
 	double fraction = long(completed * 2.0) / 200.0;
 
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), percentage);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);
 
 	gtk_label_set_text(GTK_LABEL(elapsedTime), elapsed_time);

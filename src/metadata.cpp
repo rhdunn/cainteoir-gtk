@@ -122,17 +122,23 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 	values[aPredicate.str()] = std::make_pair(label, value);
 
 	gtk_widget_set_size_request(label, 80, 0);
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
 	{
+#if GTK_CHECK_VERSION(3, 0, 0)
+		GtkStyleContext *context = gtk_widget_get_style_context(label);
+		gtk_style_context_add_class(context, "label");
+		gtk_label_set_label(GTK_LABEL(label), labelText);
+#else
 		char buf[1024];
 		snprintf(buf, sizeof(buf), _("<i>%1$s:</i>"), labelText);
 		gtk_label_set_markup(GTK_LABEL(label), buf);
+#endif
 	}
 
 	gtk_misc_set_alignment(GTK_MISC(value), 0, 0);
 	gtk_label_set_line_wrap(GTK_LABEL(value), true);
 	gtk_label_set_width_chars(GTK_LABEL(value), 40);
 
-	gtk_table_attach(GTK_TABLE(metadata), label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
+	gtk_table_attach(GTK_TABLE(metadata), label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 20, 4);
 	gtk_table_attach(GTK_TABLE(metadata), value, 1, 2, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
 }

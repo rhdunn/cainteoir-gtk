@@ -68,6 +68,10 @@ int main(int argc, char ** argv)
 		"	border-radius: 0 4 4 0;\n"
 		"}\n"
 
+		".label {\n"
+		"	color: alpha(@fg_color, 0.6);\n"
+		"}\n"
+
 		, -1, NULL);
 #endif
 

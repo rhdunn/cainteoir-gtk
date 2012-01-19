@@ -34,6 +34,22 @@ int main(int argc, char ** argv)
 
 	Gtk::Main app(argc, argv);
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+	GtkCssProvider *provider = gtk_css_provider_new();
+	GdkDisplay *display = gdk_display_get_default();
+	GdkScreen *screen = gdk_display_get_default_screen(display);
+	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+	gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider),
+		"GtkNotebook {\n"
+		"	background-color: @bg_color;\n"
+		"}\n"
+		"GtkTreeView#toc {\n"
+		"	background-color: @bg_color;\n"
+		"}\n"
+		, -1, NULL);
+#endif
+
 	Cainteoir window(argc > 1 ? argv[1] : NULL);
 	Gtk::Main::run(window);
 

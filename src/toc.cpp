@@ -30,6 +30,7 @@ TocPane::TocPane()
 	view.set_model(data);
 	view.append_column(_("Contents"), model.title);
 
+	gtk_widget_set_name(GTK_WIDGET(view.gobj()), "toc");
 	view.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
 	view.set_rubber_banding();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view.gobj()), FALSE);

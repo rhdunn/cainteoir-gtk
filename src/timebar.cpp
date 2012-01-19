@@ -68,10 +68,7 @@ void TimeBar::update(double elapsed, double total, double completed)
 	format_time(elapsed_time, 80, elapsed);
 	format_time(total_time, 80, total);
 
-	// Restrict fraction to 0.5% increments:
-	double fraction = long(completed * 2.0) / 200.0;
-
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), completed / 100.0);
 
 	gtk_label_set_text(GTK_LABEL(elapsedTime), elapsed_time);
 	gtk_label_set_text(GTK_LABEL(totalTime), total_time);

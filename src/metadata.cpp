@@ -121,6 +121,7 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 
 	values[aPredicate.str()] = std::make_pair(label, value);
 
+	gtk_widget_set_size_request(label, 80, 0);
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
 	gtk_label_set_markup(GTK_LABEL(label), labelText);
 

@@ -137,18 +137,18 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), timebar, TRUE, TRUE, 0);
 
-	doc_metadata.create_entry(rdf::dc("title"), _("<i>Title:</i>"), 0);
-	doc_metadata.create_entry(rdf::dc("creator"), _("<i>Author:</i>"), 1);
-	doc_metadata.create_entry(rdf::dc("publisher"), _("<i>Publisher:</i>"), 2);
-	doc_metadata.create_entry(rdf::dc("description"), _("<i>Description:</i>"), 3);
-	doc_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 4);
-	doc_metadata.create_entry(rdf::tts("length"), _("<i>Length:</i>"), 5);
+	doc_metadata.create_entry(rdf::dc("title"), _("Title"), 0);
+	doc_metadata.create_entry(rdf::dc("creator"), _("Author"), 1);
+	doc_metadata.create_entry(rdf::dc("publisher"), _("Publisher"), 2);
+	doc_metadata.create_entry(rdf::dc("description"), _("Description"), 3);
+	doc_metadata.create_entry(rdf::dc("language"), _("Language"), 4);
+	doc_metadata.create_entry(rdf::tts("length"), _("Length"), 5);
 
-	voice_metadata.create_entry(rdf::tts("name"), _("<i>Name:</i>"), 0);
-	voice_metadata.create_entry(rdf::dc("language"), _("<i>Language:</i>"), 1);
+	voice_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
+	voice_metadata.create_entry(rdf::dc("language"), _("Language"), 1);
 
-	engine_metadata.create_entry(rdf::tts("name"), _("<i>Name:</i>"), 0);
-	engine_metadata.create_entry(rdf::tts("version"), _("<i>Version:</i>"), 1);
+	engine_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
+	engine_metadata.create_entry(rdf::tts("version"), _("Version"), 1);
 
 	metadata_view = gtk_vbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);

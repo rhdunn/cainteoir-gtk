@@ -123,7 +123,11 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 
 	gtk_widget_set_size_request(label, 80, 0);
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(label), labelText);
+	{
+		char buf[1024];
+		snprintf(buf, sizeof(buf), _("<i>%1$s:</i>"), labelText);
+		gtk_label_set_markup(GTK_LABEL(label), buf);
+	}
 
 	gtk_misc_set_alignment(GTK_MISC(value), 0, 0);
 	gtk_label_set_line_wrap(GTK_LABEL(value), true);

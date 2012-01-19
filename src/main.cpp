@@ -42,10 +42,14 @@ int main(int argc, char ** argv)
 
 	gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider),
 		"GtkNotebook {\n"
-		"	background-color: @bg_color;\n"
+		"	border-style: solid;\n"
+		"	border-top-color: @notebook_border;\n"
+		"	border-top-width: 1;\n"
+		"	border-bottom-color: @notebook_border;\n"
+		"	border-bottom-width: 1;\n"
 		"}\n"
-		"GtkTreeView#toc {\n"
-		"	background-color: @bg_color;\n"
+		"GtkNotebook, GtkTreeView#toc {\n"
+		"	background-color: @theme_base_color;\n"
 		"}\n"
 		, -1, NULL);
 #endif

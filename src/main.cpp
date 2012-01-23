@@ -45,14 +45,19 @@ int main(int argc, char ** argv)
 	GdkScreen *screen = gdk_display_get_default_screen(display);
 	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
+	char *theme_name = NULL;
+	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, NULL);
+
 	try
 	{
-		cainteoir::mmap_buffer theme(get_theme_path("Adwaita").c_str());
+		cainteoir::mmap_buffer theme(get_theme_path(theme_name).c_str());
 		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), NULL);
 	}
 	catch (const std::exception &e)
 	{
 	}
+
+	g_free(theme_name);
 #endif
 
 	Cainteoir window(argc > 1 ? argv[1] : NULL);

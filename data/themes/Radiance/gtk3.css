@@ -1,0 +1,14 @@
+/* The toc pane is coloured white by default, with the notebook
+ * background grey, so make these both white ...
+ */
+
+GtkNotebook, #toc {
+	background-color: white;
+}
+
+/* Make the metadata label a light grey ...
+ */
+
+.label {
+	color: alpha(@fg_color, 0.6);
+}

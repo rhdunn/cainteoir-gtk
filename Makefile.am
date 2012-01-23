@@ -92,9 +92,16 @@ EXTRA_DIST += ChangeLog
 ############################# themes ##########################################
 
 themedir = ${datadir}/cainteoir-gtk/themes
+theme_DATA = data/themes/gtk3-common.css
 
 AdwaitaThemedir = ${themedir}/Adwaita
 AdwaitaTheme_DATA = data/themes/Adwaita/gtk3.css
+
+AmbianceThemedir = ${themedir}/Ambiance
+AmbianceTheme_DATA = data/themes/Ambiance/gtk3.css
+
+RadianceThemedir = ${themedir}/Radiance
+RadianceTheme_DATA = data/themes/Radiance/gtk3.css
 
 ############################# applications ####################################
 

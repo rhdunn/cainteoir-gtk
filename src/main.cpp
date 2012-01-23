@@ -24,10 +24,26 @@
 
 #include "cainteoir.hpp"
 
-std::string get_theme_path(const char *theme)
+#if GTK_CHECK_VERSION(3, 0, 0)
+static void load_gtk3_theme(const std::string &theme)
 {
-	return std::string(DATADIR "/" PACKAGE "/themes/") + theme + std::string("/gtk3.css");
+	std::string theme_path = std::string(DATADIR "/" PACKAGE "/themes/") + theme;
+
+	try
+	{
+		cainteoir::mmap_buffer theme(theme_path.c_str());
+
+		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
+
+		GtkCssProvider *provider = gtk_css_provider_new();
+		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), NULL);
+	}
+	catch (const std::exception &e)
+	{
+	}
 }
+#endif
 
 int main(int argc, char ** argv)
 {
@@ -40,22 +56,11 @@ int main(int argc, char ** argv)
 	Gtk::Main app(argc, argv);
 
 #if GTK_CHECK_VERSION(3, 0, 0)
-	GtkCssProvider *provider = gtk_css_provider_new();
-	GdkDisplay *display = gdk_display_get_default();
-	GdkScreen *screen = gdk_display_get_default_screen(display);
-	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-
 	char *theme_name = NULL;
 	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, NULL);
 
-	try
-	{
-		cainteoir::mmap_buffer theme(get_theme_path(theme_name).c_str());
-		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), NULL);
-	}
-	catch (const std::exception &e)
-	{
-	}
+	load_gtk3_theme("gtk3-common.css");
+	load_gtk3_theme(std::string(theme_name) + "/gtk3.css");
 
 	g_free(theme_name);
 #endif

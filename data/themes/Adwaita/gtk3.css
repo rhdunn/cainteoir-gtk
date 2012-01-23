@@ -1,14 +1,3 @@
-/* Give the notebook a border at the top and bottom ...
- */
-
-GtkNotebook {
-	border-style: solid;
-	border-top-color: @notebook_border;
-	border-top-width: 1;
-	border-bottom-color: @notebook_border;
-	border-bottom-width: 1;
-}
-
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */

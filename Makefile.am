@@ -89,6 +89,13 @@ dist-hook: ChangeLog
 
 EXTRA_DIST += ChangeLog
 
+############################# themes ##########################################
+
+themedir = ${datadir}/cainteoir-gtk/themes
+
+AdwaitaThemedir = ${themedir}/Adwaita
+AdwaitaTheme_DATA = data/themes/Adwaita/gtk3.css
+
 ############################# applications ####################################
 
 desktopdir = $(datadir)/applications

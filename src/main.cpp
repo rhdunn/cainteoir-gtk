@@ -24,6 +24,11 @@
 
 #include "cainteoir.hpp"
 
+std::string get_theme_path(const char *theme)
+{
+	return std::string(DATADIR "/" PACKAGE "/themes/") + theme + std::string("/gtk3.css");
+}
+
 int main(int argc, char ** argv)
 {
 	cainteoir::initialise();
@@ -40,39 +45,14 @@ int main(int argc, char ** argv)
 	GdkScreen *screen = gdk_display_get_default_screen(display);
 	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-	gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider),
-
-		"GtkNotebook {\n"
-		"	border-style: solid;\n"
-		"	border-top-color: @notebook_border;\n"
-		"	border-top-width: 1;\n"
-		"	border-bottom-color: @notebook_border;\n"
-		"	border-bottom-width: 1;\n"
-		"}\n"
-
-		"GtkNotebook, #toc {\n"
-		"	background-color: @theme_base_color;\n"
-		"}\n"
-
-		"#navbar .button {\n"
-		"	border-radius: 0;\n"
-		"	border-image: none;\n"
-		"	border-style: solid;\n"
-		"	border-width: 1;\n"
-		"	border-color: @notebook_border;\n"
-		"}\n"
-		"#navbar .button:nth-child(first) {\n"
-		"	border-radius: 4 0 0 4;\n"
-		"}\n"
-		"#navbar .button:nth-child(last) {\n"
-		"	border-radius: 0 4 4 0;\n"
-		"}\n"
-
-		".label {\n"
-		"	color: alpha(@fg_color, 0.6);\n"
-		"}\n"
-
-		, -1, NULL);
+	try
+	{
+		cainteoir::mmap_buffer theme(get_theme_path("Adwaita").c_str());
+		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), NULL);
+	}
+	catch (const std::exception &e)
+	{
+	}
 #endif
 
 	Cainteoir window(argc > 1 ? argv[1] : NULL);

@@ -1,0 +1,43 @@
+/* Give the notebook a border at the top and bottom ...
+ */
+
+GtkNotebook {
+	border-style: solid;
+	border-top-color: @notebook_border;
+	border-top-width: 1;
+	border-bottom-color: @notebook_border;
+	border-bottom-width: 1;
+}
+
+/* The toc pane is coloured white by default, with the notebook
+ * background grey, so make these both white ...
+ */
+
+GtkNotebook, #toc {
+	background-color: @theme_base_color;
+}
+
+/* Make the buttons in the navbar appear to be part of one single
+ * button, with rounded corners at the ends ...
+ */
+
+#navbar .button {
+	border-radius: 0;
+	border-image: none;
+	border-style: solid;
+	border-width: 1;
+	border-color: @notebook_border;
+}
+#navbar .button:nth-child(first) {
+	border-radius: 4 0 0 4;
+}
+#navbar .button:nth-child(last) {
+	border-radius: 0 4 4 0;
+}
+
+/* Make the metadata label a light grey ...
+ */
+
+.label {
+	color: alpha(@fg_color, 0.6);
+}

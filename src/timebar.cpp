@@ -41,6 +41,7 @@ TimeBar::TimeBar()
 {
 	progress = gtk_progress_bar_new();
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), FALSE);
+	gtk_widget_set_name(progress, "timebar");
 
 	elapsedTime = gtk_label_new("00:00:00.0");
 	totalTime   = gtk_label_new("00:00:00.0");

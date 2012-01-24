@@ -6,6 +6,20 @@ GtkNotebook, #toc {
 	background-color: white;
 }
 
+/* Workaround for Ubuntu bug 888891 ...
+ */
+
+.progressbar,
+.progressbar row,
+.trough,
+.trough row {
+	-unico-inner-stroke-gradient: none;
+	-unico-inner-stroke-width: 0;
+
+	-unico-outer-stroke-gradient: none;
+	-unico-outer-stroke-width: 0;
+}
+
 /* Make the metadata label a light grey ...
  */
 

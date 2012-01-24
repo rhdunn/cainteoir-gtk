@@ -6,7 +6,7 @@ GtkNotebook, #toc {
 	background-color: white;
 }
 
-/* Workaround for Ubuntu bug 888891 ...
+/* Workaround for Ubuntu bug 888901 ...
  */
 
 .progressbar,

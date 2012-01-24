@@ -24,6 +24,16 @@ GtkNotebook, #toc {
 	border-radius: 0 4 4 0;
 }
 
+/* Style the toc pane ...
+ */
+
+#toc row:selected,
+#toc row:selected:focused {
+	background-image: none;
+	color: @theme_selected_bg_color;
+	font-weight: bold;
+}
+
 /* Make the metadata label a light grey ...
  */
 

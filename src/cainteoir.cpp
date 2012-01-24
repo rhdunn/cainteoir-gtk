@@ -115,6 +115,8 @@ Cainteoir::Cainteoir(const char *filename)
 	set_title(_("Cainteoir Text-to-Speech"));
 	set_size_request(500, 300);
 
+	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(gobj()), TRUE);
+
 	resize(settings("window.width",  700).as<int>(), settings("window.height", 445).as<int>());
 	move(settings("window.left", 0).as<int>(), settings("window.top",  0).as<int>());
 	if (settings("window.maximized", "false").as<std::string>() == "true")

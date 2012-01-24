@@ -27,6 +27,12 @@ inline void gtk_progress_bar_set_show_text(GtkProgressBar *, gboolean)
 }
 #endif
 
+#if !GTK_CHECK_VERSION(3, 4, 0)
+inline void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean)
+{
+}
+#endif
+
 /** @brief Gtkmm 2 and 3 compatibility helper.
   *
   * In Gtkmm 2 you need to declare some objects on the stack:

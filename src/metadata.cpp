@@ -46,7 +46,11 @@ MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int r
 void MetadataView::clear()
 {
 	for(auto item = values.begin(), last = values.end(); item != last; ++item)
+	{
 		gtk_label_set_label(GTK_LABEL(item->second.second), "");
+		gtk_widget_hide(item->second.first);
+		gtk_widget_hide(item->second.second);
+	}
 }
 
 void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
@@ -62,9 +66,9 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 				if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
 				{
 					if (aPredicate == rdf::dc("language"))
-						gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), languages(rql::value(object)).c_str());
+						add_metadata(aPredicate, languages(rql::value(object)).c_str());
 					else
-						gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), rql::value(object).c_str());
+						add_metadata(aPredicate, rql::value(object).c_str());
 				}
 			}
 			else
@@ -86,7 +90,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 					}
 
 					if (!author.empty() && (role == "aut" || role.empty()))
-						gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), author.c_str());
+						add_metadata(aPredicate, author.c_str());
 				}
 				else if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
 				{
@@ -96,9 +100,9 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 						if (rql::predicate(*data) == rdf::rdf("value"))
 						{
 							if (aPredicate == rdf::dc("language"))
-								gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), languages(object).c_str());
+								add_metadata(aPredicate, languages(object).c_str());
 							else
-								gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), object.c_str());
+								add_metadata(aPredicate, object.c_str());
 						}
 					}
 				}
@@ -111,7 +115,11 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 
 void MetadataView::add_metadata(const rdf::uri & aPredicate, const char * value)
 {
-	gtk_label_set_label(GTK_LABEL(values[aPredicate.str()].second), value);
+	auto &item = values[aPredicate.str()];
+
+	gtk_label_set_label(GTK_LABEL(item.second), value);
+	gtk_widget_show(item.first);
+	gtk_widget_show(item.second);
 }
 
 void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelText, int row)

@@ -25,19 +25,6 @@
 
 namespace rdf = cainteoir::rdf;
 
-class TocModel : public Gtk::TreeModelColumnRecord
-{
-public:
-	TocModel()
-	{
-		add(title);
-		add(location);
-	}
-
-	Gtk::TreeModelColumn<Glib::ustring> title;
-	Gtk::TreeModelColumn<rdf::uri> location;
-};
-
 typedef std::pair<const rdf::uri, const rdf::uri> TocSelection;
 
 class TocPane
@@ -56,9 +43,8 @@ public:
 	TocSelection selection() const;
 private:
 	GtkWidget *layout;
-	Gtk::TreeView view;
-	TocModel model;
-	Glib::RefPtr<Gtk::ListStore> data;
+	GtkTreeStore *store;
+	GtkTreeSelection *toc_selection;
 };
 
 #endif

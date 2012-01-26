@@ -80,7 +80,7 @@ private:
 	tts::engines *mEngines;
 
 	VoiceList voices;
-	Gtk::Table parameterView;
+	GtkWidget *parameterView;
 	Gtk::HButtonBox buttons;
 	Gtk::Button apply;
 

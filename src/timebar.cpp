@@ -46,13 +46,15 @@ TimeBar::TimeBar()
 	elapsedTime = gtk_label_new("00:00:00.0");
 	totalTime   = gtk_label_new("00:00:00.0");
 
-	GtkWidget *hlayout = gtk_hbox_new(FALSE, 4);
+	GtkWidget *hlayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	gtk_box_pack_start(GTK_BOX(hlayout), elapsedTime, FALSE, FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(hlayout), progress, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hlayout), totalTime, FALSE, FALSE, 4);
 
-	layout = gtk_vbox_new(TRUE, 0);
+	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(layout), hlayout, FALSE, FALSE, 0);
+
+	gtk_widget_set_valign(layout, GTK_ALIGN_CENTER);
 }
 
 void TimeBar::update(double elapsed, double total, double completed)

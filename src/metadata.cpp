@@ -23,21 +23,24 @@
 #include <cainteoir/platform.hpp>
 
 #include "metadata.hpp"
+#include "gtk-compatibility.hpp"
 
 namespace rql = cainteoir::rdf::query;
 
 MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int rows)
 	: languages(lang)
 {
-	layout = gtk_vbox_new(FALSE, 0);
+	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
 
 	header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
 	gtk_label_set_markup(GTK_LABEL(header), label);
 
-	metadata = gtk_table_new(rows, 2, FALSE);
+	metadata = gtk_grid_new();
 	gtk_container_set_border_width(GTK_CONTAINER(metadata), 4);
+	gtk_grid_set_row_spacing(GTK_GRID(metadata), 4);
+	gtk_grid_set_column_spacing(GTK_GRID(metadata), 15);
 
 	gtk_box_pack_start(GTK_BOX(layout), header,   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(layout), metadata, FALSE, FALSE, 0);
@@ -147,6 +150,6 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 	gtk_label_set_line_wrap(GTK_LABEL(value), true);
 	gtk_label_set_width_chars(GTK_LABEL(value), 40);
 
-	gtk_table_attach(GTK_TABLE(metadata), label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 20, 4);
-	gtk_table_attach(GTK_TABLE(metadata), value, 1, 2, row, row+1, GTK_FILL, GTK_FILL, 4, 4);
+	gtk_grid_attach(GTK_GRID(metadata), label, 0, row, 1, 1);
+	gtk_grid_attach(GTK_GRID(metadata), value, 1, row, 1, 1);
 }

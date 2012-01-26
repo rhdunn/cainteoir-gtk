@@ -23,6 +23,7 @@
 #include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
+#include "gtk-compatibility.hpp"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -66,10 +67,10 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 
 static GtkWidget *create_padded_container(GtkWidget *child, int padding_width, int padding_height)
 {
-	GtkWidget *left_right = gtk_hbox_new(FALSE, 0);
+	GtkWidget *left_right = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(GTK_BOX(left_right), child, TRUE, TRUE, padding_width);
 
-	GtkWidget *top_bottom = gtk_vbox_new(FALSE, 0);
+	GtkWidget *top_bottom = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(top_bottom), left_right, TRUE, TRUE, padding_height);
 
 	return top_bottom;
@@ -148,16 +149,16 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
 	openButton.set_menu(*create_file_chooser_menu());
 
-	GtkWidget *navbar = gtk_hbutton_box_new();
+	GtkWidget *navbar = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_set_name(navbar, "navbar");
 
-	GtkWidget *topbar = gtk_hbox_new(FALSE, 0);
+	GtkWidget *topbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(topbar, 0, 50);
 	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
 	gtk_box_pack_start(GTK_BOX(topbar), gtk_label_new(""), TRUE, TRUE, 0); // stretchy
 	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
 
-	GtkWidget *bottombar = gtk_hbox_new(FALSE, 0);
+	GtkWidget *bottombar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(bottombar, 0, 50);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
@@ -177,16 +178,16 @@ Cainteoir::Cainteoir(const char *filename)
 	engine_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
 	engine_metadata.create_entry(rdf::tts("version"), _("Version"), 1);
 
-	metadata_view = gtk_vbox_new(FALSE, 0);
+	metadata_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
-	GtkWidget *toc = gtk_hbox_new(FALSE, 0);
+	GtkWidget *toc = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(toc, 300, 0);
 	gtk_box_pack_start(GTK_BOX(toc), doc.toc, TRUE, TRUE, 0);
 
-	GtkWidget *pane = gtk_hbox_new(FALSE, 30);
+	GtkWidget *pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
 	gtk_box_pack_start(GTK_BOX(pane), toc, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pane), metadata_view, TRUE, TRUE, 0);
 

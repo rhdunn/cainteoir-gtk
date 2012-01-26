@@ -23,6 +23,7 @@
 #include <cainteoir/platform.hpp>
 
 #include "voice_selection.hpp"
+#include "gtk-compatibility.hpp"
 
 enum VoiceListColumns
 {
@@ -184,10 +185,9 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
 	: mEngines(&aEngines)
 	, voices(settings, aMetadata, languages)
-	, parameterView(5, 3, false)
 	, apply(_("_Apply"), true)
 {
-	layout = gtk_vbox_new(FALSE, FALSE);
+	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
 
 	GtkWidget *voices_header = gtk_label_new("");
@@ -198,6 +198,9 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
 	gtk_label_set_markup(GTK_LABEL(header), _("<b>Voice Settings</b>"));
 
+	parameterView = gtk_grid_new();
+	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);
+
 	create_entry(tts::parameter::rate, 0);
 	create_entry(tts::parameter::volume, 1);
 	create_entry(tts::parameter::pitch, 2);
@@ -207,7 +210,7 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	buttons.set_layout(Gtk::BUTTONBOX_START);
 
 	gtk_box_pack_start(GTK_BOX(gobj()), header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), GTK_WIDGET(parameterView.gobj()), FALSE, FALSE, 12);
+	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 12);
 	gtk_box_pack_start(GTK_BOX(gobj()), voices_header, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
 	gtk_box_pack_start(GTK_BOX(gobj()), GTK_WIDGET(buttons.gobj()), FALSE, FALSE, 0);
@@ -248,10 +251,11 @@ void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
 	VoiceParameter item;
 	item.type = aParameter;
 
-	item.param = gtk_hscale_new(NULL);
+	item.param = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, NULL);
 	gtk_range_set_increments(GTK_RANGE(item.param), 1.0, 5.0);
 	gtk_scale_set_value_pos(GTK_SCALE(item.param), GTK_POS_RIGHT);
 	gtk_scale_set_digits(GTK_SCALE(item.param), 0);
+	gtk_widget_set_hexpand(item.param, TRUE);
 
 	item.label = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(item.label), 1, 0.5);
@@ -259,9 +263,9 @@ void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
 	item.units = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(item.units), 0, 0.5);
 
-	gtk_table_attach(GTK_TABLE(parameterView.gobj()), item.label, 0, 1, row, row+1, GTK_FILL, GTK_FILL, 15, 0);
-	gtk_table_attach(GTK_TABLE(parameterView.gobj()), item.param, 1, 2, row, row+1, GtkAttachOptions(GTK_FILL|GTK_EXPAND), GTK_FILL, 4, 0);
-	gtk_table_attach(GTK_TABLE(parameterView.gobj()), item.units, 2, 3, row, row+1, GTK_FILL, GTK_FILL, 5, 0);
+	gtk_grid_attach(GTK_GRID(parameterView), item.label, 0, row, 1, 1);
+	gtk_grid_attach(GTK_GRID(parameterView), item.param, 1, row, 1, 1);
+	gtk_grid_attach(GTK_GRID(parameterView), item.units, 2, row, 1, 1);
 
 	parameters.push_back(item);
 }

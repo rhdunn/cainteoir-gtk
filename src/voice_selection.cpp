@@ -19,7 +19,8 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
+#include <sigc++/signal.h>
 #include <cainteoir/platform.hpp>
 
 #include "voice_selection.hpp"
@@ -48,7 +49,7 @@ const char * columns[VLC_COUNT] = {
 	_("Channels"),
 };
 
-void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
+static void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
 {
 	application_settings &settings = *(application_settings *)data;
 
@@ -62,7 +63,7 @@ struct voice_list_selection
 	GtkTreeSelection *selection;
 };
 
-gboolean select_voice_list_item_by_voice(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, void *data)
+static gboolean select_voice_list_item_by_voice(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, void *data)
 {
 	voice_list_selection *vls = (voice_list_selection *)data;
 
@@ -76,6 +77,11 @@ gboolean select_voice_list_item_by_voice(GtkTreeModel *model, GtkTreePath *path,
 	}
 	g_free(voice);
 	return ret;
+}
+
+static void on_apply_button_clicked(GtkButton *button, void *data)
+{
+	((VoiceSelectionView *)data)->apply();
 }
 
 VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages)
@@ -185,7 +191,6 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
 	: mEngines(&aEngines)
 	, voices(settings, aMetadata, languages)
-	, apply(_("_Apply"), true)
 {
 	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
@@ -206,16 +211,19 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	create_entry(tts::parameter::pitch, 2);
 	create_entry(tts::parameter::pitch_range, 3);
 
-	buttons.add(apply);
-	buttons.set_layout(Gtk::BUTTONBOX_START);
+	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
+
+	GtkWidget *apply = gtk_button_new_with_mnemonic(_("_Apply"));
+	gtk_box_pack_start(GTK_BOX(buttons), apply, FALSE, FALSE, 0);
 
 	gtk_box_pack_start(GTK_BOX(gobj()), header, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 12);
 	gtk_box_pack_start(GTK_BOX(gobj()), voices_header, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
-	gtk_box_pack_start(GTK_BOX(gobj()), GTK_WIDGET(buttons.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(gobj()), buttons, FALSE, FALSE, 0);
 
-	apply.signal_clicked().connect(sigc::mem_fun(*this, &VoiceSelectionView::apply_settings));
+	g_signal_connect(apply, "clicked", G_CALLBACK(on_apply_button_clicked), this);
 }
 
 void VoiceSelectionView::show(const rdf::uri &voice)
@@ -236,7 +244,7 @@ void VoiceSelectionView::show(const rdf::uri &voice)
 	gtk_widget_show(layout);
 }
 
-void VoiceSelectionView::apply_settings()
+void VoiceSelectionView::apply()
 {
 	foreach_iter (item, parameters)
 	{

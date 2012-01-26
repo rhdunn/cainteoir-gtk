@@ -69,8 +69,8 @@ public:
 	void show(const rdf::uri &voice);
 
 	sigc::signal<bool, const rdf::uri &> &signal_on_voice_change() { return on_voice_change; }
-protected:
-	void apply_settings();
+
+	void apply();
 private:
 	void create_entry(tts::parameter::type, int row);
 
@@ -81,8 +81,6 @@ private:
 
 	VoiceList voices;
 	GtkWidget *parameterView;
-	Gtk::HButtonBox buttons;
-	Gtk::Button apply;
 
 	sigc::signal<bool, const rdf::uri &> on_voice_change;
 };

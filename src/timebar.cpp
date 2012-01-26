@@ -19,7 +19,8 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
+#include <math.h>
 
 #include "timebar.hpp"
 #include "gtk-compatibility.hpp"

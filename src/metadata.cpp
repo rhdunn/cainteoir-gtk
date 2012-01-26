@@ -19,7 +19,7 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
 #include <cainteoir/platform.hpp>
 
 #include "metadata.hpp"

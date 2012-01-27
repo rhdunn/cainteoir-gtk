@@ -19,7 +19,8 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
+#include <sigc++/signal.h>
 #include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
@@ -53,7 +54,7 @@ int main(int argc, char ** argv)
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 
-	Gtk::Main app(argc, argv);
+	gtk_init(&argc, &argv);
 
 #if GTK_CHECK_VERSION(3, 0, 0)
 	char *theme_name = NULL;
@@ -66,8 +67,8 @@ int main(int argc, char ** argv)
 #endif
 
 	Cainteoir window(argc > 1 ? argv[1] : NULL);
-	Gtk::Main::run(window);
 
+	gtk_main();
 	cainteoir::cleanup();
 	return 0;
 }

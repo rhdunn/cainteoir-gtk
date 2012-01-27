@@ -31,14 +31,14 @@ AC_CHECK_HEADERS([getopt.h])
 AC_CHECK_FUNCS([getopt_long])
 
 dnl ================================================================
-dnl GTK+/Gtkmm checks.
+dnl GTK+ checks.
 dnl ================================================================
 
 AS_IF([test "x$with_gtk3" = "xyes"], [
-    PKG_CHECK_MODULES([GTK], [gtkmm-3.0 >= 3.0.0])
+    PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.0.0])
     gtkver="3.0"
 ], [
-    PKG_CHECK_MODULES([GTK], [gtkmm-2.4 >= 2.10.0])
+    PKG_CHECK_MODULES([GTK], [gtk+-2.4 >= 2.10.0])
     gtkver="2.4"
 ])
 

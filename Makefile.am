@@ -116,7 +116,6 @@ src_cainteoir_gtk_SOURCES = \
 	src/toc.hpp \
 	src/toc.cpp \
 	src/document.hpp \
-	src/gtkmm-compatibility.hpp \
 	src/gtk-compatibility.hpp \
 	src/gtk-compatibility.cpp \
 	src/voice_selection.hpp \

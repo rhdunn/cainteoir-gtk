@@ -19,12 +19,12 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
+#include <sigc++/signal.h>
 #include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
 #include "gtk-compatibility.hpp"
-#include "gtkmm-compatibility.hpp"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -59,6 +59,60 @@ static void display_error_message(GtkWindow *window, const char *title, const ch
 	gtk_widget_destroy(dialog);
 }
 
+static std::string select_file(
+	GtkWindow *window,
+	const char *title,
+	GtkFileChooserAction action,
+	const char *open_id,
+	const char *filename,
+	std::string default_mimetype,
+	rdf::graph &metadata,
+	rql::results &formats)
+{
+	GtkWidget *dialog = gtk_file_chooser_dialog_new(title, window, action,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		open_id,          GTK_RESPONSE_OK,
+		NULL);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
+
+	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
+	{
+		rql::results data = rql::select(metadata, rql::matches(rql::subject, rql::subject(*format)));
+
+		GtkFileFilter *filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(filter, rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))).c_str());
+
+		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
+
+		bool active_filter = false;
+		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
+		{
+			const std::string & mimetype = rql::value(*item);
+			gtk_file_filter_add_mime_type(filter, mimetype.c_str());
+			if (default_mimetype == mimetype)
+				active_filter = true;
+		}
+
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+		if (active_filter)
+			gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter);
+	}
+
+	std::string ret;
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK)
+	{
+		char *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		if (path)
+		{
+			ret = path;
+			g_free(path);
+		}
+	}
+
+	gtk_widget_destroy(dialog);
+	return ret;
+}
+
 static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 {
 	GtkRecentFilter *filter = gtk_recent_filter_new();
@@ -66,7 +120,6 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 	rql::results formats = rql::select(aMetadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
-
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
@@ -117,6 +170,41 @@ static GtkWidget *create_navbutton(const char *label, GtkWidget *view, int page)
 	return navbutton;
 }
 
+typedef void (Cainteoir::*callback_function)();
+
+struct CallbackData
+{
+	Cainteoir *window;
+	callback_function callback;
+};
+
+static void on_button_clicked(GtkWidget *widget, void *data)
+{
+	CallbackData *cbd = (CallbackData *)data;
+	((cbd->window)->*(cbd->callback))();
+}
+
+static GtkWidget *create_stock_button(const char *stock, Cainteoir *window, callback_function callback, GtkWidget *menu=NULL)
+{
+	CallbackData *data = g_slice_new(CallbackData);
+	data->window   = window;
+	data->callback = callback;
+
+	GtkToolItem *button = NULL;
+	if (menu)
+	{
+		button = gtk_menu_tool_button_new_from_stock(stock);
+		gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(button), menu);
+	}
+	else
+	{
+		button = gtk_tool_button_new_from_stock(stock);
+	}
+	gtk_container_set_border_width(GTK_CONTAINER(button), 0);
+	g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), data);
+	return GTK_WIDGET(button);
+}
+
 static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
 {
 	GtkRecentInfo *info = gtk_recent_chooser_get_current_item(chooser);
@@ -131,12 +219,14 @@ static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
 
 static void on_recent_files_dialog(GtkMenuItem *item, void *data)
 {
-	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), GTK_WINDOW(((Cainteoir *)data)->gobj()),
+	Cainteoir &window = *(Cainteoir *)data;
+
+	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), window,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
 		NULL);
 	gtk_window_resize(GTK_WINDOW(dialog), 500, 200);
-	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), ((Cainteoir *)data)->recent_filter());
+	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), window.recent_filter());
 	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
@@ -145,47 +235,61 @@ static void on_recent_files_dialog(GtkMenuItem *item, void *data)
 	gtk_widget_destroy(dialog);
 }
 
+static gboolean on_window_state_changed(GtkWidget *widget, GdkEvent *event, void *data)
+{
+	application_settings &settings = *(application_settings *)data;
+	settings("window.maximized") = (((GdkEventWindowState *)event)->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) ? "true" : "false";
+	settings.save();
+	return TRUE;
+}
+
+static gboolean on_window_delete(GtkWidget *widget, GdkEvent *event, void *data)
+{
+	Cainteoir &app = *(Cainteoir *)data;
+	app.stop();
+	app.save_settings();
+
+	gtk_widget_hide(widget);
+	gtk_main_quit();
+	return TRUE;
+}
+
+static gboolean on_timer_speaking(Cainteoir *window)
+{
+	return window->on_speaking();
+}
+
 Cainteoir::Cainteoir(const char *filename)
 	: doc_metadata(languages, _("<b>Document</b>"), 5)
 	, voice_metadata(languages, _("<b>Voice</b>"), 2)
 	, engine_metadata(languages, _("<b>Engine</b>"), 2)
 	, languages("en")
-	, readButton(Gtk::Stock::MEDIA_PLAY)
-	, stopButton(Gtk::Stock::MEDIA_STOP)
-	, recordButton(Gtk::Stock::MEDIA_RECORD)
-	, openButton(Gtk::Stock::OPEN)
 	, settings(get_user_file("settings.dat"))
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, doc.tts, doc.m_metadata, languages));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
-	set_title(_("Cainteoir Text-to-Speech"));
-	set_size_request(500, 300);
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(window), _("Cainteoir Text-to-Speech"));
+	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(window), TRUE);
 
-	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(gobj()), TRUE);
+	gtk_widget_set_size_request(window, 500, 300);
 
-	resize(settings("window.width",  700).as<int>(), settings("window.height", 445).as<int>());
-	move(settings("window.left", 0).as<int>(), settings("window.top",  0).as<int>());
+	gtk_window_resize(GTK_WINDOW(window), settings("window.width",  700).as<int>(), settings("window.height", 445).as<int>());
+	gtk_window_move(GTK_WINDOW(window), settings("window.left", 0).as<int>(), settings("window.top",  0).as<int>());
 	if (settings("window.maximized", "false").as<std::string>() == "true")
-		maximize();
+		gtk_window_maximize(GTK_WINDOW(window));
 
-	signal_window_state_event().connect(sigc::mem_fun(*this, &Cainteoir::on_window_state_changed));
-	signal_delete_event().connect(sigc::mem_fun(*this, &Cainteoir::on_delete));
+	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
+	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
 
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(doc.m_metadata);
 
-	readButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_read));
-	stopButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_stop));
-	recordButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_record));
-
-	readButton.set_border_width(0);
-	stopButton.set_border_width(0);
-	recordButton.set_border_width(0);
-	openButton.set_border_width(0);
-
-	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(openButton.gobj()), create_file_chooser_menu());
+	readButton   = create_stock_button(GTK_STOCK_MEDIA_PLAY,   this, &Cainteoir::read);
+	stopButton   = create_stock_button(GTK_STOCK_MEDIA_STOP,   this, &Cainteoir::stop);
+	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
+	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
 
 	GtkWidget *navbar = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_set_name(navbar, "navbar");
@@ -194,13 +298,13 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_widget_set_size_request(topbar, 0, 50);
 	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
 	gtk_box_pack_start(GTK_BOX(topbar), gtk_label_new(""), TRUE, TRUE, 0); // stretchy
-	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton), FALSE, FALSE, 0);
 
 	GtkWidget *bottombar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(bottombar, 0, 50);
-	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton.gobj()), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton.gobj()), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), timebar, TRUE, TRUE, 0);
 
 	doc_metadata.create_entry(rdf::dc("title"), _("Title"), 0);
@@ -239,81 +343,43 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(navbar), create_navbutton(_("Voice"), view, voice_page), FALSE, FALSE, 0);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_container_add(GTK_CONTAINER(gobj()), box);
+	gtk_container_add(GTK_CONTAINER(window), box);
 	gtk_box_pack_start(GTK_BOX(box), topbar, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box), view, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box), bottombar, FALSE, FALSE, 0);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
-	show_all_children();
+	gtk_widget_show_all(window);
 
-	readButton.set_sensitive(false);
-	stopButton.set_visible(false);
+	gtk_widget_set_sensitive(readButton, FALSE);
+	gtk_widget_set_sensitive(recordButton, FALSE);
+	gtk_widget_set_visible(stopButton, FALSE);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
 	switch_voice(doc.tts.voice());
 }
 
-bool Cainteoir::on_window_state_changed(GdkEventWindowState *event)
-{
-	settings("window.maximized") = (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) ? "true" : "false";
-	settings.save();
-	return true;
-}
-
-bool Cainteoir::on_delete(GdkEventAny *event)
-{
-	on_quit();
-	return true;
-}
-
 void Cainteoir::on_open_document()
 {
-	Gtk::FileChooserDialog dialog(_("Open Document"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-	dialog.set_transient_for(*this);
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
-	dialog.set_filename(settings("document.filename").as<std::string>());
-
 	rql::results formats = rql::select(doc.m_metadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
-	std::string default_mimetype = settings("document.mimetype", "text/plain").as<std::string>();
+	std::string filename = select_file(GTK_WINDOW(window),
+		_("Open Document"),
+		GTK_FILE_CHOOSER_ACTION_OPEN,
+		GTK_STOCK_OPEN,
+		settings("document.filename").as<std::string>().c_str(),
+		settings("document.mimetype", "text/plain").as<std::string>(),
+		doc.m_metadata, formats);
 
-	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
-	{
-		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
-
-		GtkObjectRef<Gtk::FileFilter> filter;
-		filter->set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
-
-		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
-
-		bool active_filter = false;
-		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
-		{
-			const std::string & mimetype = rql::value(*item);
-			filter->add_mime_type(mimetype);
-			if (default_mimetype == mimetype)
-				active_filter = true;
-		}
-
- 		dialog.add_filter(filter);
-		if (active_filter)
-			dialog.set_filter(filter);
-	}
-
-	if (dialog.run() == Gtk::RESPONSE_OK)
-		load_document(dialog.get_filename());
+	if (!filename.empty())
+		load_document(filename);
 }
 
-void Cainteoir::on_quit()
+void Cainteoir::save_settings()
 {
-	if (speech)
-		speech->stop();
-
 	if (settings("window.maximized", "false").as<std::string>() == "false")
 	{
 		int width = 0;
@@ -321,8 +387,8 @@ void Cainteoir::on_quit()
 		int top = 0;
 		int left = 0;
 
-		get_position(left, top);
-		get_size(width, height);
+		gtk_window_get_position(GTK_WINDOW(window), &left, &top);
+		gtk_window_get_size(GTK_WINDOW(window), &width, &height);
 
 		settings("window.width")  = width;
 		settings("window.height") = height;
@@ -330,59 +396,32 @@ void Cainteoir::on_quit()
 		settings("window.left")   = left;
 	}
 	settings.save();
-
-	hide();
 }
 
-void Cainteoir::on_read()
+void Cainteoir::read()
 {
 	out = cainteoir::open_audio_device(NULL, "pulse", 0.3, doc.m_metadata, *doc.subject, doc.tts.voice());
 	on_speak(_("reading"));
 }
 
-void Cainteoir::on_record()
+void Cainteoir::record()
 {
 	// TODO: Generate a default name from the file metadata ($(recording.basepath)/author - title.ogg)
-
-	Gtk::FileChooserDialog dialog(_("Record Document"), Gtk::FILE_CHOOSER_ACTION_SAVE);
-	dialog.set_transient_for(*this);
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::MEDIA_RECORD, Gtk::RESPONSE_OK);
-	dialog.set_filename(settings("recording.filename").as<std::string>());
 
 	rql::results formats = rql::select(doc.m_metadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("AudioFormat"))));
 
-	std::string default_mimetype = settings("recording.mimetype", "audio/x-vorbis+ogg").as<std::string>();
+	std::string filename = select_file(GTK_WINDOW(window),
+		_("Record Document"),
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_MEDIA_RECORD,
+		settings("recording.filename").as<std::string>().c_str(),
+		settings("recording.mimetype", "audio/x-vorbis+ogg").as<std::string>(),
+		doc.m_metadata, formats);
 
-	for (auto format = formats.begin(), last = formats.end(); format != last; ++format)
-	{
-		rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, rql::subject(*format)));
-
-		GtkObjectRef<Gtk::FileFilter> filter;
-		filter->set_name(rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))));
-
-		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
-
-		bool active_filter = false;
-		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
-		{
-			const std::string & mimetype = rql::value(*item);
-			filter->add_mime_type(mimetype);
-			if (default_mimetype == mimetype)
-				active_filter = true;
-		}
-
- 		dialog.add_filter(filter);
-		if (active_filter)
-			dialog.set_filter(filter);
-	}
-
-	if (dialog.run() != Gtk::RESPONSE_OK)
+	if (filename.empty())
 		return;
-
-	std::string filename = dialog.get_filename();
 
 	std::string::size_type extpos = filename.rfind('.');
 	if (extpos != std::string::npos)
@@ -417,10 +456,16 @@ void Cainteoir::on_record()
 		}
 	}
 
-	display_error_message(GTK_WINDOW(gobj()),
+	display_error_message(GTK_WINDOW(window),
 		_("Record Document"),
 		_("Unable to record the document"),
 		_("Unsupported file type."));
+}
+
+void Cainteoir::stop()
+{
+	if (speech)
+		speech->stop();
 }
 
 void Cainteoir::on_speak(const char * status)
@@ -428,17 +473,12 @@ void Cainteoir::on_speak(const char * status)
 	cainteoir::document::range_type selection = doc.selection();
 	speech = doc.tts.speak(doc.m_doc, out, selection.first, selection.second);
 
-	readButton.set_visible(false);
-	stopButton.set_visible(true);
-	recordButton.set_sensitive(false);
-	openButton.set_sensitive(false);
+	gtk_widget_set_visible(readButton, FALSE);
+	gtk_widget_set_visible(stopButton, TRUE);
+	gtk_widget_set_sensitive(recordButton, FALSE);
+	gtk_widget_set_sensitive(openButton, FALSE);
 
-	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
-}
-
-void Cainteoir::on_stop()
-{
-	speech->stop();
+	g_timeout_add(100, (GSourceFunc)on_timer_speaking, this);
 }
 
 bool Cainteoir::on_speaking()
@@ -452,7 +492,7 @@ bool Cainteoir::on_speaking()
 	std::string error = speech->error_message();
 	if (!error.empty())
 	{
-		display_error_message(GTK_WINDOW(gobj()),
+		display_error_message(GTK_WINDOW(window),
 			_("Cainteoir Text-to-Speech"),
 			_("Error speaking the document"),
 			error.c_str());
@@ -463,10 +503,10 @@ bool Cainteoir::on_speaking()
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
-	readButton.set_visible(true);
-	stopButton.set_visible(false);
-	recordButton.set_sensitive(true);
-	openButton.set_sensitive(true);
+	gtk_widget_set_visible(readButton, TRUE);
+	gtk_widget_set_visible(stopButton, FALSE);
+	gtk_widget_set_sensitive(recordButton, TRUE);
+	gtk_widget_set_sensitive(openButton, TRUE);
 
 	return false;
 }
@@ -475,7 +515,8 @@ bool Cainteoir::load_document(std::string filename)
 {
 	if (speech || filename.empty()) return false;
 
-	readButton.set_sensitive(false);
+	gtk_widget_set_sensitive(readButton, FALSE);
+	gtk_widget_set_sensitive(recordButton, FALSE);
 
 	doc.clear();
 	doc_metadata.clear();
@@ -525,13 +566,14 @@ bool Cainteoir::load_document(std::string filename)
 
 			switch_voice_by_language(lang);
 
-			readButton.set_sensitive(true);
+			gtk_widget_set_sensitive(readButton, TRUE);
+			gtk_widget_set_sensitive(recordButton, TRUE);
 			return true;
 		}
 	}
 	catch (const std::exception & e)
 	{
-		display_error_message(GTK_WINDOW(gobj()),
+		display_error_message(GTK_WINDOW(window),
 			_("Open Document"),
 			_("Unable to open the document"),
 			e.what());

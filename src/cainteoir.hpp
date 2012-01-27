@@ -29,26 +29,27 @@
 #include "metadata.hpp"
 #include "timebar.hpp"
 
-class Cainteoir : public Gtk::Window
+class Cainteoir
 {
 public:
 	Cainteoir(const char *filename);
 
 	bool load_document(std::string filename);
 
+	void read();
+	void record();
+	void stop();
+
+	void save_settings();
+	bool on_speaking();
+
+	operator GtkWindow *() const { return GTK_WINDOW(window); }
+
 	inline GtkRecentFilter *recent_filter() const { return recentFilter; }
 protected:
-	bool on_window_state_changed(GdkEventWindowState *event);
-	bool on_delete(GdkEventAny *event);
-
 	void on_open_document();
-	void on_quit();
-	void on_read();
-	void on_record();
-	void on_stop();
 
 	void on_speak(const char * state);
-	bool on_speaking();
 
 	bool switch_voice(const rdf::uri &voice);
 
@@ -59,6 +60,7 @@ private:
 
 	TimeBar timebar;
 
+	GtkWidget *window;
 	GtkWidget *view;
 
 	MetadataView doc_metadata;
@@ -71,10 +73,10 @@ private:
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;
 
-	Gtk::ToolButton readButton;
-	Gtk::ToolButton stopButton;
-	Gtk::ToolButton recordButton;
-	Gtk::MenuToolButton openButton;
+	GtkWidget *readButton;
+	GtkWidget *stopButton;
+	GtkWidget *recordButton;
+	GtkWidget *openButton;
 
 	document doc;
 	cainteoir::languages languages;

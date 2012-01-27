@@ -78,11 +78,6 @@ private:
 	Gtk::ToolButton recordButton;
 	Gtk::MenuToolButton openButton;
 
-	Glib::RefPtr<Gtk::Action> readAction;
-	Glib::RefPtr<Gtk::Action> stopAction;
-	Glib::RefPtr<Gtk::Action> recordAction;
-	Glib::RefPtr<Gtk::Action> openAction;
-
 	document doc;
 	cainteoir::languages languages;
 	std::tr1::shared_ptr<cainteoir::tts::speech> speech;

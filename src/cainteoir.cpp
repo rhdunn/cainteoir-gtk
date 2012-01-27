@@ -127,15 +127,8 @@ Cainteoir::Cainteoir(const char *filename)
 	signal_delete_event().connect(sigc::mem_fun(*this, &Cainteoir::on_delete));
 
 	create_recent_filter(recentFilter, doc.m_metadata);
-
 	recentManager = Gtk::RecentManager::get_default();
-
-	openAction = Gtk::Action::create("FileOpen", Gtk::Stock::OPEN), sigc::mem_fun(*this, &Cainteoir::on_open_document);
 	recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Documents"));
-
-	readAction = Gtk::Action::create("ReaderRead", Gtk::Stock::MEDIA_PLAY), sigc::mem_fun(*this, &Cainteoir::on_read);
-	stopAction = Gtk::Action::create("ReaderStop", Gtk::Stock::MEDIA_STOP), sigc::mem_fun(*this, &Cainteoir::on_stop);
-	recordAction = Gtk::Action::create("ReaderRecord", Gtk::Stock::MEDIA_RECORD), sigc::mem_fun(*this, &Cainteoir::on_record);
 
 	readButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_read));
 	stopButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_stop));
@@ -209,9 +202,6 @@ Cainteoir::Cainteoir(const char *filename)
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
 	show_all_children();
-
-	readAction->set_sensitive(false);
-	stopAction->set_visible(false);
 
 	readButton.set_sensitive(false);
 	stopButton.set_visible(false);
@@ -430,16 +420,11 @@ void Cainteoir::on_speak(const char * status)
 	cainteoir::document::range_type selection = doc.selection();
 	speech = doc.tts.speak(doc.m_doc, out, selection.first, selection.second);
 
-	readAction->set_visible(false);
-	stopAction->set_visible(true);
-	recordAction->set_sensitive(false);
-
 	readButton.set_visible(false);
 	stopButton.set_visible(true);
 	recordButton.set_sensitive(false);
 
 	openButton.set_sensitive(false);
-	openAction->set_sensitive(false);
 	recentAction->set_sensitive(false);
 
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
@@ -472,16 +457,11 @@ bool Cainteoir::on_speaking()
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 
-	readAction->set_visible(true);
-	stopAction->set_visible(false);
-	recordAction->set_sensitive(true);
-
 	readButton.set_visible(true);
 	stopButton.set_visible(false);
 	recordButton.set_sensitive(true);
 
 	openButton.set_sensitive(true);
-	openAction->set_sensitive(true);
 	recentAction->set_sensitive(true);
 
 	return false;
@@ -491,7 +471,6 @@ bool Cainteoir::load_document(std::string filename)
 {
 	if (speech || filename.empty()) return false;
 
-	readAction->set_sensitive(false);
 	readButton.set_sensitive(false);
 
 	doc.clear();
@@ -553,7 +532,6 @@ bool Cainteoir::load_document(std::string filename)
 
 			switch_voice_by_language(lang);
 
-			readAction->set_sensitive(true);
 			readButton.set_sensitive(true);
 			return true;
 		}

@@ -28,7 +28,6 @@
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
-#include "gtkmm-compatibility.hpp"
 
 class Cainteoir : public Gtk::Window
 {
@@ -36,13 +35,13 @@ public:
 	Cainteoir(const char *filename);
 
 	bool load_document(std::string filename);
+
+	inline GtkRecentFilter *recent_filter() const { return recentFilter; }
 protected:
 	bool on_window_state_changed(GdkEventWindowState *event);
 	bool on_delete(GdkEventAny *event);
 
 	void on_open_document();
-	void on_recent_files_dialog();
-	void on_recent_file(Gtk::RecentChooserMenu * recent);
 	void on_quit();
 	void on_read();
 	void on_record();
@@ -56,7 +55,7 @@ protected:
 	bool switch_voice_by_language(const std::string &language);
 private:
 	void updateProgress(double elapsed, double total, double completed);
-	Gtk::Menu *create_file_chooser_menu();
+	GtkWidget *create_file_chooser_menu();
 
 	TimeBar timebar;
 
@@ -69,9 +68,8 @@ private:
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
-	GtkObjectRef<Gtk::RecentFilter> recentFilter;
-	Glib::RefPtr<Gtk::RecentManager> recentManager;
-	Glib::RefPtr<Gtk::Action> recentAction;
+	GtkRecentManager *recentManager;
+	GtkRecentFilter  *recentFilter;
 
 	Gtk::ToolButton readButton;
 	Gtk::ToolButton stopButton;

@@ -24,6 +24,7 @@
 
 #include "cainteoir.hpp"
 #include "gtk-compatibility.hpp"
+#include "gtkmm-compatibility.hpp"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -58,8 +59,10 @@ static void display_error_message(GtkWindow *window, const char *title, const ch
 	gtk_widget_destroy(dialog);
 }
 
-static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const rdf::graph & aMetadata)
+static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 {
+	GtkRecentFilter *filter = gtk_recent_filter_new();
+
 	rql::results formats = rql::select(aMetadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
@@ -74,8 +77,10 @@ static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const 
 			          rql::matches(rql::subject, *uri)));
 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
-			filter->add_mime_type(rql::value(*mimetype));
+			gtk_recent_filter_add_mime_type(filter, rql::value(*mimetype).c_str());
 	}
+
+	return filter;
 }
 
 static GtkWidget *create_padded_container(GtkWidget *child, int padding_width, int padding_height)
@@ -112,6 +117,34 @@ static GtkWidget *create_navbutton(const char *label, GtkWidget *view, int page)
 	return navbutton;
 }
 
+static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
+{
+	GtkRecentInfo *info = gtk_recent_chooser_get_current_item(chooser);
+	gchar *filename = gtk_recent_info_get_uri_display(info);
+	if (filename)
+	{
+		((Cainteoir *)data)->load_document(filename);
+		g_free(filename);
+	}
+	gtk_recent_info_unref(info);
+}
+
+static void on_recent_files_dialog(GtkMenuItem *item, void *data)
+{
+	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), GTK_WINDOW(((Cainteoir *)data)->gobj()),
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
+		NULL);
+	gtk_window_resize(GTK_WINDOW(dialog), 500, 200);
+	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), ((Cainteoir *)data)->recent_filter());
+	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
+
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+		on_recent_item_activated(GTK_RECENT_CHOOSER(dialog), data);
+
+	gtk_widget_destroy(dialog);
+}
+
 Cainteoir::Cainteoir(const char *filename)
 	: doc_metadata(languages, _("<b>Document</b>"), 5)
 	, voice_metadata(languages, _("<b>Voice</b>"), 2)
@@ -139,9 +172,8 @@ Cainteoir::Cainteoir(const char *filename)
 	signal_window_state_event().connect(sigc::mem_fun(*this, &Cainteoir::on_window_state_changed));
 	signal_delete_event().connect(sigc::mem_fun(*this, &Cainteoir::on_delete));
 
-	create_recent_filter(recentFilter, doc.m_metadata);
-	recentManager = Gtk::RecentManager::get_default();
-	recentAction = Gtk::Action::create("FileRecentFiles", _("_Recent Documents"));
+	recentManager = gtk_recent_manager_get_default();
+	recentFilter = create_recent_filter(doc.m_metadata);
 
 	readButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_read));
 	stopButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_stop));
@@ -153,7 +185,7 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton.set_border_width(0);
 
 	openButton.signal_clicked().connect(sigc::mem_fun(*this, &Cainteoir::on_open_document));
-	openButton.set_menu(*create_file_chooser_menu());
+	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(openButton.gobj()), create_file_chooser_menu());
 
 	GtkWidget *navbar = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_set_name(navbar, "navbar");
@@ -275,43 +307,6 @@ void Cainteoir::on_open_document()
 
 	if (dialog.run() == Gtk::RESPONSE_OK)
 		load_document(dialog.get_filename());
-}
-
-void Cainteoir::on_recent_files_dialog()
-{
-	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), GTK_WINDOW(gobj()),
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
-		NULL);
-	gtk_window_resize(GTK_WINDOW(dialog), 500, 200);
-	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_FILTER(recentFilter->gobj()));
-	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
-
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
-	{
-		GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(dialog));
-		gchar *filename = gtk_recent_info_get_uri_display(info);
-		if (filename)
-		{
-			load_document(filename);
-			g_free(filename);
-		}
-		gtk_recent_info_unref(info);
-	}
-
-	gtk_widget_destroy(dialog);
-}
-
-void Cainteoir::on_recent_file(Gtk::RecentChooserMenu * recent)
-{
-	GtkRecentInfo *info = gtk_recent_chooser_get_current_item(GTK_RECENT_CHOOSER(recent->gobj()));
-	gchar *filename = gtk_recent_info_get_uri_display(info);
-	if (filename)
-	{
-		load_document(filename);
-		g_free(filename);
-	}
-	gtk_recent_info_unref(info);
 }
 
 void Cainteoir::on_quit()
@@ -436,9 +431,7 @@ void Cainteoir::on_speak(const char * status)
 	readButton.set_visible(false);
 	stopButton.set_visible(true);
 	recordButton.set_sensitive(false);
-
 	openButton.set_sensitive(false);
-	recentAction->set_sensitive(false);
 
 	Glib::signal_timeout().connect(sigc::mem_fun(*this, &Cainteoir::on_speaking), 100);
 }
@@ -473,9 +466,7 @@ bool Cainteoir::on_speaking()
 	readButton.set_visible(true);
 	stopButton.set_visible(false);
 	recordButton.set_sensitive(true);
-
 	openButton.set_sensitive(true);
-	recentAction->set_sensitive(true);
 
 	return false;
 }
@@ -497,7 +488,7 @@ bool Cainteoir::load_document(std::string filename)
 		if (cainteoir::parseDocument(filename.c_str(), doc, doc.m_metadata))
 		{
 			doc.subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
-			recentManager->add_item("file://" + filename);
+			gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
 			rql::results data = rql::select(doc.m_metadata, rql::matches(rql::subject, *doc.subject));
 			std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
@@ -549,24 +540,24 @@ bool Cainteoir::load_document(std::string filename)
 	return false;
 }
 
-Gtk::Menu *Cainteoir::create_file_chooser_menu()
+GtkWidget *Cainteoir::create_file_chooser_menu()
 {
-	Gtk::RecentChooserMenu *recent = Gtk::manage(new Gtk::RecentChooserMenu(recentManager));
+	GtkWidget *recent = gtk_recent_chooser_menu_new_for_manager(recentManager);
+	gtk_recent_chooser_menu_set_show_numbers(GTK_RECENT_CHOOSER_MENU(recent), TRUE);
+	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(recent), GTK_RECENT_SORT_MRU);
+	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(recent), recentFilter);
+	gtk_recent_chooser_set_limit(GTK_RECENT_CHOOSER(recent), 10);
 
-	recent->signal_item_activated().connect(sigc::bind(sigc::mem_fun(*this, &Cainteoir::on_recent_file), recent));
-	recent->set_show_numbers(true);
-	recent->set_sort_type(Gtk::RECENT_SORT_MRU);
-	recent->set_filter(recentFilter);
-	recent->set_limit(6);
+	GtkWidget *separator = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(recent), separator);
+	gtk_widget_show(separator);
 
-	Gtk::MenuItem *separator = Gtk::manage(new Gtk::SeparatorMenuItem());
-	recent->append(*separator);
-	separator->show();
+	GtkWidget *more = gtk_menu_item_new_with_mnemonic(_("_More Documents..."));
+	gtk_menu_shell_append(GTK_MENU_SHELL(recent), more);
+	gtk_widget_show(more);
 
-	Gtk::MenuItem *more = Gtk::manage(new Gtk::MenuItem(_("_More Documents..."), true));
-	more->signal_activate().connect(sigc::mem_fun(*this, &Cainteoir::on_recent_files_dialog));
-	recent->append(*more);
-	more->show();
+	g_signal_connect(recent, "item-activated", G_CALLBACK(on_recent_item_activated), this);
+	g_signal_connect(more, "activate", G_CALLBACK(on_recent_files_dialog), this);
 
 	return recent;
 }

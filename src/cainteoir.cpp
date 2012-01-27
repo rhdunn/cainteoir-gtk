@@ -490,17 +490,6 @@ bool Cainteoir::load_document(std::string filename)
 			std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 			std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
-			/*
-			if (title.empty())
-				gtk_label_set_markup(GTK_LABEL(doc_title), "");
-			else
-			{
-				char buf[1024];
-				snprintf(buf, sizeof(buf), _("<b>%1$s</b>"), title.c_str());
-				gtk_label_set_markup(GTK_LABEL(doc_title), buf);
-			}
-			*/
-
 			if (doc.toc.empty())
 				gtk_widget_hide(doc.toc);
 			else

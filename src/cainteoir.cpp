@@ -45,6 +45,19 @@ static double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parame
 	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
 }
 
+static void display_error_message(GtkWindow *window, const char *title, const char *text, const char *secondary_text)
+{
+	GtkWidget *dialog = gtk_message_dialog_new(window,
+		GTK_DIALOG_DESTROY_WITH_PARENT,
+		GTK_MESSAGE_ERROR,
+		GTK_BUTTONS_CLOSE,
+		"%s", text);
+	gtk_window_set_title(GTK_WINDOW(dialog), title);
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", secondary_text);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+}
+
 static void create_recent_filter(GtkObjectRef<Gtk::RecentFilter> &filter, const rdf::graph & aMetadata)
 {
 	rql::results formats = rql::select(aMetadata,
@@ -409,10 +422,10 @@ void Cainteoir::on_record()
 		}
 	}
 
-	Gtk::MessageDialog message(*this, _("Unable to record the document"), false, Gtk::MESSAGE_ERROR);
-	message.set_title(_("Record Document"));
-	message.set_secondary_text(_("Unsupported file type."));
-	message.run();
+	display_error_message(GTK_WINDOW(gobj()),
+		_("Record Document"),
+		_("Unable to record the document"),
+		_("Unsupported file type."));
 }
 
 void Cainteoir::on_speak(const char * status)
@@ -446,10 +459,10 @@ bool Cainteoir::on_speaking()
 	std::string error = speech->error_message();
 	if (!error.empty())
 	{
-		Gtk::MessageDialog dialog(*this, _("Error speaking the document"), false, Gtk::MESSAGE_ERROR);
-		dialog.set_title(_("Cainteoir Text-to-Speech"));
-		dialog.set_secondary_text(error.c_str());
-		dialog.run();
+		display_error_message(GTK_WINDOW(gobj()),
+			_("Cainteoir Text-to-Speech"),
+			_("Error speaking the document"),
+			error.c_str());
 	}
 
 	speech.reset();
@@ -527,10 +540,10 @@ bool Cainteoir::load_document(std::string filename)
 	}
 	catch (const std::exception & e)
 	{
-		Gtk::MessageDialog dialog(*this, _("Unable to open the document"), false, Gtk::MESSAGE_ERROR);
-		dialog.set_title(_("Open Document"));
-		dialog.set_secondary_text(e.what());
-		dialog.run();
+		display_error_message(GTK_WINDOW(gobj()),
+			_("Open Document"),
+			_("Unable to open the document"),
+			e.what());
 	}
 
 	return false;

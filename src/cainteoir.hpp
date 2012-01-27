@@ -58,7 +58,6 @@ private:
 	void updateProgress(double elapsed, double total, double completed);
 	Gtk::Menu *create_file_chooser_menu();
 
-	Gtk::VBox box;
 	TimeBar timebar;
 
 	GtkWidget *view;

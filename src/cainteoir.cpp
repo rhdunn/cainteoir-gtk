@@ -200,10 +200,11 @@ Cainteoir::Cainteoir(const char *filename)
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
 	gtk_box_pack_start(GTK_BOX(navbar), create_navbutton(_("Voice"), view, voice_page), FALSE, FALSE, 0);
 
-	add(box);
-	gtk_box_pack_start(GTK_BOX(box.gobj()), topbar, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box.gobj()), view, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(box.gobj()), bottombar, FALSE, FALSE, 0);
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_add(GTK_CONTAINER(gobj()), box);
+	gtk_box_pack_start(GTK_BOX(box), topbar, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box), view, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box), bottombar, FALSE, FALSE, 0);
 
 	timebar.update(0.0, estimate_time(doc.m_doc->text_length(), doc.tts.parameter(tts::parameter::rate)), 0.0);
 

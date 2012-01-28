@@ -520,6 +520,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 	gtk_widget_set_sensitive(readButton, FALSE);
 	gtk_widget_set_sensitive(recordButton, FALSE);
 
+	bool ret = true;
 	try
 	{
 		if (filename.find("file://") == 0)
@@ -573,10 +574,6 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 				lang = "en";
 
 			switch_voice_by_language(lang);
-
-			gtk_widget_set_sensitive(readButton, TRUE);
-			gtk_widget_set_sensitive(recordButton, TRUE);
-			return true;
 		}
 	}
 	catch (const std::exception & e)
@@ -588,9 +585,15 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 				_("Unable to open the document"),
 				e.what());
 		}
+		ret = false;
 	}
 
-	return false;
+	if (doc->text_length() != 0)
+	{
+		gtk_widget_set_sensitive(readButton, TRUE);
+		gtk_widget_set_sensitive(recordButton, TRUE);
+	}
+	return ret;
 }
 
 GtkWidget *Cainteoir::create_file_chooser_menu()

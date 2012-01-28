@@ -78,6 +78,9 @@ private:
 	GtkWidget *recordButton;
 	GtkWidget *openButton;
 
+	rdf::graph tts_metadata;
+	cainteoir::tts::engines tts;
+
 	document doc;
 	cainteoir::languages languages;
 	std::tr1::shared_ptr<cainteoir::tts::speech> speech;

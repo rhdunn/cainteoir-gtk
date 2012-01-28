@@ -28,9 +28,7 @@
 
 struct document : public cainteoir::document_events
 {
-	document()
-		: tts(tts_metadata, cainteoir::text_support)
-		, doc(new cainteoir::document())
+	document() : doc(new cainteoir::document())
 	{
 	}
 
@@ -70,9 +68,6 @@ struct document : public cainteoir::document_events
 	{
 		return doc->children(toc.selection());
 	}
-
-	rdf::graph tts_metadata;
-	cainteoir::tts::engines tts;
 
 	std::tr1::shared_ptr<const rdf::uri> subject;
 	rdf::graph doc_metadata;

@@ -1,3 +1,16 @@
+#toc row,
+.label {
+	color: alpha(@fg_color, 0.7);
+}
+
+#toc row:selected,
+#toc row:selected:focused {
+	background-image: none;
+	border-width: 0;
+	color: @selected_bg_color;
+	font-weight: bold;
+}
+
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */
@@ -18,22 +31,4 @@ GtkNotebook, #toc {
 
 	-unico-outer-stroke-gradient: none;
 	-unico-outer-stroke-width: 0;
-}
-
-/* Style the toc pane ...
- */
-
-#toc row:selected,
-#toc row:selected:focused {
-	background-image: none;
-	border-width: 0;
-	color: @selected_bg_color;
-	font-weight: bold;
-}
-
-/* Make the metadata label a light grey ...
- */
-
-.label {
-	color: alpha(@fg_color, 0.6);
 }

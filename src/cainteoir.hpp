@@ -34,7 +34,7 @@ class Cainteoir
 public:
 	Cainteoir(const char *filename);
 
-	bool load_document(std::string filename);
+	bool load_document(std::string filename) { return load_document(filename, false); }
 
 	void read();
 	void record();
@@ -55,6 +55,8 @@ protected:
 
 	bool switch_voice_by_language(const std::string &language);
 private:
+	bool load_document(std::string filename, bool from_constructor);
+
 	void updateProgress(double elapsed, double total, double completed);
 	GtkWidget *create_file_chooser_menu();
 

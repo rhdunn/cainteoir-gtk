@@ -358,7 +358,7 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_widget_set_sensitive(recordButton, FALSE);
 	gtk_widget_set_visible(stopButton, FALSE);
 
-	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>());
+	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
 	switch_voice(tts.voice());
 }
 
@@ -513,7 +513,7 @@ bool Cainteoir::on_speaking()
 	return false;
 }
 
-bool Cainteoir::load_document(std::string filename)
+bool Cainteoir::load_document(std::string filename, bool from_constructor)
 {
 	if (speech || filename.empty()) return false;
 
@@ -581,10 +581,13 @@ bool Cainteoir::load_document(std::string filename)
 	}
 	catch (const std::exception & e)
 	{
-		display_error_message(GTK_WINDOW(window),
-			_("Open Document"),
-			_("Unable to open the document"),
-			e.what());
+		if (!from_constructor)
+		{
+			display_error_message(GTK_WINDOW(window),
+				_("Open Document"),
+				_("Unable to open the document"),
+				e.what());
+		}
 	}
 
 	return false;

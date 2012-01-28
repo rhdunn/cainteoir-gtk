@@ -41,20 +41,27 @@ struct toc_entry_data
 	}
 };
 
-struct document : public cainteoir::document_events
+struct document : public cainteoir::document
 {
-	document() : doc(new cainteoir::document())
+	std::vector<toc_entry_data> toc;
+	std::tr1::shared_ptr<const rdf::uri> subject;
+	rdf::graph metadata;
+};
+
+struct document_builder : public cainteoir::document_events
+{
+	document_builder() : doc(new document())
 	{
 	}
 
 	void metadata(const std::tr1::shared_ptr<const rdf::triple> &aStatement)
 	{
-		doc_metadata.push_back(aStatement);
+		doc->metadata.push_back(aStatement);
 	}
 
 	const rdf::uri genid()
 	{
-		return doc_metadata.genid();
+		return doc->metadata.genid();
 	}
 
 	void text(std::tr1::shared_ptr<cainteoir::buffer> aText)
@@ -64,7 +71,7 @@ struct document : public cainteoir::document_events
 
 	void toc_entry(int depth, const rdf::uri &location, const std::string &title)
 	{
-		toc.push_back(toc_entry_data(depth, location, title));
+		doc->toc.push_back(toc_entry_data(depth, location, title));
 	}
 
 	void anchor(const rdf::uri &location, const std::string &mimetype)
@@ -72,17 +79,7 @@ struct document : public cainteoir::document_events
 		doc->add_anchor(location);
 	}
 
-	void clear()
-	{
-		doc->clear();
-		subject.reset();
-		toc.clear();
-	}
-
-	std::vector<toc_entry_data> toc;
-	std::tr1::shared_ptr<const rdf::uri> subject;
-	rdf::graph doc_metadata;
-	std::tr1::shared_ptr<cainteoir::document> doc;
+	std::tr1::shared_ptr<document> doc;
 };
 
 #endif

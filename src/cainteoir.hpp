@@ -82,7 +82,7 @@ private:
 	rdf::graph tts_metadata;
 	cainteoir::tts::engines tts;
 
-	document doc;
+	std::tr1::shared_ptr<document> doc;
 	cainteoir::languages languages;
 	std::tr1::shared_ptr<cainteoir::tts::speech> speech;
 	std::tr1::shared_ptr<cainteoir::audio> out;

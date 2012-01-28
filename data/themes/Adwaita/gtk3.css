@@ -1,3 +1,5 @@
+@define-color borders #a7aba7;
+
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */
@@ -7,21 +9,54 @@ GtkNotebook, #toc {
 }
 
 /* Make the buttons in the navbar appear to be part of one single
- * button, with rounded corners at the ends ...
+ * button, with rounded corners at the ends.
+ *
+ * Styling borrowed from the gnome-themes-standard 3.4 Adwaita
+ * linked buttons css ...
  */
 
 #navbar .button {
-	border-radius: 0;
-	border-image: none;
-	border-style: solid;
-	border-width: 1;
-	border-color: @notebook_border;
+    box-shadow: 1 0 inset @inset_light_color, -1 0 inset @inset_dark_color;
 }
-#navbar .button:nth-child(first) {
-	border-radius: 4 0 0 4;
+
+#navbar .button:first-child {
+    box-shadow: -1 0 inset @inset_dark_color;
 }
-#navbar .button:nth-child(last) {
-	border-radius: 0 4 4 0;
+
+#navbar .button:last-child {
+    box-shadow: 1 0 inset @inset_light_color;
+}
+
+#navbar .button:only-child {
+    box-shadow: none; 
+}
+
+#navbar .button {
+    border-right-width: 0;
+    border-left-width: 0;
+    border-image-width: 3 0 4 0;
+    border-radius: 0;
+}
+
+#navbar .button:first-child {
+    border-right-width: 0;
+    border-image-width: 3 0 4 3;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+#navbar .button:last-child {
+    border-left-width: 0;
+    border-image-width: 3 3 4 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
+#navbar .button:only-child {
+    border-right-width: 1;
+    border-left-width: 1;
+    border-image-width: 3 3 4 3;
+    border-radius: 3;
 }
 
 /* Style the toc pane ...

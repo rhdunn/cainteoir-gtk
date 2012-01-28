@@ -8,11 +8,13 @@ CAINTEOIR_LIBS   = -lcainteoir
 AM_LDFLAGS  = \
 	${CAINTEOIR_LIBS} \
 	${GTK_LIBS} \
+	${SIGCXX_LIBS} \
 	${LTLIBINTL}
 
 AM_CXXFLAGS = \
 	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
+	${SIGCXX_CFLAGS}  \
 	-std=c++0x -DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
 
 ACLOCAL_AMFLAGS = -I m4

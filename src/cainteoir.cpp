@@ -326,12 +326,12 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
-	GtkWidget *toc = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(toc, 300, 0);
-	gtk_box_pack_start(GTK_BOX(toc), doc.toc, TRUE, TRUE, 0);
+	GtkWidget *toc_pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_size_request(toc_pane, 300, 0);
+	gtk_box_pack_start(GTK_BOX(toc_pane), toc, TRUE, TRUE, 0);
 
 	GtkWidget *pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
-	gtk_box_pack_start(GTK_BOX(pane), toc, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), toc_pane, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pane), metadata_view, TRUE, TRUE, 0);
 
 	view = gtk_notebook_new();
@@ -471,7 +471,7 @@ void Cainteoir::stop()
 
 void Cainteoir::on_speak(const char * status)
 {
-	cainteoir::document::range_type selection = doc.selection();
+	cainteoir::document::range_type selection = doc.doc->children(toc.selection());
 	speech = tts.speak(doc.doc, out, selection.first, selection.second);
 
 	gtk_widget_set_visible(readButton, FALSE);
@@ -519,6 +519,7 @@ bool Cainteoir::load_document(std::string filename)
 	gtk_widget_set_sensitive(readButton, FALSE);
 	gtk_widget_set_sensitive(recordButton, FALSE);
 
+	toc.clear();
 	doc.clear();
 	doc_metadata.clear();
 
@@ -536,10 +537,13 @@ bool Cainteoir::load_document(std::string filename)
 			std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 			std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
-			if (doc.toc.empty())
-				gtk_widget_hide(doc.toc);
+			foreach_iter(entry, doc.toc)
+				toc.add(entry->depth, entry->location, entry->title);
+
+			if (toc.empty())
+				gtk_widget_hide(toc);
 			else
-				gtk_widget_show(doc.toc);
+				gtk_widget_show(toc);
 
 			settings("document.filename") = filename;
 			if (!mimetype.empty())

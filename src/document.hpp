@@ -25,6 +25,21 @@
 #include <cainteoir/engines.hpp>
 
 #include "toc.hpp"
+#include <vector>
+
+struct toc_entry_data
+{
+	int depth;
+	rdf::uri location;
+	std::string title;
+
+	toc_entry_data(int aDepth, const rdf::uri &aLocation, const std::string &aTitle)
+		: depth(aDepth)
+		, location(aLocation)
+		, title(aTitle)
+	{
+	}
+};
 
 struct document : public cainteoir::document_events
 {
@@ -49,7 +64,7 @@ struct document : public cainteoir::document_events
 
 	void toc_entry(int depth, const rdf::uri &location, const std::string &title)
 	{
-		toc.add(depth, location, title);
+		toc.push_back(toc_entry_data(depth, location, title));
 	}
 
 	void anchor(const rdf::uri &location, const std::string &mimetype)
@@ -64,16 +79,10 @@ struct document : public cainteoir::document_events
 		toc.clear();
 	}
 
-	cainteoir::document::range_type selection() const
-	{
-		return doc->children(toc.selection());
-	}
-
+	std::vector<toc_entry_data> toc;
 	std::tr1::shared_ptr<const rdf::uri> subject;
 	rdf::graph doc_metadata;
 	std::tr1::shared_ptr<cainteoir::document> doc;
-
-	TocPane toc;
 };
 
 #endif

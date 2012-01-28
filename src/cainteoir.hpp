@@ -59,6 +59,7 @@ private:
 	GtkWidget *create_file_chooser_menu();
 
 	TimeBar timebar;
+	TocPane toc;
 
 	GtkWidget *window;
 	GtkWidget *view;

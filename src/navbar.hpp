@@ -1,6 +1,6 @@
-/* Gtkmm 2 and 3 compatibility helpers.
+/* Navigation Bar
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -18,11 +18,25 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
-#define CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
+#ifndef CAINTEOIRGTK_SRC_NAVBAR_HPP
+#define CAINTEOIRGTK_SRC_NAVBAR_HPP
 
-#if !GTK_CHECK_VERSION(3, 4, 0)
-void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
-#endif
+class NavigationBar
+{
+public:
+	NavigationBar();
+
+	operator GtkWidget *() { return layout; }
+
+	GtkWidget *add_paged_button(const char *label, GtkNotebook *view, int page);
+
+	GtkWidget *get_active_button() const;
+
+	bool set_active_button(GtkWidget *button);
+private:
+	GtkWidget *layout;
+	GtkWidget *active_button;
+	bool setting_active_button;
+};
 
 #endif

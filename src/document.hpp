@@ -25,57 +25,61 @@
 #include <cainteoir/engines.hpp>
 
 #include "toc.hpp"
+#include <vector>
 
-struct document : public cainteoir::document_events
+struct toc_entry_data
 {
-	document()
-		: tts(m_metadata, cainteoir::text_support)
-		, m_doc(new cainteoir::document())
+	int depth;
+	rdf::uri location;
+	std::string title;
+
+	toc_entry_data(int aDepth, const rdf::uri &aLocation, const std::string &aTitle)
+		: depth(aDepth)
+		, location(aLocation)
+		, title(aTitle)
+	{
+	}
+};
+
+struct document : public cainteoir::document
+{
+	std::vector<toc_entry_data> toc;
+	std::tr1::shared_ptr<const rdf::uri> subject;
+	rdf::graph metadata;
+};
+
+struct document_builder : public cainteoir::document_events
+{
+	document_builder() : doc(new document())
 	{
 	}
 
 	void metadata(const std::tr1::shared_ptr<const rdf::triple> &aStatement)
 	{
-		m_metadata.push_back(aStatement);
+		doc->metadata.push_back(aStatement);
 	}
 
 	const rdf::uri genid()
 	{
-		return m_metadata.genid();
+		return doc->metadata.genid();
 	}
 
 	void text(std::tr1::shared_ptr<cainteoir::buffer> aText)
 	{
-		m_doc->add(aText);
+		doc->add(aText);
 	}
 
 	void toc_entry(int depth, const rdf::uri &location, const std::string &title)
 	{
-		toc.add(depth, location, title);
+		doc->toc.push_back(toc_entry_data(depth, location, title));
 	}
 
-	void anchor(const rdf::uri &location)
+	void anchor(const rdf::uri &location, const std::string &mimetype)
 	{
-		m_doc->add_anchor(location);
+		doc->add_anchor(location);
 	}
 
-	void clear()
-	{
-		m_doc->clear();
-		subject.reset();
-		toc.clear();
-	}
-
-	cainteoir::document::range_type selection() const
-	{
-		return m_doc->children(toc.selection());
-	}
-
-	std::tr1::shared_ptr<const rdf::uri> subject;
-	rdf::graph m_metadata;
-	cainteoir::tts::engines tts;
-	std::tr1::shared_ptr<cainteoir::document> m_doc;
-	TocPane toc;
+	std::tr1::shared_ptr<document> doc;
 };
 
 #endif

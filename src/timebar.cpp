@@ -1,6 +1,6 @@
 /* Time Bar
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -19,7 +19,8 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
+#include <math.h>
 
 #include "timebar.hpp"
 #include "gtk-compatibility.hpp"
@@ -40,23 +41,25 @@ static void format_time(char *s, int n, double seconds)
 TimeBar::TimeBar()
 {
 	progress = gtk_progress_bar_new();
-	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), FALSE);
+	gtk_widget_set_name(progress, "timebar");
 
 	elapsedTime = gtk_label_new("00:00:00.0");
 	totalTime   = gtk_label_new("00:00:00.0");
 
-	GtkWidget *hlayout = gtk_hbox_new(FALSE, 4);
+	GtkWidget *hlayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	gtk_box_pack_start(GTK_BOX(hlayout), elapsedTime, FALSE, FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(hlayout), progress, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hlayout), totalTime, FALSE, FALSE, 4);
 
-	layout = gtk_vbox_new(TRUE, 0);
+	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(layout), hlayout, FALSE, FALSE, 0);
+
+	gtk_widget_set_valign(layout, GTK_ALIGN_CENTER);
 }
 
 void TimeBar::update(double elapsed, double total, double completed)
 {
-	char percentage[20];
 	char elapsed_time[80];
 	char total_time[80];
 
@@ -66,15 +69,10 @@ void TimeBar::update(double elapsed, double total, double completed)
 		return;
 	}
 
-	sprintf(percentage, "%0.2f%%", completed);
 	format_time(elapsed_time, 80, elapsed);
 	format_time(total_time, 80, total);
 
-	// Restrict fraction to 0.5% increments:
-	double fraction = long(completed * 2.0) / 200.0;
-
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), percentage);
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), completed / 100.0);
 
 	gtk_label_set_text(GTK_LABEL(elapsedTime), elapsed_time);
 	gtk_label_set_text(GTK_LABEL(totalTime), total_time);

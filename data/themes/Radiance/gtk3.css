@@ -1,0 +1,64 @@
+#toc row,
+.label {
+	color: alpha(@fg_color, 0.7);
+}
+
+#toc row:selected,
+#toc row:selected:focused {
+	background-image: none;
+	border-width: 0;
+	color: @selected_bg_color;
+	font-weight: bold;
+}
+
+/* The toc pane is coloured white by default, with the notebook
+ * background grey, so make these both white ...
+ */
+
+GtkNotebook, #toc {
+	background-color: white;
+}
+
+/* Make the buttons in the navbar appear to be part of one single
+ * button, with rounded corners at the ends.
+ */
+
+#navbar .button {
+	-unico-inner-stroke-width: 0;
+	-unico-outer-stroke-width: 0;
+	border-right-width: 1;
+	border-left-width: 0;
+	border-radius: 0;
+}
+
+#navbar .button:first-child {
+	border-left-width: 1;
+	border-bottom-left-radius: 3;
+	border-top-left-radius: 3;
+}
+
+#navbar .button:last-child {
+	border-right-width: 1;
+	border-bottom-right-radius: 3;
+	border-top-right-radius: 3;
+}
+
+#navbar .button:only-child {
+	border-right-width: 1;
+	border-left-width: 1;
+	border-radius: 3;
+}
+
+/* Workaround for Ubuntu bug 888901 ...
+ */
+
+.progressbar,
+.progressbar row,
+.trough,
+.trough row {
+	-unico-inner-stroke-gradient: none;
+	-unico-inner-stroke-width: 0;
+
+	-unico-outer-stroke-gradient: none;
+	-unico-outer-stroke-width: 0;
+}

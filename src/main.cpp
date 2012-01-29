@@ -1,6 +1,6 @@
 /* Cainteoir Gtk Application.
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -19,10 +19,30 @@
  */
 
 #include <config.h>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
+#include <sigc++/signal.h>
 #include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
+
+static void load_gtk3_theme(const std::string &theme)
+{
+	std::string theme_path = std::string(DATADIR "/" PACKAGE "/themes/") + theme;
+
+	try
+	{
+		cainteoir::mmap_buffer theme(theme_path.c_str());
+
+		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
+
+		GtkCssProvider *provider = gtk_css_provider_new();
+		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), NULL);
+	}
+	catch (const std::exception &e)
+	{
+	}
+}
 
 int main(int argc, char ** argv)
 {
@@ -32,11 +52,19 @@ int main(int argc, char ** argv)
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 
-	Gtk::Main app(argc, argv);
+	gtk_init(&argc, &argv);
+
+	char *theme_name = NULL;
+	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, NULL);
+
+	load_gtk3_theme("gtk3-common.css");
+	load_gtk3_theme(std::string(theme_name) + "/gtk3.css");
+
+	g_free(theme_name);
 
 	Cainteoir window(argc > 1 ? argv[1] : NULL);
-	Gtk::Main::run(window);
 
+	gtk_main();
 	cainteoir::cleanup();
 	return 0;
 }

@@ -1,6 +1,6 @@
 /* Table of Content Side Pane
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -25,19 +25,6 @@
 
 namespace rdf = cainteoir::rdf;
 
-class TocModel : public Gtk::TreeModelColumnRecord
-{
-public:
-	TocModel()
-	{
-		add(title);
-		add(location);
-	}
-
-	Gtk::TreeModelColumn<Glib::ustring> title;
-	Gtk::TreeModelColumn<rdf::uri> location;
-};
-
 typedef std::pair<const rdf::uri, const rdf::uri> TocSelection;
 
 class TocPane
@@ -47,6 +34,8 @@ public:
 
 	operator GtkWidget *() { return layout; }
 
+	bool empty() const;
+
 	void clear();
 
 	void add(int depth, const rdf::uri &location, const std::string &title);
@@ -54,9 +43,8 @@ public:
 	TocSelection selection() const;
 private:
 	GtkWidget *layout;
-	Gtk::TreeView view;
-	TocModel model;
-	Glib::RefPtr<Gtk::ListStore> data;
+	GtkTreeStore *store;
+	GtkTreeSelection *toc_selection;
 };
 
 #endif

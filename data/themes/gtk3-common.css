@@ -1,0 +1,18 @@
+/* Give the notebook a border at the top and bottom ...
+ */
+
+GtkNotebook {
+	border-style: solid;
+	border-width: 1 0 1 0;
+}
+
+/* Emphasise the active navbar button ...
+ */
+
+#navbar .button {
+	font-weight: normal;
+}
+
+#navbar .button:active {
+	font-weight: bold;
+}

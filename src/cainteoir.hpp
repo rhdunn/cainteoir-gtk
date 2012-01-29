@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -28,52 +28,45 @@
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
-#include "gtk-compatibility.hpp"
+#include "navbar.hpp"
 
-class Cainteoir : public Gtk::Window
+class Cainteoir
 {
 public:
 	Cainteoir(const char *filename);
 
-	bool load_document(std::string filename);
-protected:
-	bool on_window_state_changed(GdkEventWindowState *event);
-	bool on_delete(GdkEventAny *event);
+	bool load_document(std::string filename) { return load_document(filename, false); }
 
-	void on_open_document();
-	void on_recent_files_dialog();
-	void on_recent_file(Gtk::RecentChooserMenu * recent);
-	void on_quit();
-	void on_read();
-	void on_record();
-	void on_stop();
+	void read();
+	void record();
+	void stop();
 
-	void on_speak(const char * state);
+	void save_settings();
 	bool on_speaking();
 
-	enum view_t
-	{
-		metadata,
-		voice_selection,
-		n_views,
-	};
+	operator GtkWindow *() const { return GTK_WINDOW(window); }
+
+	inline GtkRecentFilter *recent_filter() const { return recentFilter; }
+protected:
+	void on_open_document();
+
+	void on_speak(const char * state);
 
 	bool switch_voice(const rdf::uri &voice);
 
 	bool switch_voice_by_language(const std::string &language);
-
-	void switch_view(int aView);
 private:
+	bool load_document(std::string filename, bool from_constructor);
+
 	void updateProgress(double elapsed, double total, double completed);
-	Gtk::Menu *create_file_chooser_menu();
+	GtkWidget *create_file_chooser_menu();
 
-	Gtk::VBox box;
-	GtkWidget *mediabar;
 	TimeBar timebar;
+	TocPane toc;
+	NavigationBar navbar;
 
-	GtkWidget *pane;
+	GtkWidget *window;
 	GtkWidget *view;
-	int views[n_views];
 
 	MetadataView doc_metadata;
 	MetadataView voice_metadata;
@@ -82,24 +75,18 @@ private:
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 
-	Glib::RefPtr<Gtk::UIManager> uiManager;
-	Glib::RefPtr<Gtk::ActionGroup> actions;
+	GtkRecentManager *recentManager;
+	GtkRecentFilter  *recentFilter;
 
-	GtkObjectRef<Gtk::RecentFilter> recentFilter;
-	Glib::RefPtr<Gtk::RecentManager> recentManager;
-	Glib::RefPtr<Gtk::Action> recentAction;
+	GtkWidget *readButton;
+	GtkWidget *stopButton;
+	GtkWidget *recordButton;
+	GtkWidget *openButton;
 
-	Gtk::ToolButton readButton;
-	Gtk::ToolButton stopButton;
-	Gtk::ToolButton recordButton;
-	Gtk::MenuToolButton openButton;
+	rdf::graph tts_metadata;
+	cainteoir::tts::engines tts;
 
-	Glib::RefPtr<Gtk::Action> readAction;
-	Glib::RefPtr<Gtk::Action> stopAction;
-	Glib::RefPtr<Gtk::Action> recordAction;
-	Glib::RefPtr<Gtk::Action> openAction;
-
-	document doc;
+	std::tr1::shared_ptr<document> doc;
 	cainteoir::languages languages;
 	std::tr1::shared_ptr<cainteoir::tts::speech> speech;
 	std::tr1::shared_ptr<cainteoir::audio> out;

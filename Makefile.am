@@ -8,11 +8,13 @@ CAINTEOIR_LIBS   = -lcainteoir
 AM_LDFLAGS  = \
 	${CAINTEOIR_LIBS} \
 	${GTK_LIBS} \
+	${SIGCXX_LIBS} \
 	${LTLIBINTL}
 
 AM_CXXFLAGS = \
 	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
+	${SIGCXX_CFLAGS}  \
 	-std=c++0x -DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
 
 ACLOCAL_AMFLAGS = -I m4
@@ -89,6 +91,20 @@ dist-hook: ChangeLog
 
 EXTRA_DIST += ChangeLog
 
+############################# themes ##########################################
+
+themedir = ${datadir}/cainteoir-gtk/themes
+theme_DATA = data/themes/gtk3-common.css
+
+AdwaitaThemedir = ${themedir}/Adwaita
+AdwaitaTheme_DATA = data/themes/Adwaita/gtk3.css
+
+AmbianceThemedir = ${themedir}/Ambiance
+AmbianceTheme_DATA = data/themes/Ambiance/gtk3.css
+
+RadianceThemedir = ${themedir}/Radiance
+RadianceTheme_DATA = data/themes/Radiance/gtk3.css
+
 ############################# applications ####################################
 
 desktopdir = $(datadir)/applications
@@ -102,12 +118,16 @@ src_cainteoir_gtk_SOURCES = \
 	src/toc.hpp \
 	src/toc.cpp \
 	src/document.hpp \
+	src/gtk-compatibility.hpp \
+	src/gtk-compatibility.cpp \
 	src/voice_selection.hpp \
 	src/voice_selection.cpp \
 	src/metadata.hpp \
 	src/metadata.cpp \
 	src/timebar.hpp \
 	src/timebar.cpp \
+	src/navbar.hpp \
+	src/navbar.cpp \
 	src/cainteoir.hpp \
 	src/cainteoir.cpp \
 	src/main.cpp

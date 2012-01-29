@@ -25,7 +25,6 @@
 
 #include "cainteoir.hpp"
 
-#if GTK_CHECK_VERSION(3, 0, 0)
 static void load_gtk3_theme(const std::string &theme)
 {
 	std::string theme_path = std::string(DATADIR "/" PACKAGE "/themes/") + theme;
@@ -44,7 +43,6 @@ static void load_gtk3_theme(const std::string &theme)
 	{
 	}
 }
-#endif
 
 int main(int argc, char ** argv)
 {
@@ -56,7 +54,6 @@ int main(int argc, char ** argv)
 
 	gtk_init(&argc, &argv);
 
-#if GTK_CHECK_VERSION(3, 0, 0)
 	char *theme_name = NULL;
 	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, NULL);
 
@@ -64,7 +61,6 @@ int main(int argc, char ** argv)
 	load_gtk3_theme(std::string(theme_name) + "/gtk3.css");
 
 	g_free(theme_name);
-#endif
 
 	Cainteoir window(argc > 1 ? argv[1] : NULL);
 

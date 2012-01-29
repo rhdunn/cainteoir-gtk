@@ -1,5 +1,13 @@
 
 -------------------------------------------------------------------------------
+VERSION 0.3 -- Sunday January 29th 2012 [Nov 2012]
+
+  *  redesigned the UI -- make it consistent with the GNOME 3 application designs.
+  *  don't show the "unable to open document" dialog when launching the program.
+  *  keep the previous document if opening a document fails.
+  *  require gtk+ >= 3.0.
+
+-------------------------------------------------------------------------------
 VERSION 0.2 -- Tuesday November 22nd 2011 [Nov 2011]
 
 new functionality:

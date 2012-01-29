@@ -19,6 +19,36 @@ GtkNotebook, #toc {
 	background-color: white;
 }
 
+/* Make the buttons in the navbar appear to be part of one single
+ * button, with rounded corners at the ends.
+ */
+
+#navbar .button {
+	-unico-inner-stroke-width: 0;
+	-unico-outer-stroke-width: 0;
+	border-right-width: 1;
+	border-left-width: 0;
+	border-radius: 0;
+}
+
+#navbar .button:first-child {
+	border-left-width: 1;
+	border-bottom-left-radius: 3;
+	border-top-left-radius: 3;
+}
+
+#navbar .button:last-child {
+	border-right-width: 1;
+	border-bottom-right-radius: 3;
+	border-top-right-radius: 3;
+}
+
+#navbar .button:only-child {
+	border-right-width: 1;
+	border-left-width: 1;
+	border-radius: 3;
+}
+
 /* Workaround for Ubuntu bug 888901 ...
  */
 

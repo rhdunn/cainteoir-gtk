@@ -147,29 +147,6 @@ static GtkWidget *create_padded_container(GtkWidget *child, int padding_width, i
 	return top_bottom;
 }
 
-struct NavButtonData
-{
-	GtkWidget *view;
-	int page;
-};
-
-static void on_navbutton_clicked(GtkTreeViewColumn *column, void *data)
-{
-	NavButtonData *navbutton = (NavButtonData *)data;
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(navbutton->view), navbutton->page);
-}
-
-static GtkWidget *create_navbutton(const char *label, GtkWidget *view, int page)
-{
-	NavButtonData *data = g_slice_new(NavButtonData);
-	data->view = view;
-	data->page = page;
-
-	GtkWidget *navbutton = gtk_button_new_with_label(label);
-	g_signal_connect(navbutton, "clicked", G_CALLBACK(on_navbutton_clicked), data);
-	return navbutton;
-}
-
 typedef void (Cainteoir::*callback_function)();
 
 struct CallbackData
@@ -293,9 +270,6 @@ Cainteoir::Cainteoir(const char *filename)
 	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
 	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
 
-	GtkWidget *navbar = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_widget_set_name(navbar, "navbar");
-
 	GtkWidget *topbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(topbar, 0, 50);
 	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
@@ -339,10 +313,10 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
 
 	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), NULL);
-	gtk_box_pack_start(GTK_BOX(navbar), create_navbutton(_("Document"), view, doc_page), FALSE, FALSE, 0);
+	navbar.add_paged_button(_("Document"), GTK_NOTEBOOK(view), doc_page);
 
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
-	gtk_box_pack_start(GTK_BOX(navbar), create_navbutton(_("Voice"), view, voice_page), FALSE, FALSE, 0);
+	navbar.add_paged_button(_("Voice"), GTK_NOTEBOOK(view), voice_page);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);

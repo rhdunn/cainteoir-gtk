@@ -126,6 +126,8 @@ src_cainteoir_gtk_SOURCES = \
 	src/metadata.cpp \
 	src/timebar.hpp \
 	src/timebar.cpp \
+	src/navbar.hpp \
+	src/navbar.cpp \
 	src/cainteoir.hpp \
 	src/cainteoir.cpp \
 	src/main.cpp

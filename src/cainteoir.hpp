@@ -28,6 +28,7 @@
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
+#include "navbar.hpp"
 
 class Cainteoir
 {
@@ -62,6 +63,7 @@ private:
 
 	TimeBar timebar;
 	TocPane toc;
+	NavigationBar navbar;
 
 	GtkWidget *window;
 	GtkWidget *view;

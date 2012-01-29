@@ -313,7 +313,7 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
 
 	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), NULL);
-	navbar.add_paged_button(_("Document"), GTK_NOTEBOOK(view), doc_page);
+	navbar.set_active_button(navbar.add_paged_button(_("Document"), GTK_NOTEBOOK(view), doc_page));
 
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
 	navbar.add_paged_button(_("Voice"), GTK_NOTEBOOK(view), voice_page);

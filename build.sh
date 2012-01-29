@@ -19,6 +19,8 @@ builddeb() {
 	DIST=$1
 	shift
 	doclean
+	cp debian/changelog{,.downstream}
+	sed -i -e "s/~unstable\([0-9]*\)) unstable;/~${DIST}\1) ${DIST};/" debian/changelog
 	sed -i -e "s/) unstable;/~${DIST}1) ${DIST};/" debian/changelog
 	if [[ -e debian/$DIST.patch ]] ; then
 		patch -f -p1 -i debian/$DIST.patch || touch builddeb.failed
@@ -34,7 +36,7 @@ builddeb() {
 	if [[ -e debian/$DIST.patch ]] ; then
 		patch -Rf -p1 -i debian/$DIST.patch || touch builddeb.failed
 	fi
-	sed -i -e "s/~${DIST}1) ${DIST};/) unstable;/" debian/changelog
+	mv debian/changelog{.downstream,}
 	if [[ -e builddeb.failed ]] ; then
 		rm builddeb.failed
 		exit 1
@@ -65,10 +67,11 @@ doppa() {
 	# |dput| command does not.
 	#
 	# In addition to this, it is advised that a version identifier is used for ppa
-	# files, so a "~<distro-name>1" is appended.
+	# files, so a "~<distro-name>N" is appended.
 	DIST=$1
+	VER=`cat debian/changelog | grep ") unstable" | head -n 1 | sed -e "s/.*(//" -e "s/~unstable\([0-9]*\)) unstable;.*/~${DIST}\1/" -e "s/) unstable;.*/~${DIST}1/"`
 	builddeb $DIST -S -sa || exit 1
-	dput ppa:msclrhd-gmail/cainteoir ../${PACKAGE}_*~${DIST}1_source.changes
+	dput ppa:msclrhd-gmail/cainteoir ../${PACKAGE}_${VER}_source.changes
 }
 
 doallppa() {

@@ -1,3 +1,9 @@
+cainteoir-gtk (0.3~unstable0) unstable; urgency=low
+ 
+  * Initial upstream release.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Sun, 29 Jan 2012 21:56:00 +0000
+
 cainteoir-gtk (0.2-1) unstable; urgency=low
  
   * fix a buffer overflow when setting the percentage complete to a

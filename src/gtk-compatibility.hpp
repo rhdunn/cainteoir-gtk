@@ -21,7 +21,7 @@
 #ifndef CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
 #define CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
 
-#if !GTK_CHECK_VERSION(3, 4, 0)
+#if !GTK_CHECK_VERSION(3, 3, 0)
 void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
 #endif
 

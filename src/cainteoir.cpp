@@ -272,8 +272,11 @@ Cainteoir::Cainteoir(const char *filename)
 	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
 	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
 
+	GtkWidget *resizebar = gtk_menu_bar_new();
+	gtk_widget_set_size_request(resizebar, 0, 10);
+
 	GtkWidget *topbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(topbar, 0, 50);
+	gtk_widget_set_size_request(topbar, 0, 40);
 	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
 	gtk_box_pack_start(GTK_BOX(topbar), gtk_label_new(""), TRUE, TRUE, 0); // stretchy
 	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton), FALSE, FALSE, 0);
@@ -322,6 +325,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);
+	gtk_box_pack_start(GTK_BOX(box), resizebar, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box), topbar, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box), view, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box), bottombar, FALSE, FALSE, 0);

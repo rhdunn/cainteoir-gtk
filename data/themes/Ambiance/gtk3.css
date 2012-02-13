@@ -23,7 +23,7 @@ GtkNotebook, #toc {
  * button, with rounded corners at the ends.
  */
 
-#navbar .button {
+.linked .button {
 	-unico-inner-stroke-width: 0;
 	-unico-outer-stroke-width: 0;
 	border-right-width: 1;
@@ -31,19 +31,19 @@ GtkNotebook, #toc {
 	border-radius: 0;
 }
 
-#navbar .button:first-child {
+.linked .button:first-child {
 	border-left-width: 1;
 	border-bottom-left-radius: 3;
 	border-top-left-radius: 3;
 }
 
-#navbar .button:last-child {
+.linked .button:last-child {
 	border-right-width: 1;
 	border-bottom-right-radius: 3;
 	border-top-right-radius: 3;
 }
 
-#navbar .button:only-child {
+.linked .button:only-child {
 	border-right-width: 1;
 	border-left-width: 1;
 	border-radius: 3;

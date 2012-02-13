@@ -44,6 +44,9 @@ NavigationBar::NavigationBar()
 {
 	layout = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_set_name(layout, "navbar");
+
+	GtkStyleContext *context = gtk_widget_get_style_context(layout);
+	gtk_style_context_add_class(context, "linked");
 }
 
 GtkWidget *NavigationBar::add_paged_button(const char *label, GtkNotebook *view, int page)

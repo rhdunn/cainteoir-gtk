@@ -26,6 +26,8 @@
 #include "cainteoir.hpp"
 #include "gtk-compatibility.hpp"
 
+#include <stdexcept>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -504,54 +506,53 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 			filename.erase(0, 7);
 
 		document_builder newdoc;
-		if (cainteoir::parseDocument(filename.c_str(), newdoc, newdoc.doc->metadata))
-		{
-			doc = newdoc.doc;
+		if (!cainteoir::parseDocument(filename.c_str(), newdoc, newdoc.doc->metadata))
+			throw std::runtime_error(_("Document type is not supported"));
+		doc = newdoc.doc;
 
-			toc.clear();
-			doc_metadata.clear();
+		toc.clear();
+		doc_metadata.clear();
 
-			doc->subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
-			gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
+		doc->subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
+		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
-			rql::results data = rql::select(doc->metadata, rql::matches(rql::subject, *doc->subject));
-			std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
-			std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
+		rql::results data = rql::select(doc->metadata, rql::matches(rql::subject, *doc->subject));
+		std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
+		std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
-			foreach_iter(entry, doc->toc)
-				toc.add(entry->depth, entry->location, entry->title);
+		foreach_iter(entry, doc->toc)
+			toc.add(entry->depth, entry->location, entry->title);
 
-			if (toc.empty())
-				gtk_widget_hide(toc);
-			else
-				gtk_widget_show(toc);
+		if (toc.empty())
+			gtk_widget_hide(toc);
+		else
+			gtk_widget_show(toc);
 
-			settings("document.filename") = filename;
-			if (!mimetype.empty())
-				settings("document.mimetype") = mimetype;
-			settings.save();
+		settings("document.filename") = filename;
+		if (!mimetype.empty())
+			settings("document.mimetype") = mimetype;
+		settings.save();
 
-			doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("title"));
-			doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("creator"));
-			doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("publisher"));
-			doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("description"));
-			doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("language"));
+		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("title"));
+		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("creator"));
+		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("publisher"));
+		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("description"));
+		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("language"));
 
-			std::ostringstream length;
-			length << (doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
+		std::ostringstream length;
+		length << (doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
 
-			doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
+		doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
-			timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+		timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
-			std::string lang = rql::select_value<std::string>(doc->metadata,
-				rql::both(rql::matches(rql::subject, *doc->subject),
-				          rql::matches(rql::predicate, rdf::dc("language"))));
-			if (lang.empty())
-				lang = "en";
+		std::string lang = rql::select_value<std::string>(doc->metadata,
+			rql::both(rql::matches(rql::subject, *doc->subject),
+			          rql::matches(rql::predicate, rdf::dc("language"))));
+		if (lang.empty())
+			lang = "en";
 
-			switch_voice_by_language(lang);
-		}
+		switch_voice_by_language(lang);
 	}
 	catch (const std::exception & e)
 	{

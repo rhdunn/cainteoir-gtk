@@ -43,7 +43,7 @@ static std::string get_user_file(const char * filename)
 	return root + "/" + std::string(filename);
 }
 
-static double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parameter> aRate)
+static double estimate_time(size_t text_length, std::shared_ptr<tts::parameter> aRate)
 {
 	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
 }
@@ -513,7 +513,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		toc.clear();
 		doc_metadata.clear();
 
-		doc->subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
+		doc->subject = std::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
 		rql::results data = rql::select(doc->metadata, rql::matches(rql::subject, *doc->subject));

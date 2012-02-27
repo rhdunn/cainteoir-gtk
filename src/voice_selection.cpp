@@ -230,7 +230,7 @@ void VoiceSelectionView::show(const rdf::uri &voice)
 {
 	foreach_iter (item, parameters)
 	{
-		std::tr1::shared_ptr<tts::parameter> parameter = mEngines->parameter(item->type);
+		std::shared_ptr<tts::parameter> parameter = mEngines->parameter(item->type);
 
 		gtk_range_set_range(GTK_RANGE(item->param), parameter->minimum(), parameter->maximum());
 		gtk_range_set_value(GTK_RANGE(item->param), parameter->value());

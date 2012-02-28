@@ -272,17 +272,22 @@ Cainteoir::Cainteoir(const char *filename)
 	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
 	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
 
-	GtkWidget *stretchy = gtk_menu_bar_new();
-	gtk_widget_set_size_request(stretchy, 0, 50);
+	GtkWidget *topbar = gtk_toolbar_new();
+	gtk_widget_set_size_request(topbar, 0, 40);
+	gtk_style_context_add_class(gtk_widget_get_style_context(topbar), GTK_STYLE_CLASS_MENUBAR);
 
-	GtkWidget *topbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(topbar, 0, 50);
-	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
-	gtk_box_pack_start(GTK_BOX(topbar), stretchy, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton), FALSE, FALSE, 0);
+	GtkToolItem *navbar_item = gtk_tool_item_new();
+	gtk_container_add(GTK_CONTAINER(navbar_item), navbar);
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(navbar_item));
+
+	GtkToolItem *expander = gtk_tool_item_new();
+	gtk_tool_item_set_expand(GTK_TOOL_ITEM(expander), TRUE);
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(expander));
+
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(openButton));
 
 	GtkWidget *bottombar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(bottombar, 0, 50);
+	gtk_widget_set_size_request(bottombar, 0, 40);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton), FALSE, FALSE, 0);

@@ -1,6 +1,6 @@
 /* Voice Selection View
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -177,7 +177,7 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 			if (rql::object(*statement) == rdf::tts("male"))
 				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
 			else if (rql::object(*statement) == rdf::tts("female"))
-				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
+				gtk_tree_store_set(store, &row, VLC_GENDER, _("female"), -1);
 		}
 		else if (rql::predicate(*statement) == rdf::tts("age"))
 			gtk_tree_store_set(store, &row, VLC_AGE, rql::value(*statement).c_str(), -1);

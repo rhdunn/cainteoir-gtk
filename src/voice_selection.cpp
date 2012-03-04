@@ -32,7 +32,6 @@ enum VoiceListColumns
 	VLC_ENGINE,
 	VLC_LANGUAGE,
 	VLC_GENDER,
-	VLC_AGE,
 	VLC_FREQUENCY,
 	VLC_CHANNELS,
 	VLC_URI,
@@ -44,7 +43,6 @@ const char * columns[VLC_COUNT] = {
 	_("Engine"),
 	_("Language"),
 	_("Gender"),
-	_("Age"),
 	_("Frequency (Hz)"),
 	_("Channels"),
 };
@@ -179,8 +177,6 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 			else if (rql::object(*statement) == rdf::tts("female"))
 				gtk_tree_store_set(store, &row, VLC_GENDER, _("female"), -1);
 		}
-		else if (rql::predicate(*statement) == rdf::tts("age"))
-			gtk_tree_store_set(store, &row, VLC_AGE, rql::value(*statement).c_str(), -1);
 		else if (rql::predicate(*statement) == rdf::tts("frequency"))
 			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(*statement).c_str(), -1);
 		else if (rql::predicate(*statement) == rdf::tts("channels"))

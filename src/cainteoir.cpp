@@ -628,9 +628,9 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	return false;
 }
 
-bool Cainteoir::switch_voice_by_language(const std::string &language)
+bool Cainteoir::switch_voice_by_language(const std::string &lang)
 {
-	std::string language2 = language.substr(0, language.find('-'));
+	std::string language = cainteoir::language::make_lang(lang).lang;
 
 	// Does the current voice support this language? ...
 
@@ -638,11 +638,8 @@ bool Cainteoir::switch_voice_by_language(const std::string &language)
 		rql::both(rql::matches(rql::subject, tts.voice()),
 		          rql::matches(rql::predicate, rdf::dc("language"))));
 
-	if (current == language || current == language2)
-		return true;
-
-	current = current.substr(0, current.find('-'));
-	if (current == language || current == language2)
+	current = cainteoir::language::make_lang(current).lang;
+	if (current == language)
 		return true;
 
 	// The current voice does not support this language, so search the available voices ...
@@ -660,15 +657,8 @@ bool Cainteoir::switch_voice_by_language(const std::string &language)
 				rql::both(rql::matches(rql::subject, *uri),
 				          rql::matches(rql::predicate, rdf::dc("language"))));
 
-			if ((lang == language || lang == language2) && switch_voice(*uri))
-				return true;
-
-			// Handle specific voices against generic document languages, e.g.
-			// eSpeak has 'pt-pt' and 'pt-br' voices, but no 'pt' voice and the
-			// Project Guttenberg ebooks report portuguese as 'pt'.
-
-			lang = lang.substr(0, lang.find('-'));
-			if ((lang == language || lang == language2) && switch_voice(*uri))
+			lang = cainteoir::language::make_lang(lang).lang;
+			if (lang == language && switch_voice(*uri))
 				return true;
 		}
 	}

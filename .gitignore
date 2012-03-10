@@ -12,6 +12,7 @@
 # build output:
 
 src/cainteoir-gtk
+po/*.gmo
 
 # autotools output:
 

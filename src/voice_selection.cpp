@@ -98,7 +98,7 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 		if (i == VLC_URI) continue;
 
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(columns[i], renderer, "text", i, NULL);
+		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(gettext(columns[i]), renderer, "text", i, NULL);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 		gtk_tree_view_column_set_sort_column_id(column, i);
 		g_signal_connect(column, "clicked", G_CALLBACK(on_voice_list_column_clicked), &settings);

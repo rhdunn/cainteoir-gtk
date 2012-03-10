@@ -21,10 +21,10 @@
 #include <config.h>
 #include <gtk/gtk.h>
 #include <sigc++/signal.h>
-#include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
 #include "gtk-compatibility.hpp"
+#include "i18n.h"
 
 #include <stdexcept>
 
@@ -200,7 +200,7 @@ static void on_recent_files_dialog(GtkMenuItem *item, void *data)
 {
 	Cainteoir &window = *(Cainteoir *)data;
 
-	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), window,
+	GtkWidget *dialog = gtk_recent_chooser_dialog_new(i18n("Recent Documents"), window,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
 		NULL);
@@ -241,9 +241,9 @@ static gboolean on_timer_speaking(Cainteoir *window)
 Cainteoir::Cainteoir(const char *filename)
 	: tts(tts_metadata, cainteoir::text_support)
 	, doc(new document())
-	, doc_metadata(languages, _("<b>Document</b>"), 5)
-	, voice_metadata(languages, _("<b>Voice</b>"), 2)
-	, engine_metadata(languages, _("<b>Engine</b>"), 2)
+	, doc_metadata(languages, i18n("<b>Document</b>"), 5)
+	, voice_metadata(languages, i18n("<b>Voice</b>"), 2)
+	, engine_metadata(languages, i18n("<b>Engine</b>"), 2)
 	, languages("en")
 	, settings(get_user_file("settings.dat"))
 {
@@ -251,7 +251,7 @@ Cainteoir::Cainteoir(const char *filename)
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window), _("Cainteoir Text-to-Speech"));
+	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech"));
 	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(window), TRUE);
 
 	gtk_widget_set_size_request(window, 500, 300);
@@ -293,18 +293,18 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), timebar, TRUE, TRUE, 0);
 
-	doc_metadata.create_entry(rdf::dc("title"), _("Title"), 0);
-	doc_metadata.create_entry(rdf::dc("creator"), _("Author"), 1);
-	doc_metadata.create_entry(rdf::dc("publisher"), _("Publisher"), 2);
-	doc_metadata.create_entry(rdf::dc("description"), _("Description"), 3);
-	doc_metadata.create_entry(rdf::dc("language"), _("Language"), 4);
-	doc_metadata.create_entry(rdf::tts("length"), _("Length"), 5);
+	doc_metadata.create_entry(rdf::dc("title"), i18n("Title"), 0);
+	doc_metadata.create_entry(rdf::dc("creator"), i18n("Author"), 1);
+	doc_metadata.create_entry(rdf::dc("publisher"), i18n("Publisher"), 2);
+	doc_metadata.create_entry(rdf::dc("description"), i18n("Description"), 3);
+	doc_metadata.create_entry(rdf::dc("language"), i18n("Language"), 4);
+	doc_metadata.create_entry(rdf::tts("length"), i18n("Length"), 5);
 
-	voice_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
-	voice_metadata.create_entry(rdf::dc("language"), _("Language"), 1);
+	voice_metadata.create_entry(rdf::tts("name"), i18n("Name"), 0);
+	voice_metadata.create_entry(rdf::dc("language"), i18n("Language"), 1);
 
-	engine_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
-	engine_metadata.create_entry(rdf::tts("version"), _("Version"), 1);
+	engine_metadata.create_entry(rdf::tts("name"), i18n("Name"), 0);
+	engine_metadata.create_entry(rdf::tts("version"), i18n("Version"), 1);
 
 	metadata_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);
@@ -323,10 +323,10 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
 
 	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), NULL);
-	navbar.set_active_button(navbar.add_paged_button(_("Document"), GTK_NOTEBOOK(view), doc_page));
+	navbar.set_active_button(navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page));
 
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
-	navbar.add_paged_button(_("Voice"), GTK_NOTEBOOK(view), voice_page);
+	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);
@@ -353,7 +353,7 @@ void Cainteoir::on_open_document()
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
 	std::string filename = select_file(GTK_WINDOW(window),
-		_("Open Document"),
+		i18n("Open Document"),
 		GTK_FILE_CHOOSER_ACTION_OPEN,
 		GTK_STOCK_OPEN,
 		settings("document.filename").as<std::string>().c_str(),
@@ -387,7 +387,7 @@ void Cainteoir::save_settings()
 void Cainteoir::read()
 {
 	out = cainteoir::open_audio_device(NULL, "pulse", 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
-	on_speak(_("reading"));
+	on_speak(i18n("reading"));
 }
 
 void Cainteoir::record()
@@ -399,7 +399,7 @@ void Cainteoir::record()
 		          rql::matches(rql::object, rdf::tts("AudioFormat"))));
 
 	std::string filename = select_file(GTK_WINDOW(window),
-		_("Record Document"),
+		i18n("Record Document"),
 		GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_MEDIA_RECORD,
 		settings("recording.filename").as<std::string>().c_str(),
@@ -436,16 +436,16 @@ void Cainteoir::record()
 				settings.save();
 
 				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
-				on_speak(_("recording"));
+				on_speak(i18n("recording"));
 				return;
 			}
 		}
 	}
 
 	display_error_message(GTK_WINDOW(window),
-		_("Record Document"),
-		_("Unable to record the document"),
-		_("Unsupported file type."));
+		i18n("Record Document"),
+		i18n("Unable to record the document"),
+		i18n("Unsupported file type."));
 }
 
 void Cainteoir::stop()
@@ -479,8 +479,8 @@ bool Cainteoir::on_speaking()
 	if (!error.empty())
 	{
 		display_error_message(GTK_WINDOW(window),
-			_("Cainteoir Text-to-Speech"),
-			_("Error speaking the document"),
+			i18n("Cainteoir Text-to-Speech"),
+			i18n("Error speaking the document"),
 			error.c_str());
 	}
 
@@ -512,7 +512,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 
 		document_builder newdoc;
 		if (!cainteoir::parseDocument(filename.c_str(), newdoc, newdoc.doc->metadata))
-			throw std::runtime_error(_("Document type is not supported"));
+			throw std::runtime_error(i18n("Document type is not supported"));
 		doc = newdoc.doc;
 
 		toc.clear();
@@ -545,7 +545,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("language"));
 
 		std::ostringstream length;
-		length << (doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
+		length << (doc->text_length() / CHARACTERS_PER_WORD) << i18n(" words (approx.)");
 
 		doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
@@ -564,8 +564,8 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (!from_constructor)
 		{
 			display_error_message(GTK_WINDOW(window),
-				_("Open Document"),
-				_("Unable to open the document"),
+				i18n("Open Document"),
+				i18n("Unable to open the document"),
 				e.what());
 		}
 		ret = false;
@@ -591,7 +591,7 @@ GtkWidget *Cainteoir::create_file_chooser_menu()
 	gtk_menu_shell_append(GTK_MENU_SHELL(recent), separator);
 	gtk_widget_show(separator);
 
-	GtkWidget *more = gtk_menu_item_new_with_mnemonic(_("_More Documents..."));
+	GtkWidget *more = gtk_menu_item_new_with_mnemonic(i18n("_More Documents..."));
 	gtk_menu_shell_append(GTK_MENU_SHELL(recent), more);
 	gtk_widget_show(more);
 

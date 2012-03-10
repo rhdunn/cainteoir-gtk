@@ -20,7 +20,6 @@
 
 #include <config.h>
 #include <gtk/gtk.h>
-#include <cainteoir/platform.hpp>
 
 #include "metadata.hpp"
 #include "gtk-compatibility.hpp"
@@ -135,15 +134,9 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 	gtk_widget_set_size_request(label, 80, 0);
 	gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
 	{
-#if GTK_CHECK_VERSION(3, 0, 0)
 		GtkStyleContext *context = gtk_widget_get_style_context(label);
 		gtk_style_context_add_class(context, "label");
 		gtk_label_set_label(GTK_LABEL(label), labelText);
-#else
-		char buf[1024];
-		snprintf(buf, sizeof(buf), _("<i>%1$s:</i>"), labelText);
-		gtk_label_set_markup(GTK_LABEL(label), buf);
-#endif
 	}
 
 	gtk_misc_set_alignment(GTK_MISC(value), 0, 0);

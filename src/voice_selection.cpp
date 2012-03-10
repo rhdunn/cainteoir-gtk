@@ -21,10 +21,10 @@
 #include <config.h>
 #include <gtk/gtk.h>
 #include <sigc++/signal.h>
-#include <cainteoir/platform.hpp>
 
 #include "voice_selection.hpp"
 #include "gtk-compatibility.hpp"
+#include "i18n.h"
 
 enum VoiceListColumns
 {
@@ -39,12 +39,12 @@ enum VoiceListColumns
 };
 
 const char * columns[VLC_COUNT] = {
-	_("Voice"),
-	_("Engine"),
-	_("Language"),
-	_("Gender"),
-	_("Frequency (Hz)"),
-	_("Channels"),
+	i18n("Voice"),
+	i18n("Engine"),
+	i18n("Language"),
+	i18n("Gender"),
+	i18n("Frequency (Hz)"),
+	i18n("Channels"),
 };
 
 static void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
@@ -173,14 +173,14 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 		else if (rql::predicate(*statement) == rdf::tts("gender"))
 		{
 			if (rql::object(*statement) == rdf::tts("male"))
-				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
+				gtk_tree_store_set(store, &row, VLC_GENDER, i18n("male"), -1);
 			else if (rql::object(*statement) == rdf::tts("female"))
-				gtk_tree_store_set(store, &row, VLC_GENDER, _("female"), -1);
+				gtk_tree_store_set(store, &row, VLC_GENDER, i18n("female"), -1);
 		}
 		else if (rql::predicate(*statement) == rdf::tts("frequency"))
 			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(*statement).c_str(), -1);
 		else if (rql::predicate(*statement) == rdf::tts("channels"))
-			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement) == "1" ? _("mono") : _("stereo"), -1);
+			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement) == "1" ? i18n("mono") : i18n("stereo"), -1);
 	}
 }
 
@@ -193,11 +193,11 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 
 	GtkWidget *voices_header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(voices_header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(voices_header), _("<b>Voices</b>"));
+	gtk_label_set_markup(GTK_LABEL(voices_header), i18n("<b>Voices</b>"));
 
 	GtkWidget *header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(header), _("<b>Voice Settings</b>"));
+	gtk_label_set_markup(GTK_LABEL(header), i18n("<b>Voice Settings</b>"));
 
 	parameterView = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);
@@ -210,7 +210,7 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
 
-	GtkWidget *apply = gtk_button_new_with_mnemonic(_("_Apply"));
+	GtkWidget *apply = gtk_button_new_with_mnemonic(i18n("_Apply"));
 	gtk_box_pack_start(GTK_BOX(buttons), apply, FALSE, FALSE, 0);
 
 	gtk_box_pack_start(GTK_BOX(gobj()), header, FALSE, FALSE, 0);

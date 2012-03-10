@@ -20,7 +20,6 @@
 
 #include <config.h>
 #include <gtk/gtk.h>
-#include <cainteoir/platform.hpp>
 
 #include "toc.hpp"
 

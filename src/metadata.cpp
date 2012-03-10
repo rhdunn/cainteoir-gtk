@@ -32,9 +32,12 @@ MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int r
 	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
 
+	char labelname[512];
+	snprintf(labelname, sizeof(labelname), "<b>%s</b>", label);
+
 	header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(header), label);
+	gtk_label_set_markup(GTK_LABEL(header), labelname);
 
 	metadata = gtk_grid_new();
 	gtk_container_set_border_width(GTK_CONTAINER(metadata), 4);

@@ -47,6 +47,13 @@ const char * columns[VLC_COUNT] = {
 	i18n("Channels"),
 };
 
+static const char *bold(const char *text)
+{
+	static char boldtext[512];
+	snprintf(boldtext, sizeof(boldtext), "<b>%s</b>", text);
+	return boldtext;
+}
+
 static void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
 {
 	application_settings &settings = *(application_settings *)data;
@@ -193,11 +200,11 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 
 	GtkWidget *voices_header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(voices_header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(voices_header), i18n("<b>Voices</b>"));
+	gtk_label_set_markup(GTK_LABEL(voices_header), bold(i18n("Voices")));
 
 	GtkWidget *header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(header), i18n("<b>Voice Settings</b>"));
+	gtk_label_set_markup(GTK_LABEL(header), bold(i18n("Settings")));
 
 	parameterView = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);

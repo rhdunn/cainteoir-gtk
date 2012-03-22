@@ -63,24 +63,24 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 	rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, aUri));
 	for(auto query = selection.begin(), last = selection.end(); query != last; ++query)
 	{
-		if (rql::predicate(*query).as<rdf::uri>()->ns == rdf::dc || rql::predicate(*query).as<rdf::uri>()->ns == rdf::dcterms)
+		if (rql::predicate(*query).ns == rdf::dc || rql::predicate(*query).ns == rdf::dcterms)
 		{
-			rdf::resource object = rql::object(*query);
-			if (object.as<rdf::literal>())
+			const rdf::uri &object = rql::object(*query);
+			if (object.empty())
 			{
-				if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
+				if (rql::predicate(*query).ref == aPredicate.ref)
 				{
 					if (aPredicate == rdf::dc("language"))
-						add_metadata(aPredicate, languages(rql::value(object)).c_str());
+						add_metadata(aPredicate, languages(rql::value(*query)).c_str());
 					else
-						add_metadata(aPredicate, rql::value(object).c_str());
+						add_metadata(aPredicate, rql::value(*query).c_str());
 				}
 			}
 			else
 			{
 				rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, object));
 
-				if (rql::predicate(*query).as<rdf::uri>()->ref == "creator" && aPredicate == rdf::dc("creator"))
+				if (rql::predicate(*query).ref == "creator" && aPredicate == rdf::dc("creator"))
 				{
 					std::string role;
 					std::string author;
@@ -97,7 +97,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 					if (!author.empty() && (role == "aut" || role.empty()))
 						add_metadata(aPredicate, author.c_str());
 				}
-				else if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
+				else if (rql::predicate(*query).ref == aPredicate.ref)
 				{
 					for(auto data = selection.begin(), last = selection.end(); data != last; ++data)
 					{

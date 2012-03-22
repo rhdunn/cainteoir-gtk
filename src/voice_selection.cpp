@@ -124,12 +124,8 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 
 	foreach_iter(voice, voicelist)
 	{
-		const rdf::uri *uri = rql::subject(*voice);
-		if (uri)
-		{
-			rql::results statements = rql::select(aMetadata, rql::matches(rql::subject, *uri));
-			add_voice(aMetadata, statements, languages);
-		}
+		rql::results statements = rql::select(aMetadata, rql::matches(rql::subject, rql::subject(*voice)));
+		add_voice(aMetadata, statements, languages);
 	}
 
 	layout = gtk_scrolled_window_new(NULL, NULL);
@@ -165,7 +161,7 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 	{
 		if (rql::predicate(*statement) == rdf::tts("name"))
 			gtk_tree_store_set(store, &row,
-				VLC_URI,   rql::subject(*statement).as<rdf::uri>()->str().c_str(),
+				VLC_URI,   rql::subject(*statement).str().c_str(),
 				VLC_VOICE, rql::value(*statement).c_str(),
 				-1);
 		else if (rql::predicate(*statement) == rdf::tts("voiceOf"))

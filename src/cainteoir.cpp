@@ -125,11 +125,9 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		const rdf::uri * uri = rql::subject(*format);
-
 		rql::results mimetypes = rql::select(aMetadata,
 			rql::both(rql::matches(rql::predicate, rdf::tts("mimetype")),
-			          rql::matches(rql::subject, *uri)));
+			          rql::matches(rql::subject, rql::subject(*format))));
 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
 			gtk_recent_filter_add_mime_type(filter, rql::value(*mimetype).c_str());
@@ -415,20 +413,20 @@ void Cainteoir::record()
 		std::string ext = '*' + filename.substr(extpos);
 
 		rql::results filetypes = rql::select(tts_metadata,
-			rql::both(rql::matches(rql::predicate, rdf::tts("extension")),
-			          rql::matches(rql::object, rdf::literal(ext))));
+			rql::matches(rql::predicate, rdf::tts("extension")));
 
-		if (filetypes.size() == 1)
+		foreach_iter(filetype, filetypes)
 		{
-			const rdf::uri *uri = rql::subject(filetypes.front());
-			if (uri)
+			if (rql::value(*filetype) == ext)
 			{
+				const rdf::uri &uri = rql::subject(*filetype);
+
 				std::string type = rql::select_value<std::string>(tts_metadata,
-					rql::both(rql::matches(rql::subject, *uri),
+					rql::both(rql::matches(rql::subject,   uri),
 					          rql::matches(rql::predicate, rdf::tts("name"))));
 
 				std::string mimetype = rql::select_value<std::string>(tts_metadata,
-					rql::both(rql::matches(rql::subject, *uri),
+					rql::both(rql::matches(rql::subject,   uri),
 					          rql::matches(rql::predicate, rdf::tts("mimetype"))));
 
 				settings("recording.filename") = filename;
@@ -552,7 +550,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 		std::string lang = rql::select_value<std::string>(doc->metadata,
-			rql::both(rql::matches(rql::subject, *doc->subject),
+			rql::both(rql::matches(rql::subject,   *doc->subject),
 			          rql::matches(rql::predicate, rdf::dc("language"))));
 		if (lang.empty())
 			lang = "en";
@@ -610,11 +608,11 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	{
 		if (rql::predicate(*statement) == rdf::tts("voiceOf"))
 		{
-			const rdf::uri *engine = rql::object(*statement);
-			if (engine)
+			const rdf::uri &engine = rql::object(*statement);
+			if (!engine.empty())
 			{
-				engine_metadata.add_metadata(tts_metadata, *engine, rdf::tts("name"));
-				engine_metadata.add_metadata(tts_metadata, *engine, rdf::tts("version"));
+				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
+				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("version"));
 			}
 		}
 	}
@@ -635,7 +633,7 @@ bool Cainteoir::switch_voice_by_language(const std::string &lang)
 	// Does the current voice support this language? ...
 
 	std::string current = rql::select_value<std::string>(tts_metadata,
-		rql::both(rql::matches(rql::subject, tts.voice()),
+		rql::both(rql::matches(rql::subject,   tts.voice()),
 		          rql::matches(rql::predicate, rdf::dc("language"))));
 
 	current = cainteoir::language::make_lang(current).lang;
@@ -646,21 +644,19 @@ bool Cainteoir::switch_voice_by_language(const std::string &lang)
 
 	rql::results voicelist = rql::select(tts_metadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("Voice"))));
+		          rql::matches(rql::object,    rdf::tts("Voice"))));
 
 	foreach_iter(voice, voicelist)
 	{
-		const rdf::uri *uri = rql::subject(*voice);
-		if (uri)
-		{
-			std::string lang = rql::select_value<std::string>(tts_metadata,
-				rql::both(rql::matches(rql::subject, *uri),
-				          rql::matches(rql::predicate, rdf::dc("language"))));
+		const rdf::uri &uri = rql::subject(*voice);
 
-			lang = cainteoir::language::make_lang(lang).lang;
-			if (lang == language && switch_voice(*uri))
-				return true;
-		}
+		std::string lang = rql::select_value<std::string>(tts_metadata,
+			rql::both(rql::matches(rql::subject,   uri),
+			          rql::matches(rql::predicate, rdf::dc("language"))));
+
+		lang = cainteoir::language::make_lang(lang).lang;
+		if (lang == language && switch_voice(uri))
+			return true;
 	}
 	return false;
 }

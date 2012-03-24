@@ -628,7 +628,7 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 
 bool Cainteoir::switch_voice_by_language(const std::string &lang)
 {
-	std::string language = cainteoir::language::make_lang(lang).lang;
+	auto language = cainteoir::language::make_lang(lang);
 
 	// Does the current voice support this language? ...
 
@@ -636,8 +636,7 @@ bool Cainteoir::switch_voice_by_language(const std::string &lang)
 		rql::both(rql::matches(rql::subject,   tts.voice()),
 		          rql::matches(rql::predicate, rdf::dc("language"))));
 
-	current = cainteoir::language::make_lang(current).lang;
-	if (current == language)
+	if (cainteoir::language::make_lang(current) == language)
 		return true;
 
 	// The current voice does not support this language, so search the available voices ...
@@ -654,8 +653,7 @@ bool Cainteoir::switch_voice_by_language(const std::string &lang)
 			rql::both(rql::matches(rql::subject,   uri),
 			          rql::matches(rql::predicate, rdf::dc("language"))));
 
-		lang = cainteoir::language::make_lang(lang).lang;
-		if (lang == language && switch_voice(uri))
+		if (cainteoir::language::make_lang(lang) == language && switch_voice(uri))
 			return true;
 	}
 	return false;

@@ -59,6 +59,7 @@ private:
 	cainteoir::languages &languages;
 	cainteoir::language::tag doc_lang;
 	bool filter_by_doc_language;
+	rdf::uri selected_voice;
 };
 
 struct VoiceParameter

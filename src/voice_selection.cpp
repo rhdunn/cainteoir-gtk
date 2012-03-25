@@ -166,6 +166,10 @@ void VoiceList::filter_by_doc_lang(bool filter)
 
 void VoiceList::refresh()
 {
+	rdf::uri voice = get_voice();
+	if (!voice.empty())
+		selected_voice = voice;
+
 	gtk_tree_store_clear(store);
 	rql::results voicelist = rql::select(mMetadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
@@ -185,6 +189,8 @@ void VoiceList::refresh()
 		else
 			add_voice(mMetadata, statements, languages);
 	}
+
+	set_voice(selected_voice);
 }
 
 void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages)

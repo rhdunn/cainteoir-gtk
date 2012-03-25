@@ -556,6 +556,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 			lang = "en";
 
 		switch_voice_by_language(lang);
+		voiceSelection->set_language(lang);
 	}
 	catch (const std::exception & e)
 	{

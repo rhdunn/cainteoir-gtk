@@ -89,9 +89,18 @@ static void on_apply_button_clicked(GtkButton *button, void *data)
 	((VoiceSelectionView *)data)->apply();
 }
 
-VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages)
+static void on_filter_by_doc_lang_active(GtkSwitch *button, GParamSpec *arg, void *data)
+{
+	bool active = gtk_switch_get_active(button);
+	((VoiceList *)data)->filter_by_doc_lang(gtk_switch_get_active(button));
+}
+
+VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &aLanguages)
 	: settings(aSettings)
 	, mMetadata(aMetadata)
+	, languages(aLanguages)
+	, doc_lang(cainteoir::language::make_lang("en"))
+	, filter_by_doc_language(true)
 {
 	int         sort_column = settings("voicelist.sort.column", 0).as<int>();
 	GtkSortType sort_order  = (GtkSortType)settings("voicelist.sort.order",  GTK_SORT_ASCENDING).as<int>();
@@ -117,16 +126,7 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 	}
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
-
-	rql::results voicelist = rql::select(aMetadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("Voice"))));
-
-	foreach_iter(voice, voicelist)
-	{
-		rql::results statements = rql::select(aMetadata, rql::matches(rql::subject, rql::subject(*voice)));
-		add_voice(aMetadata, statements, languages);
-	}
+	refresh();
 
 	layout = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(layout), tree);
@@ -150,6 +150,41 @@ const rdf::uri VoiceList::get_voice() const
 		g_free(voice);
 	}
 	return ref;
+}
+
+void VoiceList::set_language(const std::string &language)
+{
+	doc_lang = cainteoir::language::make_lang(language);
+	refresh();
+}
+
+void VoiceList::filter_by_doc_lang(bool filter)
+{
+	filter_by_doc_language = filter;
+	refresh();
+}
+
+void VoiceList::refresh()
+{
+	gtk_tree_store_clear(store);
+	rql::results voicelist = rql::select(mMetadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object,    rdf::tts("Voice"))));
+
+	foreach_iter(voice, voicelist)
+	{
+		rql::results statements = rql::select(mMetadata, rql::matches(rql::subject, rql::subject(*voice)));
+		if (filter_by_doc_language)
+		{
+			std::string lang = rql::select_value<std::string>(statements,
+				rql::matches(rql::predicate, rdf::dc("language")));
+
+			if (cainteoir::language::make_lang(lang) == doc_lang)
+				add_voice(mMetadata, statements, languages);
+		}
+		else
+			add_voice(mMetadata, statements, languages);
+	}
 }
 
 void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages)
@@ -202,6 +237,12 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
 	gtk_label_set_markup(GTK_LABEL(header), bold(i18n("Settings")));
 
+	GtkWidget *filter_by_doc_lang_label = gtk_label_new(i18n("Filter voices by the document's language."));
+	gtk_misc_set_alignment(GTK_MISC(filter_by_doc_lang_label), 1, 0.5);
+
+	GtkWidget *filter_by_doc_lang = gtk_switch_new();
+	gtk_switch_set_active(GTK_SWITCH(filter_by_doc_lang), TRUE);
+
 	parameterView = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);
 
@@ -213,16 +254,22 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
 
+	GtkWidget *bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_pack_start(GTK_BOX(bottom), buttons, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottom), filter_by_doc_lang_label, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(bottom), filter_by_doc_lang, FALSE, FALSE, 0);
+
 	GtkWidget *apply = gtk_button_new_with_mnemonic(i18n("_Apply"));
 	gtk_box_pack_start(GTK_BOX(buttons), apply, FALSE, FALSE, 0);
 
 	gtk_box_pack_start(GTK_BOX(gobj()), header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 12);
+	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 6);
 	gtk_box_pack_start(GTK_BOX(gobj()), voices_header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
-	gtk_box_pack_start(GTK_BOX(gobj()), buttons, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 6);
+	gtk_box_pack_start(GTK_BOX(gobj()), bottom, FALSE, FALSE, 6);
 
 	g_signal_connect(apply, "clicked", G_CALLBACK(on_apply_button_clicked), this);
+	g_signal_connect(filter_by_doc_lang, "notify::active", G_CALLBACK(on_filter_by_doc_lang_active), &voices);
 }
 
 void VoiceSelectionView::show(const rdf::uri &voice)

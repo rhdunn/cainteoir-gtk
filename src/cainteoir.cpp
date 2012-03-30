@@ -242,7 +242,6 @@ Cainteoir::Cainteoir(const char *filename)
 	, doc_metadata(languages, i18n("Document"), 5)
 	, voice_metadata(languages, i18n("Voice"), 2)
 	, engine_metadata(languages, i18n("Engine"), 2)
-	, languages("en")
 	, settings(get_user_file("settings.dat"))
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));

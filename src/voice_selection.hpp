@@ -39,8 +39,14 @@ public:
 
 	const rdf::uri get_voice() const;
 
+	void set_language(const std::string &language);
+
+	void filter_by_doc_lang(bool filter);
+
 	operator GtkWidget *() { return layout; }
 private:
+	void refresh();
+
 	void add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages);
 
 	GtkWidget *layout;
@@ -49,6 +55,11 @@ private:
 
 	application_settings &settings;
 	rdf::graph &mMetadata;
+
+	cainteoir::languages &languages;
+	cainteoir::language::tag doc_lang;
+	bool filter_by_doc_language;
+	rdf::uri selected_voice;
 };
 
 struct VoiceParameter
@@ -67,6 +78,8 @@ public:
 	GtkWidget *gobj() { return layout; }
 
 	void show(const rdf::uri &voice);
+
+	void set_language(const std::string &lang) { voices.set_language(lang); }
 
 	sigc::signal<bool, const rdf::uri &> &signal_on_voice_change() { return on_voice_change; }
 

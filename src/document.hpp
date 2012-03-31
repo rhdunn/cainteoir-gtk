@@ -44,7 +44,7 @@ struct toc_entry_data
 struct document : public cainteoir::document
 {
 	std::vector<toc_entry_data> toc;
-	std::tr1::shared_ptr<const rdf::uri> subject;
+	std::shared_ptr<const rdf::uri> subject;
 	rdf::graph metadata;
 };
 
@@ -54,7 +54,7 @@ struct document_builder : public cainteoir::document_events
 	{
 	}
 
-	void metadata(const std::tr1::shared_ptr<const rdf::triple> &aStatement)
+	void metadata(const std::shared_ptr<const rdf::triple> &aStatement)
 	{
 		doc->metadata.push_back(aStatement);
 	}
@@ -64,7 +64,7 @@ struct document_builder : public cainteoir::document_events
 		return doc->metadata.genid();
 	}
 
-	void text(std::tr1::shared_ptr<cainteoir::buffer> aText)
+	void text(std::shared_ptr<cainteoir::buffer> aText)
 	{
 		doc->add(aText);
 	}
@@ -79,7 +79,7 @@ struct document_builder : public cainteoir::document_events
 		doc->add_anchor(location);
 	}
 
-	std::tr1::shared_ptr<document> doc;
+	std::shared_ptr<document> doc;
 };
 
 #endif

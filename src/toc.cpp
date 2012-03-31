@@ -20,7 +20,6 @@
 
 #include <config.h>
 #include <gtk/gtk.h>
-#include <cainteoir/platform.hpp>
 
 #include "toc.hpp"
 
@@ -31,11 +30,17 @@ enum TocColumns
 	TOC_COUNT // number of columns
 };
 
-static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item)
+static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item, bool advance)
 {
 	GtkTreeIter iter;
 	if (item && gtk_tree_model_get_iter(model, &iter, (GtkTreePath *)item->data))
 	{
+		if (advance)
+		{
+			if (!gtk_tree_model_iter_next(model, &iter))
+				return rdf::uri();
+		}
+
 		gchar *anchor = NULL;
 		gtk_tree_model_get(model, &iter, TOC_ANCHOR, &anchor, -1);
 
@@ -104,11 +109,11 @@ TocSelection TocPane::selection() const
 	case 0: // read all ...
 		break;
 	case 1: // read from selected item ...
-		from = uri_from_selected_item(GTK_TREE_MODEL(store), g_list_first(selected));
+		from = uri_from_selected_item(GTK_TREE_MODEL(store), g_list_first(selected), false);
 		break;
 	default: // read selected range ...
-		from = uri_from_selected_item(GTK_TREE_MODEL(store), g_list_first(selected));
-		to   = uri_from_selected_item(GTK_TREE_MODEL(store), g_list_last(selected));
+		from = uri_from_selected_item(GTK_TREE_MODEL(store), g_list_first(selected), false);
+		to   = uri_from_selected_item(GTK_TREE_MODEL(store), g_list_last(selected),  true);
 		break;
 	}
 

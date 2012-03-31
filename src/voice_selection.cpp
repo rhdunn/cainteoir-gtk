@@ -1,6 +1,6 @@
 /* Voice Selection View
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -21,18 +21,18 @@
 #include <config.h>
 #include <gtk/gtk.h>
 #include <sigc++/signal.h>
-#include <cainteoir/platform.hpp>
 
 #include "voice_selection.hpp"
 #include "gtk-compatibility.hpp"
+#include "i18n.h"
 
 enum VoiceListColumns
 {
 	VLC_VOICE,
 	VLC_ENGINE,
 	VLC_LANGUAGE,
+	VLC_REGION,
 	VLC_GENDER,
-	VLC_AGE,
 	VLC_FREQUENCY,
 	VLC_CHANNELS,
 	VLC_URI,
@@ -40,14 +40,21 @@ enum VoiceListColumns
 };
 
 const char * columns[VLC_COUNT] = {
-	_("Voice"),
-	_("Engine"),
-	_("Language"),
-	_("Gender"),
-	_("Age"),
-	_("Frequency (Hz)"),
-	_("Channels"),
+	i18n("Voice"),
+	i18n("Engine"),
+	i18n("Language"),
+	i18n("Region"),
+	i18n("Gender"),
+	i18n("Frequency (Hz)"),
+	i18n("Channels"),
 };
+
+static const char *bold(const char *text)
+{
+	static char boldtext[512];
+	snprintf(boldtext, sizeof(boldtext), "<b>%s</b>", text);
+	return boldtext;
+}
 
 static void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
 {
@@ -84,9 +91,18 @@ static void on_apply_button_clicked(GtkButton *button, void *data)
 	((VoiceSelectionView *)data)->apply();
 }
 
-VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &languages)
+static void on_filter_by_doc_lang_active(GtkSwitch *button, GParamSpec *arg, void *data)
+{
+	bool active = gtk_switch_get_active(button);
+	((VoiceList *)data)->filter_by_doc_lang(gtk_switch_get_active(button));
+}
+
+VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cainteoir::languages &aLanguages)
 	: settings(aSettings)
 	, mMetadata(aMetadata)
+	, languages(aLanguages)
+	, doc_lang(cainteoir::language::make_lang("en"))
+	, filter_by_doc_language(true)
 {
 	int         sort_column = settings("voicelist.sort.column", 0).as<int>();
 	GtkSortType sort_order  = (GtkSortType)settings("voicelist.sort.order",  GTK_SORT_ASCENDING).as<int>();
@@ -100,7 +116,7 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 		if (i == VLC_URI) continue;
 
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(columns[i], renderer, "text", i, NULL);
+		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(gettext(columns[i]), renderer, "text", i, NULL);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 		gtk_tree_view_column_set_sort_column_id(column, i);
 		g_signal_connect(column, "clicked", G_CALLBACK(on_voice_list_column_clicked), &settings);
@@ -112,20 +128,7 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 	}
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
-
-	rql::results voicelist = rql::select(aMetadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("Voice"))));
-
-	foreach_iter(voice, voicelist)
-	{
-		const rdf::uri *uri = rql::subject(*voice);
-		if (uri)
-		{
-			rql::results statements = rql::select(aMetadata, rql::matches(rql::subject, *uri));
-			add_voice(aMetadata, statements, languages);
-		}
-	}
+	refresh();
 
 	layout = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(layout), tree);
@@ -151,6 +154,47 @@ const rdf::uri VoiceList::get_voice() const
 	return ref;
 }
 
+void VoiceList::set_language(const std::string &language)
+{
+	doc_lang = cainteoir::language::make_lang(language);
+	refresh();
+}
+
+void VoiceList::filter_by_doc_lang(bool filter)
+{
+	filter_by_doc_language = filter;
+	refresh();
+}
+
+void VoiceList::refresh()
+{
+	rdf::uri voice = get_voice();
+	if (!voice.empty())
+		selected_voice = voice;
+
+	gtk_tree_store_clear(store);
+	rql::results voicelist = rql::select(mMetadata,
+		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+		          rql::matches(rql::object,    rdf::tts("Voice"))));
+
+	foreach_iter(voice, voicelist)
+	{
+		rql::results statements = rql::select(mMetadata, rql::matches(rql::subject, rql::subject(*voice)));
+		if (filter_by_doc_language)
+		{
+			std::string lang = rql::select_value<std::string>(statements,
+				rql::matches(rql::predicate, rdf::dc("language")));
+
+			if (cainteoir::language::make_lang(lang) == doc_lang)
+				add_voice(mMetadata, statements, languages);
+		}
+		else
+			add_voice(mMetadata, statements, languages);
+	}
+
+	set_voice(selected_voice);
+}
+
 void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages)
 {
 	GtkTreeIter row;
@@ -160,7 +204,7 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 	{
 		if (rql::predicate(*statement) == rdf::tts("name"))
 			gtk_tree_store_set(store, &row,
-				VLC_URI,   rql::subject(*statement).as<rdf::uri>()->str().c_str(),
+				VLC_URI,   rql::subject(*statement).str().c_str(),
 				VLC_VOICE, rql::value(*statement).c_str(),
 				-1);
 		else if (rql::predicate(*statement) == rdf::tts("voiceOf"))
@@ -171,20 +215,22 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 			gtk_tree_store_set(store, &row, VLC_ENGINE, engine.c_str(), -1);
 		}
 		else if (rql::predicate(*statement) == rdf::dc("language"))
-			gtk_tree_store_set(store, &row, VLC_LANGUAGE, languages(rql::value(*statement)).c_str(), -1);
+		{
+			cainteoir::language::tag lang = cainteoir::language::make_lang(rql::value(*statement));
+			gtk_tree_store_set(store, &row, VLC_LANGUAGE, languages.language(lang), -1);
+			gtk_tree_store_set(store, &row, VLC_REGION, languages.region(lang), -1);
+		}
 		else if (rql::predicate(*statement) == rdf::tts("gender"))
 		{
 			if (rql::object(*statement) == rdf::tts("male"))
-				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
+				gtk_tree_store_set(store, &row, VLC_GENDER, i18n("male"), -1);
 			else if (rql::object(*statement) == rdf::tts("female"))
-				gtk_tree_store_set(store, &row, VLC_GENDER, _("male"), -1);
+				gtk_tree_store_set(store, &row, VLC_GENDER, i18n("female"), -1);
 		}
-		else if (rql::predicate(*statement) == rdf::tts("age"))
-			gtk_tree_store_set(store, &row, VLC_AGE, rql::value(*statement).c_str(), -1);
 		else if (rql::predicate(*statement) == rdf::tts("frequency"))
 			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(*statement).c_str(), -1);
 		else if (rql::predicate(*statement) == rdf::tts("channels"))
-			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement) == "1" ? _("mono") : _("stereo"), -1);
+			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement) == "1" ? i18n("mono") : i18n("stereo"), -1);
 	}
 }
 
@@ -197,11 +243,17 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 
 	GtkWidget *voices_header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(voices_header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(voices_header), _("<b>Voices</b>"));
+	gtk_label_set_markup(GTK_LABEL(voices_header), bold(i18n("Voices")));
 
 	GtkWidget *header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(header), _("<b>Voice Settings</b>"));
+	gtk_label_set_markup(GTK_LABEL(header), bold(i18n("Settings")));
+
+	GtkWidget *filter_by_doc_lang_label = gtk_label_new(i18n("Filter voices by the document's language."));
+	gtk_misc_set_alignment(GTK_MISC(filter_by_doc_lang_label), 1, 0.5);
+
+	GtkWidget *filter_by_doc_lang = gtk_switch_new();
+	gtk_switch_set_active(GTK_SWITCH(filter_by_doc_lang), TRUE);
 
 	parameterView = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);
@@ -214,23 +266,29 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
 
-	GtkWidget *apply = gtk_button_new_with_mnemonic(_("_Apply"));
+	GtkWidget *bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_pack_start(GTK_BOX(bottom), buttons, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bottom), filter_by_doc_lang_label, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(bottom), filter_by_doc_lang, FALSE, FALSE, 0);
+
+	GtkWidget *apply = gtk_button_new_with_mnemonic(i18n("_Apply"));
 	gtk_box_pack_start(GTK_BOX(buttons), apply, FALSE, FALSE, 0);
 
 	gtk_box_pack_start(GTK_BOX(gobj()), header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 12);
+	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 6);
 	gtk_box_pack_start(GTK_BOX(gobj()), voices_header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 12);
-	gtk_box_pack_start(GTK_BOX(gobj()), buttons, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 6);
+	gtk_box_pack_start(GTK_BOX(gobj()), bottom, FALSE, FALSE, 6);
 
 	g_signal_connect(apply, "clicked", G_CALLBACK(on_apply_button_clicked), this);
+	g_signal_connect(filter_by_doc_lang, "notify::active", G_CALLBACK(on_filter_by_doc_lang_active), &voices);
 }
 
 void VoiceSelectionView::show(const rdf::uri &voice)
 {
 	foreach_iter (item, parameters)
 	{
-		std::tr1::shared_ptr<tts::parameter> parameter = mEngines->parameter(item->type);
+		std::shared_ptr<tts::parameter> parameter = mEngines->parameter(item->type);
 
 		gtk_range_set_range(GTK_RANGE(item->param), parameter->minimum(), parameter->maximum());
 		gtk_range_set_value(GTK_RANGE(item->param), parameter->value());

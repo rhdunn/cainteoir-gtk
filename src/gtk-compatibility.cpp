@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 #include <stdint.h>
+
 #include "gtk-compatibility.hpp"
 
 #if !GTK_CHECK_VERSION(3, 3, 0)

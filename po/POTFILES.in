@@ -1,2 +1,9 @@
-# List of source files which contain translatable strings.
-src/main.cpp
+./src/cainteoir.cpp
+./src/gtk-compatibility.cpp
+./src/main.cpp
+./src/metadata.cpp
+./src/navbar.cpp
+./src/settings.cpp
+./src/timebar.cpp
+./src/toc.cpp
+./src/voice_selection.cpp

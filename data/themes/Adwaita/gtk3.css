@@ -1,4 +1,5 @@
 @define-color borders #a7aba7;
+@define-color progress #1a73a7;
 
 #toc row,
 .label {
@@ -12,10 +13,35 @@
 	font-weight: bold;
 }
 
+GtkNotebook {
+	border-color: @borders;
+}
+
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */
 
 GtkNotebook, #toc {
 	background-color: @theme_base_color;
+}
+
+/* Use the backdrop styling for the progress bar in the active view.
+ */
+
+GtkProgressBar,
+GtkProgressBar.vertical,
+.trough row,
+.trough.vertical row {
+    background-image: none;
+    background-color: @unfocused_dark_bg;
+}
+
+.progressbar,
+.progressbar row,
+.progressbar row:selected {
+    background-image: none;
+    background-color: @progress;
+    border-color: @progressbar_unfocused_border;
+    box-shadow: none;
+    -adwaita-progressbar-pattern: none;
 }

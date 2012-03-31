@@ -21,9 +21,9 @@
 #include <config.h>
 #include <gtk/gtk.h>
 #include <sigc++/signal.h>
-#include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
+#include "i18n.h"
 
 static void load_gtk3_theme(const std::string &theme)
 {
@@ -46,8 +46,6 @@ static void load_gtk3_theme(const std::string &theme)
 
 int main(int argc, char ** argv)
 {
-	cainteoir::initialise();
-
 	setlocale(LC_MESSAGES, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
@@ -65,6 +63,5 @@ int main(int argc, char ** argv)
 	Cainteoir window(argc > 1 ? argv[1] : NULL);
 
 	gtk_main();
-	cainteoir::cleanup();
 	return 0;
 }

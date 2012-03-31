@@ -21,10 +21,10 @@
 #include <config.h>
 #include <gtk/gtk.h>
 #include <sigc++/signal.h>
-#include <cainteoir/platform.hpp>
 
 #include "cainteoir.hpp"
 #include "gtk-compatibility.hpp"
+#include "i18n.h"
 
 #include <stdexcept>
 
@@ -43,7 +43,7 @@ static std::string get_user_file(const char * filename)
 	return root + "/" + std::string(filename);
 }
 
-static double estimate_time(size_t text_length, std::tr1::shared_ptr<tts::parameter> aRate)
+static double estimate_time(size_t text_length, std::shared_ptr<tts::parameter> aRate)
 {
 	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
 }
@@ -125,11 +125,9 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
 	{
-		const rdf::uri * uri = rql::subject(*format);
-
 		rql::results mimetypes = rql::select(aMetadata,
 			rql::both(rql::matches(rql::predicate, rdf::tts("mimetype")),
-			          rql::matches(rql::subject, *uri)));
+			          rql::matches(rql::subject, rql::subject(*format))));
 
 		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
 			gtk_recent_filter_add_mime_type(filter, rql::value(*mimetype).c_str());
@@ -200,7 +198,7 @@ static void on_recent_files_dialog(GtkMenuItem *item, void *data)
 {
 	Cainteoir &window = *(Cainteoir *)data;
 
-	GtkWidget *dialog = gtk_recent_chooser_dialog_new(_("Recent Documents"), window,
+	GtkWidget *dialog = gtk_recent_chooser_dialog_new(i18n("Recent Documents"), window,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
 		NULL);
@@ -241,17 +239,16 @@ static gboolean on_timer_speaking(Cainteoir *window)
 Cainteoir::Cainteoir(const char *filename)
 	: tts(tts_metadata, cainteoir::text_support)
 	, doc(new document())
-	, doc_metadata(languages, _("<b>Document</b>"), 5)
-	, voice_metadata(languages, _("<b>Voice</b>"), 2)
-	, engine_metadata(languages, _("<b>Engine</b>"), 2)
-	, languages("en")
+	, doc_metadata(languages, i18n("Document"), 5)
+	, voice_metadata(languages, i18n("Voice"), 2)
+	, engine_metadata(languages, i18n("Engine"), 2)
 	, settings(get_user_file("settings.dat"))
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window), _("Cainteoir Text-to-Speech"));
+	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech"));
 	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(window), TRUE);
 
 	gtk_widget_set_size_request(window, 500, 300);
@@ -272,34 +269,39 @@ Cainteoir::Cainteoir(const char *filename)
 	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
 	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
 
-	GtkWidget *stretchy = gtk_menu_bar_new();
-	gtk_widget_set_size_request(stretchy, 0, 50);
+	GtkWidget *topbar = gtk_toolbar_new();
+	gtk_widget_set_size_request(topbar, 0, 40);
+	gtk_style_context_add_class(gtk_widget_get_style_context(topbar), GTK_STYLE_CLASS_MENUBAR);
 
-	GtkWidget *topbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(topbar, 0, 50);
-	gtk_box_pack_start(GTK_BOX(topbar), navbar, FALSE, FALSE, 10);
-	gtk_box_pack_start(GTK_BOX(topbar), stretchy, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(topbar), GTK_WIDGET(openButton), FALSE, FALSE, 0);
+	GtkToolItem *navbar_item = gtk_tool_item_new();
+	gtk_container_add(GTK_CONTAINER(navbar_item), navbar);
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(navbar_item));
+
+	GtkToolItem *expander = gtk_tool_item_new();
+	gtk_tool_item_set_expand(GTK_TOOL_ITEM(expander), TRUE);
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(expander));
+
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(openButton));
 
 	GtkWidget *bottombar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(bottombar, 0, 50);
+	gtk_widget_set_size_request(bottombar, 0, 40);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(bottombar), timebar, TRUE, TRUE, 0);
 
-	doc_metadata.create_entry(rdf::dc("title"), _("Title"), 0);
-	doc_metadata.create_entry(rdf::dc("creator"), _("Author"), 1);
-	doc_metadata.create_entry(rdf::dc("publisher"), _("Publisher"), 2);
-	doc_metadata.create_entry(rdf::dc("description"), _("Description"), 3);
-	doc_metadata.create_entry(rdf::dc("language"), _("Language"), 4);
-	doc_metadata.create_entry(rdf::tts("length"), _("Length"), 5);
+	doc_metadata.create_entry(rdf::dc("title"), i18n("Title"), 0);
+	doc_metadata.create_entry(rdf::dc("creator"), i18n("Author"), 1);
+	doc_metadata.create_entry(rdf::dc("publisher"), i18n("Publisher"), 2);
+	doc_metadata.create_entry(rdf::dc("description"), i18n("Description"), 3);
+	doc_metadata.create_entry(rdf::dc("language"), i18n("Language"), 4);
+	doc_metadata.create_entry(rdf::tts("length"), i18n("Length"), 5);
 
-	voice_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
-	voice_metadata.create_entry(rdf::dc("language"), _("Language"), 1);
+	voice_metadata.create_entry(rdf::tts("name"), i18n("Name"), 0);
+	voice_metadata.create_entry(rdf::dc("language"), i18n("Language"), 1);
 
-	engine_metadata.create_entry(rdf::tts("name"), _("Name"), 0);
-	engine_metadata.create_entry(rdf::tts("version"), _("Version"), 1);
+	engine_metadata.create_entry(rdf::tts("name"), i18n("Name"), 0);
+	engine_metadata.create_entry(rdf::tts("version"), i18n("Version"), 1);
 
 	metadata_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);
@@ -318,10 +320,10 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
 
 	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), NULL);
-	navbar.set_active_button(navbar.add_paged_button(_("Document"), GTK_NOTEBOOK(view), doc_page));
+	navbar.set_active_button(navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page));
 
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
-	navbar.add_paged_button(_("Voice"), GTK_NOTEBOOK(view), voice_page);
+	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);
@@ -348,7 +350,7 @@ void Cainteoir::on_open_document()
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
 	std::string filename = select_file(GTK_WINDOW(window),
-		_("Open Document"),
+		i18n("Open Document"),
 		GTK_FILE_CHOOSER_ACTION_OPEN,
 		GTK_STOCK_OPEN,
 		settings("document.filename").as<std::string>().c_str(),
@@ -382,7 +384,7 @@ void Cainteoir::save_settings()
 void Cainteoir::read()
 {
 	out = cainteoir::open_audio_device(NULL, "pulse", 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
-	on_speak(_("reading"));
+	on_speak(i18n("reading"));
 }
 
 void Cainteoir::record()
@@ -394,7 +396,7 @@ void Cainteoir::record()
 		          rql::matches(rql::object, rdf::tts("AudioFormat"))));
 
 	std::string filename = select_file(GTK_WINDOW(window),
-		_("Record Document"),
+		i18n("Record Document"),
 		GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_MEDIA_RECORD,
 		settings("recording.filename").as<std::string>().c_str(),
@@ -410,20 +412,20 @@ void Cainteoir::record()
 		std::string ext = '*' + filename.substr(extpos);
 
 		rql::results filetypes = rql::select(tts_metadata,
-			rql::both(rql::matches(rql::predicate, rdf::tts("extension")),
-			          rql::matches(rql::object, rdf::literal(ext))));
+			rql::matches(rql::predicate, rdf::tts("extension")));
 
-		if (filetypes.size() == 1)
+		foreach_iter(filetype, filetypes)
 		{
-			const rdf::uri *uri = rql::subject(filetypes.front());
-			if (uri)
+			if (rql::value(*filetype) == ext)
 			{
+				const rdf::uri &uri = rql::subject(*filetype);
+
 				std::string type = rql::select_value<std::string>(tts_metadata,
-					rql::both(rql::matches(rql::subject, *uri),
+					rql::both(rql::matches(rql::subject,   uri),
 					          rql::matches(rql::predicate, rdf::tts("name"))));
 
 				std::string mimetype = rql::select_value<std::string>(tts_metadata,
-					rql::both(rql::matches(rql::subject, *uri),
+					rql::both(rql::matches(rql::subject,   uri),
 					          rql::matches(rql::predicate, rdf::tts("mimetype"))));
 
 				settings("recording.filename") = filename;
@@ -431,16 +433,16 @@ void Cainteoir::record()
 				settings.save();
 
 				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
-				on_speak(_("recording"));
+				on_speak(i18n("recording"));
 				return;
 			}
 		}
 	}
 
 	display_error_message(GTK_WINDOW(window),
-		_("Record Document"),
-		_("Unable to record the document"),
-		_("Unsupported file type."));
+		i18n("Record Document"),
+		i18n("Unable to record the document"),
+		i18n("Unsupported file type."));
 }
 
 void Cainteoir::stop()
@@ -474,8 +476,8 @@ bool Cainteoir::on_speaking()
 	if (!error.empty())
 	{
 		display_error_message(GTK_WINDOW(window),
-			_("Cainteoir Text-to-Speech"),
-			_("Error speaking the document"),
+			i18n("Cainteoir Text-to-Speech"),
+			i18n("Error speaking the document"),
 			error.c_str());
 	}
 
@@ -507,13 +509,13 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 
 		document_builder newdoc;
 		if (!cainteoir::parseDocument(filename.c_str(), newdoc, newdoc.doc->metadata))
-			throw std::runtime_error(_("Document type is not supported"));
+			throw std::runtime_error(i18n("Document type is not supported"));
 		doc = newdoc.doc;
 
 		toc.clear();
 		doc_metadata.clear();
 
-		doc->subject = std::tr1::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
+		doc->subject = std::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
 		rql::results data = rql::select(doc->metadata, rql::matches(rql::subject, *doc->subject));
@@ -540,18 +542,19 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("language"));
 
 		std::ostringstream length;
-		length << (doc->text_length() / CHARACTERS_PER_WORD) << _(" words (approx.)");
+		length << (doc->text_length() / CHARACTERS_PER_WORD) << i18n(" words (approx.)");
 
 		doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
 		timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 		std::string lang = rql::select_value<std::string>(doc->metadata,
-			rql::both(rql::matches(rql::subject, *doc->subject),
+			rql::both(rql::matches(rql::subject,   *doc->subject),
 			          rql::matches(rql::predicate, rdf::dc("language"))));
 		if (lang.empty())
 			lang = "en";
 
+		voiceSelection->set_language(lang);
 		switch_voice_by_language(lang);
 	}
 	catch (const std::exception & e)
@@ -559,8 +562,8 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (!from_constructor)
 		{
 			display_error_message(GTK_WINDOW(window),
-				_("Open Document"),
-				_("Unable to open the document"),
+				i18n("Open Document"),
+				i18n("Unable to open the document"),
 				e.what());
 		}
 		ret = false;
@@ -586,7 +589,7 @@ GtkWidget *Cainteoir::create_file_chooser_menu()
 	gtk_menu_shell_append(GTK_MENU_SHELL(recent), separator);
 	gtk_widget_show(separator);
 
-	GtkWidget *more = gtk_menu_item_new_with_mnemonic(_("_More Documents..."));
+	GtkWidget *more = gtk_menu_item_new_with_mnemonic(i18n("_More Documents..."));
 	gtk_menu_shell_append(GTK_MENU_SHELL(recent), more);
 	gtk_widget_show(more);
 
@@ -605,11 +608,11 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	{
 		if (rql::predicate(*statement) == rdf::tts("voiceOf"))
 		{
-			const rdf::uri *engine = rql::object(*statement);
-			if (engine)
+			const rdf::uri &engine = rql::object(*statement);
+			if (!engine.empty())
 			{
-				engine_metadata.add_metadata(tts_metadata, *engine, rdf::tts("name"));
-				engine_metadata.add_metadata(tts_metadata, *engine, rdf::tts("version"));
+				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
+				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("version"));
 			}
 		}
 	}
@@ -623,49 +626,35 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	return false;
 }
 
-bool Cainteoir::switch_voice_by_language(const std::string &language)
+bool Cainteoir::switch_voice_by_language(const std::string &lang)
 {
-	std::string language2 = language.substr(0, language.find('-'));
+	auto language = cainteoir::language::make_lang(lang);
 
 	// Does the current voice support this language? ...
 
 	std::string current = rql::select_value<std::string>(tts_metadata,
-		rql::both(rql::matches(rql::subject, tts.voice()),
+		rql::both(rql::matches(rql::subject,   tts.voice()),
 		          rql::matches(rql::predicate, rdf::dc("language"))));
 
-	if (current == language || current == language2)
-		return true;
-
-	current = current.substr(0, current.find('-'));
-	if (current == language || current == language2)
+	if (cainteoir::language::make_lang(current) == language)
 		return true;
 
 	// The current voice does not support this language, so search the available voices ...
 
 	rql::results voicelist = rql::select(tts_metadata,
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("Voice"))));
+		          rql::matches(rql::object,    rdf::tts("Voice"))));
 
 	foreach_iter(voice, voicelist)
 	{
-		const rdf::uri *uri = rql::subject(*voice);
-		if (uri)
-		{
-			std::string lang = rql::select_value<std::string>(tts_metadata,
-				rql::both(rql::matches(rql::subject, *uri),
-				          rql::matches(rql::predicate, rdf::dc("language"))));
+		const rdf::uri &uri = rql::subject(*voice);
 
-			if ((lang == language || lang == language2) && switch_voice(*uri))
-				return true;
+		std::string lang = rql::select_value<std::string>(tts_metadata,
+			rql::both(rql::matches(rql::subject,   uri),
+			          rql::matches(rql::predicate, rdf::dc("language"))));
 
-			// Handle specific voices against generic document languages, e.g.
-			// eSpeak has 'pt-pt' and 'pt-br' voices, but no 'pt' voice and the
-			// Project Guttenberg ebooks report portuguese as 'pt'.
-
-			lang = lang.substr(0, lang.find('-'));
-			if ((lang == language || lang == language2) && switch_voice(*uri))
-				return true;
-		}
+		if (cainteoir::language::make_lang(lang) == language && switch_voice(uri))
+			return true;
 	}
 	return false;
 }

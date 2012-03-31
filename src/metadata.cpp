@@ -20,7 +20,6 @@
 
 #include <config.h>
 #include <gtk/gtk.h>
-#include <cainteoir/platform.hpp>
 
 #include "metadata.hpp"
 #include "gtk-compatibility.hpp"
@@ -33,9 +32,12 @@ MetadataView::MetadataView(cainteoir::languages & lang, const char *label, int r
 	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
 
+	char labelname[512];
+	snprintf(labelname, sizeof(labelname), "<b>%s</b>", label);
+
 	header = gtk_label_new("");
 	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(header), label);
+	gtk_label_set_markup(GTK_LABEL(header), labelname);
 
 	metadata = gtk_grid_new();
 	gtk_container_set_border_width(GTK_CONTAINER(metadata), 4);
@@ -61,24 +63,24 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 	rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, aUri));
 	for(auto query = selection.begin(), last = selection.end(); query != last; ++query)
 	{
-		if (rql::predicate(*query).as<rdf::uri>()->ns == rdf::dc || rql::predicate(*query).as<rdf::uri>()->ns == rdf::dcterms)
+		if (rql::predicate(*query).ns == rdf::dc || rql::predicate(*query).ns == rdf::dcterms)
 		{
-			rdf::resource object = rql::object(*query);
-			if (object.as<rdf::literal>())
+			const rdf::uri &object = rql::object(*query);
+			if (object.empty())
 			{
-				if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
+				if (rql::predicate(*query).ref == aPredicate.ref)
 				{
 					if (aPredicate == rdf::dc("language"))
-						add_metadata(aPredicate, languages(rql::value(object)).c_str());
+						add_metadata(aPredicate, languages(rql::value(*query)).c_str());
 					else
-						add_metadata(aPredicate, rql::value(object).c_str());
+						add_metadata(aPredicate, rql::value(*query).c_str());
 				}
 			}
 			else
 			{
 				rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, object));
 
-				if (rql::predicate(*query).as<rdf::uri>()->ref == "creator" && aPredicate == rdf::dc("creator"))
+				if (rql::predicate(*query).ref == "creator" && aPredicate == rdf::dc("creator"))
 				{
 					std::string role;
 					std::string author;
@@ -95,7 +97,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 					if (!author.empty() && (role == "aut" || role.empty()))
 						add_metadata(aPredicate, author.c_str());
 				}
-				else if (rql::predicate(*query).as<rdf::uri>()->ref == aPredicate.ref)
+				else if (rql::predicate(*query).ref == aPredicate.ref)
 				{
 					for(auto data = selection.begin(), last = selection.end(); data != last; ++data)
 					{
@@ -135,15 +137,9 @@ void MetadataView::create_entry(const rdf::uri & aPredicate, const char * labelT
 	gtk_widget_set_size_request(label, 80, 0);
 	gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
 	{
-#if GTK_CHECK_VERSION(3, 0, 0)
 		GtkStyleContext *context = gtk_widget_get_style_context(label);
 		gtk_style_context_add_class(context, "label");
 		gtk_label_set_label(GTK_LABEL(label), labelText);
-#else
-		char buf[1024];
-		snprintf(buf, sizeof(buf), _("<i>%1$s:</i>"), labelText);
-		gtk_label_set_markup(GTK_LABEL(label), buf);
-#endif
 	}
 
 	gtk_misc_set_alignment(GTK_MISC(value), 0, 0);

@@ -1,5 +1,17 @@
 
 -------------------------------------------------------------------------------
+VERSION 0.4 -- Saturday March 31st 2012 [Mar 2012]
+
+  *  initial translations from OSTD [http://littlesvr.ca/ostd].
+  *  hide the titlebar when maximized on GNOME 3.4 and later.
+  *  report 'Document type is not supported' when loading fails instead of
+     clearing the currently open document.
+  *  support filtering voices by the current document's language.
+
+bug fixes:
+  *  fix reading/recording section ranges (it would miss the last section).
+
+-------------------------------------------------------------------------------
 VERSION 0.3 -- Sunday January 29th 2012 [Nov 2012]
 
   *  redesigned the UI -- make it consistent with the GNOME 3 application designs.

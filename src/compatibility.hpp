@@ -27,4 +27,46 @@
 void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
 #endif
 
+#ifndef HAVE_CPP_NULLPTR
+#	include <stddef.h>
+
+	const struct nullptr_t 
+	{
+		template <typename T>
+		inline operator T *() const { return 0; }
+
+		template <typename C, typename T>
+		inline operator T C:: *() const { return 0; }
+	private:
+		void operator&() const;
+	} nullptr = {};
+
+#ifndef HAVE_CPP_IMPLICIT_NULLPTR_COMPARE
+	template <typename T>
+	inline bool operator==(const T &a, const nullptr_t &b)
+	{
+		return a == NULL;
+	}
+
+	template <typename T>
+	inline bool operator==(const nullptr_t &a, const T &b)
+	{
+		return b == NULL;
+	}
+
+	template <typename T>
+	inline bool operator!=(const T &a, const nullptr_t &b)
+	{
+		return a != NULL;
+	}
+
+	template <typename T>
+	inline bool operator!=(const nullptr_t &a, const T &b)
+	{
+		return b != NULL;
+	}
+#endif
+#endif
+
+
 #endif

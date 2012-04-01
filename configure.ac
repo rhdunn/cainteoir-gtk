@@ -89,6 +89,30 @@ dnl C++11 language support
 dnl ================================================================
 
 AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 nullptr])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[]],
+		[[const char *ptr = nullptr;]])],
+	[AC_MSG_RESULT([yes])
+	 AC_DEFINE([HAVE_CPP_NULLPTR],[1],[Define 1 if the nullptr keyword is not supported.])],
+	[AC_MSG_RESULT([no])
+	 dnl Check if a workaround for a gcc bug is needed
+	 AC_MSG_CHECKING([if $CXX supports implicit conversions for ==/!=])
+	 AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+			[[const struct nullptr_t]
+			 [{]
+			 [	template<class T> inline operator T*() const { return 0; }]
+			 [} nullptr = {};]],
+			[[const char *ptr = "testing";]
+			 [return (ptr != nullptr) ? 0 : 1]])],
+		[AC_MSG_RESULT([yes])
+		 AC_DEFINE([HAVE_CPP_IMPLICIT_NULLPTR_COMPARE],[1],[Define 1 if the nullptr workaround needs ==/!= definitions.])],
+		[AC_MSG_RESULT([no])])])
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
 AC_MSG_CHECKING([if $CXX supports C++11 decltype])
 AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(

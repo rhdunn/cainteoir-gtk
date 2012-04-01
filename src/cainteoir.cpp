@@ -74,7 +74,7 @@ static std::string select_file(
 	GtkWidget *dialog = gtk_file_chooser_dialog_new(title, window, action,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		open_id,          GTK_RESPONSE_OK,
-		NULL);
+		nullptr);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
 
 	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
@@ -161,13 +161,13 @@ static void on_button_clicked(GtkWidget *widget, void *data)
 	((cbd->window)->*(cbd->callback))();
 }
 
-static GtkWidget *create_stock_button(const char *stock, Cainteoir *window, callback_function callback, GtkWidget *menu=NULL)
+static GtkWidget *create_stock_button(const char *stock, Cainteoir *window, callback_function callback, GtkWidget *menu=nullptr)
 {
 	CallbackData *data = g_slice_new(CallbackData);
 	data->window   = window;
 	data->callback = callback;
 
-	GtkToolItem *button = NULL;
+	GtkToolItem *button = nullptr;
 	if (menu)
 	{
 		button = gtk_menu_tool_button_new_from_stock(stock);
@@ -201,7 +201,7 @@ static void on_recent_files_dialog(GtkMenuItem *item, void *data)
 	GtkWidget *dialog = gtk_recent_chooser_dialog_new(i18n("Recent Documents"), window,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
-		NULL);
+		nullptr);
 	gtk_window_resize(GTK_WINDOW(dialog), 500, 200);
 	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), window.recent_filter());
 	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
@@ -319,10 +319,10 @@ Cainteoir::Cainteoir(const char *filename)
 	view = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
 
-	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), NULL);
+	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), nullptr);
 	navbar.set_active_button(navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page));
 
-	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  NULL);
+	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
 	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -383,7 +383,7 @@ void Cainteoir::save_settings()
 
 void Cainteoir::read()
 {
-	out = cainteoir::open_audio_device(NULL, "pulse", 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
+	out = cainteoir::open_audio_device(nullptr, "pulse", 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
 	on_speak(i18n("reading"));
 }
 

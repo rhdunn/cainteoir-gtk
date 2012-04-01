@@ -38,7 +38,7 @@ static void on_navbutton_toggled(GtkWidget *button, void *data)
 }
 
 NavigationBar::NavigationBar()
-	: active_button(NULL)
+	: active_button(nullptr)
 	, setting_active_button(false)
 {
 	layout = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
@@ -69,7 +69,7 @@ GtkWidget *NavigationBar::get_active_button() const
 
 bool NavigationBar::set_active_button(GtkWidget *button)
 {
-	//g_return_if_fail(button != NULL);
+	//g_return_if_fail(button != nullptr);
 	//g_return_if_fail(GTK_IS_TOGGLE_BUTTON(button));
 
 	if (setting_active_button)

@@ -75,7 +75,7 @@ static gboolean select_voice_list_item_by_voice(GtkTreeModel *model, GtkTreePath
 	voice_list_selection *vls = (voice_list_selection *)data;
 
 	gboolean ret = FALSE;
-	gchar *voice = NULL;
+	gchar *voice = nullptr;
 	gtk_tree_model_get(model, iter, VLC_URI, &voice, -1);
 	if (vls->voice->str() == voice)
 	{
@@ -116,7 +116,7 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 		if (i == VLC_URI) continue;
 
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(gettext(columns[i]), renderer, "text", i, NULL);
+		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(gettext(columns[i]), renderer, "text", i, nullptr);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 		gtk_tree_view_column_set_sort_column_id(column, i);
 		g_signal_connect(column, "clicked", G_CALLBACK(on_voice_list_column_clicked), &settings);
@@ -130,7 +130,7 @@ VoiceList::VoiceList(application_settings &aSettings, rdf::graph &aMetadata, cai
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
 	refresh();
 
-	layout = gtk_scrolled_window_new(NULL, NULL);
+	layout = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_add(GTK_CONTAINER(layout), tree);
 }
 
@@ -144,9 +144,9 @@ const rdf::uri VoiceList::get_voice() const
 {
 	rdf::uri ref;
 	GtkTreeIter row;
-	if (gtk_tree_selection_get_selected(selection, NULL, &row))
+	if (gtk_tree_selection_get_selected(selection, nullptr, &row))
 	{
-		gchar *voice = NULL;
+		gchar *voice = nullptr;
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &row, VLC_URI, &voice, -1);
 		ref = mMetadata.href(voice);
 		g_free(voice);
@@ -198,7 +198,7 @@ void VoiceList::refresh()
 void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir::languages &languages)
 {
 	GtkTreeIter row;
-	gtk_tree_store_append(store, &row, NULL);
+	gtk_tree_store_append(store, &row, nullptr);
 
 	foreach_iter(statement, voice)
 	{
@@ -317,7 +317,7 @@ void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
 	VoiceParameter item;
 	item.type = aParameter;
 
-	item.param = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, NULL);
+	item.param = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
 	gtk_range_set_increments(GTK_RANGE(item.param), 1.0, 5.0);
 	gtk_scale_set_value_pos(GTK_SCALE(item.param), GTK_POS_RIGHT);
 	gtk_scale_set_digits(GTK_SCALE(item.param), 0);

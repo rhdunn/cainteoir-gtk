@@ -1,3 +1,9 @@
+cainteoir-gtk (0.4~unstable1) unstable; urgency=low
+ 
+  * Updated the po files to match the source code.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Sun, 1 Apr 2012 11:16:00 +0000
+
 cainteoir-gtk (0.4~unstable0) unstable; urgency=low
  
   * Initial upstream release.

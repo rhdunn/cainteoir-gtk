@@ -85,6 +85,72 @@ else
 fi
 
 dnl ================================================================
+dnl C++11 language support
+dnl ================================================================
+
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 decltype])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[]],
+		[[int a;]
+		 [decltype(a) b = a;]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 decltype not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 auto])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[]],
+		[[class A {} a;]
+		 [auto b = a;]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 decltype not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 brace initialization])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[#include <complex>]],
+		[[std::complex<float> c { 0.1, 0.2 };]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 brace initialization not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+dnl ================================================================
+dnl C++11 library support
+dnl ================================================================
+
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 std::initializer_list])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[#include <vector>]
+		 [std::initializer_list<int> il = { 1, 2, 3, 4 };]],
+		[[std::vector<int> v(il);]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 std::initializer_list not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 std::shared_ptr])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[#include <memory>]],
+		[[std::shared_ptr<int> p = std::make_shared<int>(5);]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 std::shared_ptr not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+dnl ================================================================
 dnl getopt checks.
 dnl ================================================================
 

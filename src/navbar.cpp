@@ -18,8 +18,8 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtk/gtk.h>
+#include "config.h"
+#include "compatibility.hpp"
 
 #include "navbar.hpp"
 

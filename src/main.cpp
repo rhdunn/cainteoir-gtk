@@ -18,12 +18,13 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtk/gtk.h>
+#include "config.h"
+#include "compatibility.hpp"
+#include "i18n.h"
+
 #include <sigc++/signal.h>
 
 #include "cainteoir.hpp"
-#include "i18n.h"
 
 static void load_gtk3_theme(const std::string &theme)
 {

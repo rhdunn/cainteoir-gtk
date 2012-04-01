@@ -18,12 +18,12 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtk/gtk.h>
+#include "config.h"
+#include "compatibility.hpp"
+
 #include <math.h>
 
 #include "timebar.hpp"
-#include "gtk-compatibility.hpp"
 
 static void format_time(char *s, int n, double seconds)
 {

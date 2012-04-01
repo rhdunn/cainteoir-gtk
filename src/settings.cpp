@@ -1,6 +1,6 @@
 /* Application Settings
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -18,7 +18,9 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
+#include "config.h"
+#include "compatibility.hpp"
+
 #include <cainteoir/metadata.hpp>
 #include <fstream>
 

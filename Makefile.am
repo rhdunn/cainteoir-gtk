@@ -113,13 +113,14 @@ desktop_DATA = src/cainteoir-gtk.desktop
 bin_PROGRAMS += src/cainteoir-gtk
 
 src_cainteoir_gtk_SOURCES = \
+	src/i18n.h \
+	src/compatibility.hpp \
+	src/compatibility.cpp \
 	src/settings.hpp \
 	src/settings.cpp \
 	src/toc.hpp \
 	src/toc.cpp \
 	src/document.hpp \
-	src/gtk-compatibility.hpp \
-	src/gtk-compatibility.cpp \
 	src/voice_selection.hpp \
 	src/voice_selection.cpp \
 	src/metadata.hpp \

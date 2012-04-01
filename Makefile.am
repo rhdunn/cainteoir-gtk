@@ -15,7 +15,7 @@ AM_CXXFLAGS = \
 	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
 	${SIGCXX_CFLAGS}  \
-	-std=c++0x -DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
+	-DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
 
 ACLOCAL_AMFLAGS = -I m4
 

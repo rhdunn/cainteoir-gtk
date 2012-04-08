@@ -308,13 +308,16 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
+	GtkWidget *metadata_pane = gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(metadata_pane), metadata_view);
+
 	GtkWidget *toc_pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(toc_pane, 300, 0);
 	gtk_box_pack_start(GTK_BOX(toc_pane), toc, TRUE, TRUE, 0);
 
 	GtkWidget *pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
 	gtk_box_pack_start(GTK_BOX(pane), toc_pane, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pane), metadata_view, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), metadata_pane, TRUE, TRUE, 0);
 
 	view = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);

@@ -28,6 +28,7 @@
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
+#include "library.hpp"
 #include "navbar.hpp"
 
 class Cainteoir
@@ -74,6 +75,7 @@ private:
 	GtkWidget *metadata_view;
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
+	std::shared_ptr<DocumentLibrary> library;
 
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;

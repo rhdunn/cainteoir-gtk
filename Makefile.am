@@ -129,6 +129,8 @@ src_cainteoir_gtk_SOURCES = \
 	src/timebar.cpp \
 	src/navbar.hpp \
 	src/navbar.cpp \
+	src/libraryentrycellrenderer.h \
+	src/libraryentrycellrenderer.cpp \
 	src/library.hpp \
 	src/library.cpp \
 	src/cainteoir.hpp \

@@ -1,4 +1,6 @@
-#toc row,
+@define-color borders #a7aba7;
+
+#toc row
 .label {
 	color: alpha(@fg_color, 0.7);
 }
@@ -9,6 +11,10 @@
 	border-width: 0;
 	color: @selected_bg_color;
 	font-weight: bold;
+}
+
+GtkNotebook {
+	border-color: @borders;
 }
 
 /* The toc pane is coloured white by default, with the notebook

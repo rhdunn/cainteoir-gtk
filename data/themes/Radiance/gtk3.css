@@ -13,6 +13,11 @@
 	font-weight: bold;
 }
 
+GtkToolbar {
+	padding-left: 5;
+	padding-right: 5;
+}
+
 GtkNotebook {
 	border-color: @borders;
 }

@@ -271,6 +271,7 @@ Cainteoir::Cainteoir(const char *filename)
 	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
 
 	GtkWidget *topbar = gtk_toolbar_new();
+	gtk_widget_set_name(topbar, "topbar");
 	gtk_widget_set_size_request(topbar, 0, 40);
 	gtk_style_context_add_class(gtk_widget_get_style_context(topbar), GTK_STYLE_CLASS_MENUBAR);
 

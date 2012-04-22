@@ -65,9 +65,7 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 
 	gtk_widget_set_name(view, "toc");
-	gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(view), TRUE);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
-	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(view), LIB_TITLE);
 
 	toc_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 	gtk_tree_selection_set_mode(toc_selection, GTK_SELECTION_MULTIPLE);

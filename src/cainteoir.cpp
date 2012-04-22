@@ -136,17 +136,6 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 	return filter;
 }
 
-static GtkWidget *create_padded_container(GtkWidget *child, int padding_width, int padding_height)
-{
-	GtkWidget *left_right = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_box_pack_start(GTK_BOX(left_right), child, TRUE, TRUE, padding_width);
-
-	GtkWidget *top_bottom = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_box_pack_start(GTK_BOX(top_bottom), left_right, TRUE, TRUE, padding_height);
-
-	return top_bottom;
-}
-
 typedef void (Cainteoir::*callback_function)();
 
 struct CallbackData
@@ -324,9 +313,9 @@ Cainteoir::Cainteoir(const char *filename)
 	view = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
 
-	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(pane, 5, 5), nullptr);
+	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), pane, nullptr);
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
-	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), create_padded_container(*library, 5, 5), nullptr);
+	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
 
 	navbar.add_paged_button(i18n("Recent"), GTK_NOTEBOOK(view), lib_page);
 	navbar.set_active_button(navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page));

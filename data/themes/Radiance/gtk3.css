@@ -18,10 +18,6 @@ GtkToolbar {
 	padding-right: 5;
 }
 
-GtkNotebook {
-	border-color: @borders;
-}
-
 GtkToolbar .linked .button,
 GtkToolbar .linked .button:active,
 GtkToolbar .linked .button:insensitive {

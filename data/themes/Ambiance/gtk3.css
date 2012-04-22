@@ -18,10 +18,6 @@ GtkToolbar {
 	padding-right: 5;
 }
 
-GtkNotebook {
-	border-color: @borders;
-}
-
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */

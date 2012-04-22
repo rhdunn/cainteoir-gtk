@@ -274,12 +274,20 @@ Cainteoir::Cainteoir(const char *filename)
 
 	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(openButton));
 
-	GtkWidget *bottombar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *bottombar = gtk_toolbar_new();
+	gtk_widget_set_name(bottombar, "bottombar");
 	gtk_widget_set_size_request(bottombar, 0, 40);
-	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(readButton), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(stopButton), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(bottombar), GTK_WIDGET(recordButton), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(bottombar), timebar, TRUE, TRUE, 0);
+	gtk_style_context_add_class(gtk_widget_get_style_context(bottombar), GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+
+	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(readButton));
+	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(stopButton));
+	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(recordButton));
+
+	GtkToolItem *timebar_item = gtk_tool_item_new();
+	gtk_tool_item_set_expand(GTK_TOOL_ITEM(timebar_item), TRUE);
+	gtk_container_add(GTK_CONTAINER(timebar_item), timebar);
+
+	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(timebar_item));
 
 	doc_metadata.create_entry(rdf::dc("title"), i18n("Title"), 0);
 	doc_metadata.create_entry(rdf::dc("creator"), i18n("Author"), 1);

@@ -72,8 +72,18 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	toc_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 	gtk_tree_selection_set_mode(toc_selection, GTK_SELECTION_MULTIPLE);
 
-	layout = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view));
+	GtkWidget *scrolled_view = gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_container_add(GTK_CONTAINER(scrolled_view), GTK_WIDGET(view));
+
+	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
+
+	GtkWidget *open = gtk_button_new_with_label(i18n("Open"));
+	gtk_box_pack_start(GTK_BOX(buttons), open, FALSE, FALSE, 5);
+
+	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_box_pack_start(GTK_BOX(layout), scrolled_view, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(layout), buttons, FALSE, FALSE, 5);
 
 	update_recent(aRecent, aMetadata, 30);
 }

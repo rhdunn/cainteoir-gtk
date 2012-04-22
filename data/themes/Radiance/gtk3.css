@@ -35,7 +35,7 @@ GtkToolbar .linked .button:insensitive {
  * background grey, so make these both white ...
  */
 
-GtkNotebook, #toc {
+GtkNotebook, #toc, GtkScrolledWindow * {
 	background-color: white;
 }
 

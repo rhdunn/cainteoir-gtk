@@ -34,10 +34,12 @@ public:
 	operator GtkWidget *() { return layout; }
 
 	void update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show);
+
+	std::string get_filename() const;
 private:
 	GtkWidget *layout;
 	GtkTreeStore *store;
-	GtkTreeSelection *toc_selection;
+	GtkTreeSelection *lib_selection;
 
 	rdf::graph metadata;
 };

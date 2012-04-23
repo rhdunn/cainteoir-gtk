@@ -90,8 +90,7 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	gtk_widget_set_name(view, "toc");
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
 
-	toc_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-	gtk_tree_selection_set_mode(toc_selection, GTK_SELECTION_MULTIPLE);
+	lib_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
 	GtkWidget *scrolled_view = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_add(GTK_CONTAINER(scrolled_view), GTK_WIDGET(view));
@@ -111,7 +110,7 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	gtk_box_pack_start(GTK_BOX(layout), topbar, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(layout), scrolled_view, TRUE, TRUE, 0);
 
-	update_recent(aRecent, aMetadata, 30);
+	update_recent(aRecent, aMetadata, 45);
 }
 
 void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show)
@@ -153,4 +152,31 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 
 	g_list_foreach(items, (GFunc)gtk_recent_info_unref, nullptr);
 	g_list_free(items);
+}
+
+std::string DocumentLibrary::get_filename() const
+{
+	std::string filename;
+
+	GList *selected = gtk_tree_selection_get_selected_rows(lib_selection, nullptr);
+	if (g_list_length(selected) == 1)
+	{
+		GtkTreeModel *model = GTK_TREE_MODEL(store);
+
+		GList *item = g_list_first(selected);
+		GtkTreeIter iter;
+		if (item && gtk_tree_model_get_iter(model, &iter, (GtkTreePath *)item->data))
+		{
+			gchar *anchor = nullptr;
+			gtk_tree_model_get(model, &iter, LIB_ANCHOR, &anchor, -1);
+
+			filename = anchor;
+			g_free(anchor);
+		}
+	}
+
+	g_list_foreach(selected, (GFunc)gtk_tree_path_free, nullptr);
+	g_list_free(selected);
+
+	return filename;
 }

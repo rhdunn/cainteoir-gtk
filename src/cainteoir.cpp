@@ -150,22 +150,13 @@ static void on_button_clicked(GtkWidget *widget, void *data)
 	((cbd->window)->*(cbd->callback))();
 }
 
-static GtkWidget *create_stock_button(const char *stock, Cainteoir *window, callback_function callback, GtkWidget *menu=nullptr)
+static GtkWidget *create_stock_button(const char *stock, Cainteoir *window, callback_function callback)
 {
 	CallbackData *data = g_slice_new(CallbackData);
 	data->window   = window;
 	data->callback = callback;
 
-	GtkToolItem *button = nullptr;
-	if (menu)
-	{
-		button = gtk_menu_tool_button_new_from_stock(stock);
-		gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(button), menu);
-	}
-	else
-	{
-		button = gtk_tool_button_new_from_stock(stock);
-	}
+	GtkToolItem *button = gtk_tool_button_new_from_stock(stock);
 	gtk_container_set_border_width(GTK_CONTAINER(button), 0);
 	g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), data);
 	return GTK_WIDGET(button);
@@ -257,7 +248,7 @@ Cainteoir::Cainteoir(const char *filename)
 	readButton   = create_stock_button(GTK_STOCK_MEDIA_PLAY,   this, &Cainteoir::read);
 	stopButton   = create_stock_button(GTK_STOCK_MEDIA_STOP,   this, &Cainteoir::stop);
 	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
-	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document, create_file_chooser_menu());
+	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document);
 
 	GtkWidget *topbar = gtk_toolbar_new();
 	gtk_widget_set_name(topbar, "topbar");
@@ -325,9 +316,10 @@ Cainteoir::Cainteoir(const char *filename)
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
 	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
 
-	navbar.add_paged_button(i18n("Library"), GTK_NOTEBOOK(view), lib_page);
-	navbar.set_active_button(navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page));
+	library_button  = navbar.add_paged_button(i18n("Library"),  GTK_NOTEBOOK(view), lib_page);
+	document_button = navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page);
 	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
+	navbar.set_active_button(document_button);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);
@@ -349,17 +341,25 @@ Cainteoir::Cainteoir(const char *filename)
 
 void Cainteoir::on_open_document()
 {
-	rql::results formats = rql::select(tts_metadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
+	std::string filename;
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(library_button)))
+	{
+		filename = library->get_filename();
+	}
+	else
+	{
+		rql::results formats = rql::select(tts_metadata,
+			rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
+			          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
-	std::string filename = select_file(GTK_WINDOW(window),
-		i18n("Open Document"),
-		GTK_FILE_CHOOSER_ACTION_OPEN,
-		GTK_STOCK_OPEN,
-		settings("document.filename").as<std::string>().c_str(),
-		settings("document.mimetype", "text/plain").as<std::string>(),
-		tts_metadata, formats);
+		filename = select_file(GTK_WINDOW(window),
+			i18n("Open Document"),
+			GTK_FILE_CHOOSER_ACTION_OPEN,
+			GTK_STOCK_OPEN,
+			settings("document.filename").as<std::string>().c_str(),
+			settings("document.mimetype", "text/plain").as<std::string>(),
+			tts_metadata, formats);
+	}
 
 	if (!filename.empty())
 		load_document(filename);
@@ -558,6 +558,8 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (lang.empty())
 			lang = "en";
 
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(document_button), TRUE);
+
 		voiceSelection->set_language(lang);
 		switch_voice_by_language(lang);
 	}
@@ -579,28 +581,6 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		gtk_widget_set_sensitive(recordButton, TRUE);
 	}
 	return ret;
-}
-
-GtkWidget *Cainteoir::create_file_chooser_menu()
-{
-	GtkWidget *recent = gtk_recent_chooser_menu_new_for_manager(recentManager);
-	gtk_recent_chooser_menu_set_show_numbers(GTK_RECENT_CHOOSER_MENU(recent), TRUE);
-	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(recent), GTK_RECENT_SORT_MRU);
-	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(recent), recentFilter);
-	gtk_recent_chooser_set_limit(GTK_RECENT_CHOOSER(recent), 10);
-
-	GtkWidget *separator = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(recent), separator);
-	gtk_widget_show(separator);
-
-	GtkWidget *more = gtk_menu_item_new_with_mnemonic(i18n("_More Documents..."));
-	gtk_menu_shell_append(GTK_MENU_SHELL(recent), more);
-	gtk_widget_show(more);
-
-	g_signal_connect(recent, "item-activated", G_CALLBACK(on_recent_item_activated), this);
-	g_signal_connect(more, "activate", G_CALLBACK(on_recent_files_dialog), this);
-
-	return recent;
 }
 
 bool Cainteoir::switch_voice(const rdf::uri &voice)

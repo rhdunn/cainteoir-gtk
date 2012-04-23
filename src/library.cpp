@@ -34,6 +34,12 @@ enum LibColumns
 
 namespace rql = cainteoir::rdf::query;
 
+static gint sort_recent_items_mru(GtkRecentInfo *a, GtkRecentInfo *b, gpointer unused)
+{
+	g_assert(a != NULL && b != NULL);
+	return gtk_recent_info_get_modified(b) - gtk_recent_info_get_modified(a);
+}
+
 static GtkWidget *create_nav_item(const char *name, bool is_button)
 {
 	GtkWidget *item;
@@ -110,7 +116,7 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 
 void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show)
 {
-	GList *items = gtk_recent_manager_get_items(aRecent);
+	GList *items = g_list_sort(gtk_recent_manager_get_items(aRecent), (GCompareFunc)sort_recent_items_mru);
 
 	rql::results mimetypes = rql::select(aMetadata, rql::matches(rql::predicate, rdf::tts("mimetype")));
 

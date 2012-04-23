@@ -1,3 +1,14 @@
+#breadcrumb-bar {
+	border-style: solid;
+	border-width: 0 0 1 0;
+	border-color: @borders;
+	padding: 2;
+}
+
+#breadcrumb-bar .button {
+	background-image: none;
+}
+
 /* Give the notebook a border at the top and bottom ...
  */
 

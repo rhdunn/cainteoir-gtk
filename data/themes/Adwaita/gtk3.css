@@ -22,6 +22,10 @@ GtkNotebook {
 	background-image: none;
 }
 
+#breadcrumb-bar {
+	background-color: white;
+}
+
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */

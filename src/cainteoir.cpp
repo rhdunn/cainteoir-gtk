@@ -325,7 +325,7 @@ Cainteoir::Cainteoir(const char *filename)
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
 	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
 
-	navbar.add_paged_button(i18n("Recent"), GTK_NOTEBOOK(view), lib_page);
+	navbar.add_paged_button(i18n("Library"), GTK_NOTEBOOK(view), lib_page);
 	navbar.set_active_button(navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page));
 	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
 

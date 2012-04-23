@@ -18,6 +18,11 @@ GtkToolbar {
 	padding-right: 5;
 }
 
+#breadcrumb-bar GtkButton {
+	-unico-inner-stroke-width: 0;
+	-unico-outer-stroke-width: 0;
+}
+
 /* The toc pane is coloured white by default, with the notebook
  * background grey, so make these both white ...
  */

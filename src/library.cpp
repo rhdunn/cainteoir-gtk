@@ -40,23 +40,6 @@ static gint sort_recent_items_mru(GtkRecentInfo *a, GtkRecentInfo *b, gpointer u
 	return gtk_recent_info_get_modified(b) - gtk_recent_info_get_modified(a);
 }
 
-static GtkWidget *create_nav_item(const char *name, bool is_button)
-{
-	GtkWidget *item;
-	if (is_button)
-	{
-		item = gtk_button_new_with_label(name);
-	}
-	else
-	{
-		item = gtk_label_new(name);
-	}
-
-	GtkToolItem *toolitem = gtk_tool_item_new();
-	gtk_container_add(GTK_CONTAINER(toolitem), item);
-	return GTK_WIDGET(toolitem);
-}
-
 static void add_document(GtkTreeStore *store, rdf::graph &metadata, rdf::uri subject, int pos)
 {
 	rql::results data = rql::select(metadata, rql::matches(rql::subject, subject));
@@ -95,16 +78,18 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	GtkWidget *scrolled_view = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_add(GTK_CONTAINER(scrolled_view), GTK_WIDGET(view));
 
+	GtkWidget *breadcrumbs = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_style_context_add_class(gtk_widget_get_style_context(breadcrumbs), "breadcrumbs");
+
+	gtk_container_add(GTK_CONTAINER(breadcrumbs), gtk_button_new_with_label(i18n("All")));
+	gtk_container_add(GTK_CONTAINER(breadcrumbs), gtk_button_new_with_label(i18n("Recent")));
+
 	GtkWidget *topbar = gtk_toolbar_new();
 	gtk_widget_set_name(topbar, "breadcrumb-bar");
 
-	gtk_container_add(GTK_CONTAINER(topbar), create_nav_item(i18n("All"), true));
-	gtk_container_add(GTK_CONTAINER(topbar), create_nav_item("\xE2\x9D\xAD", false));
-	gtk_container_add(GTK_CONTAINER(topbar), create_nav_item(i18n("Recent"), true));
-
-	GtkToolItem *expander = gtk_tool_item_new();
-	gtk_tool_item_set_expand(GTK_TOOL_ITEM(expander), TRUE);
-	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(expander));
+	GtkToolItem *navbar_item = gtk_tool_item_new();
+	gtk_container_add(GTK_CONTAINER(navbar_item), breadcrumbs);
+	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(navbar_item));
 
 	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(layout), topbar, FALSE, FALSE, 0);

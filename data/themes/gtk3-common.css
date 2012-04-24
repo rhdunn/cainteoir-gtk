@@ -1,12 +1,26 @@
 #breadcrumb-bar {
-	border-style: solid;
-	border-width: 0 0 1 0;
-	border-color: @borders;
-	padding: 2;
+	padding: 0;
 }
 
-#breadcrumb-bar .button {
-	background-image: none;
+.breadcrumbs .button {
+	padding-left: 12;
+	padding-right: 12;
+}
+
+.breadcrumbs .button {
+	border-image: none;
+	border-color: @borders;
+	border-width: 0 1 1 0;
+	border-radius: 0;
+}
+
+.breadcrumbs .button:first-child {
+}
+
+.breadcrumbs .button:last-child {
+}
+
+.breadcrumbs .button:only-child {
 }
 
 /* Give the notebook a border at the top and bottom ...

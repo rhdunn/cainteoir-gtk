@@ -57,7 +57,16 @@ GtkNotebook, #toc, GtkScrolledWindow * {
  * button, with rounded corners at the ends.
  */
 
-.linked .button {
+#breadcrumb-bar {
+	background-color: #f4f4f4;
+	border-style: solid;
+	border-color: @borders;
+	border-width: 0 0 1 0;
+	padding: 0;
+}
+
+.linked .button,
+.breadcrumbs .button {
 	-unico-inner-stroke-width: 0;
 	-unico-outer-stroke-width: 0;
 	border-right-width: 1;

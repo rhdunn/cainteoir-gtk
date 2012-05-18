@@ -119,11 +119,11 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 		{
 			if (rql::value(*mimetype) == mime)
 			{
-				cainteoir::document_events events;
 				char *uri  = gtk_recent_info_get_uri_display(info);
 				try
 				{
-					if (cainteoir::parseDocument(uri, events, metadata))
+					auto reader = cainteoir::createDocumentReader(uri, metadata, std::string());
+					if (reader)
 						add_document(store, metadata, rdf::uri(uri, std::string()), index++);
 				}
 				catch (const std::exception &)

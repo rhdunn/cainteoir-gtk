@@ -511,10 +511,22 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (filename.find("file://") == 0)
 			filename.erase(0, 7);
 
-		document_builder newdoc;
-		if (!cainteoir::parseDocument(filename.c_str(), newdoc, newdoc.doc->metadata))
+		std::shared_ptr<document> newdoc = std::make_shared<document>();
+		auto reader = cainteoir::createDocumentReader(filename.c_str(), newdoc->metadata, std::string());
+		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
-		doc = newdoc.doc;
+
+		while (reader->read())
+		{
+			if (reader->type & cainteoir::events::toc_entry)
+				newdoc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
+			if (reader->type & cainteoir::events::anchor)
+				newdoc->add_anchor(reader->anchor);
+			if (reader->type & cainteoir::events::text)
+				newdoc->add(reader->text);
+		}
+
+		doc = newdoc;
 
 		toc.clear();
 		doc_metadata.clear();

@@ -48,38 +48,4 @@ struct document : public cainteoir::document
 	rdf::graph metadata;
 };
 
-struct document_builder : public cainteoir::document_events
-{
-	document_builder() : doc(new document())
-	{
-	}
-
-	void metadata(const std::shared_ptr<const rdf::triple> &aStatement)
-	{
-		doc->metadata.push_back(aStatement);
-	}
-
-	const rdf::uri genid()
-	{
-		return doc->metadata.genid();
-	}
-
-	void text(std::shared_ptr<cainteoir::buffer> aText)
-	{
-		doc->add(aText);
-	}
-
-	void toc_entry(int depth, const rdf::uri &location, const std::string &title)
-	{
-		doc->toc.push_back(toc_entry_data(depth, location, title));
-	}
-
-	void anchor(const rdf::uri &location, const std::string &mimetype)
-	{
-		doc->add_anchor(location);
-	}
-
-	std::shared_ptr<document> doc;
-};
-
 #endif

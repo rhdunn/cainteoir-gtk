@@ -1,5 +1,15 @@
 
 -------------------------------------------------------------------------------
+VERSION 0.5 -- Friday June 1st 2012 [Jun 2012]
+
+  *  moved the recent documents into a document library pane.
+  *  improve the styling of the top and bottom bars.
+  *  improve the linked button styling on the Ambiance and Radiance themes.
+
+bug fixes:
+  *  the metadata pane is now scrollable to handle large description text.
+
+-------------------------------------------------------------------------------
 VERSION 0.4 -- Saturday March 31st 2012 [Mar 2012]
 
   *  initial translations from OSTD [http://littlesvr.ca/ostd].

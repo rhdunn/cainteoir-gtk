@@ -1,6 +1,6 @@
-/* Gtkmm 2 and 3 compatibility helpers.
+/* Gtkmm 3 and 3 compatibility helpers.
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -18,11 +18,11 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
-#define CAINTEOIRGTK_SRC_GTK_COMPATIBILITY_HPP
+#include "config.h"
+#include "compatibility.hpp"
 
 #if !GTK_CHECK_VERSION(3, 3, 0)
-void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
-#endif
-
+void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean)
+{
+}
 #endif

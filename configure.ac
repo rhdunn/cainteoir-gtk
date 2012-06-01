@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([Cainteoir Text-to-Speech], [0.4], [msclrhd@gmail.com], [cainteoir-gtk], [https://github.com/rhdunn/cainteoir-gtk])
+AC_INIT([Cainteoir Text-to-Speech], [0.5], [msclrhd@gmail.com], [cainteoir-gtk], [https://github.com/rhdunn/cainteoir-gtk])
 AM_INIT_AUTOMAKE()
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES])
@@ -40,6 +40,38 @@ AC_LANG_POP(C++)
 
 AC_LANG_PUSH(C++)
 TEMP_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -std=c++11"
+AC_MSG_CHECKING([if $CXX supports C++11 with the -std=c++11 flag])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[template <typename T> struct right_angle_brackets {};]
+		 [typedef right_angle_brackets<right_angle_brackets<int>> cpp11_check;]],
+		[[]])],
+	[AC_MSG_RESULT([yes])
+	 have_cxx11_cxx11=yes],
+	[AC_MSG_RESULT([no])
+	 have_cxx11_cxx11=no])
+CXXFLAGS="$TEMP_CXXFLAGS"
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
+TEMP_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -std=gnu++11"
+AC_MSG_CHECKING([if $CXX supports C++11 with the -std=gnu++11 flag])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[template <typename T> struct right_angle_brackets {};]
+		 [typedef right_angle_brackets<right_angle_brackets<int>> cpp11_check;]],
+		[[]])],
+	[AC_MSG_RESULT([yes])
+	 have_cxx11_gnuxx11=yes],
+	[AC_MSG_RESULT([no])
+	 have_cxx11_gnuxx11=no])
+CXXFLAGS="$TEMP_CXXFLAGS"
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
+TEMP_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="$CXXFLAGS -std=c++0x"
 AC_MSG_CHECKING([if $CXX supports C++11 with the -std=c++0x flag])
 AC_COMPILE_IFELSE(
@@ -71,7 +103,13 @@ CXXFLAGS="$TEMP_CXXFLAGS"
 AC_LANG_POP(C++)
 
 AC_MSG_CHECKING([if $CXX supports C++11])
-if test "$have_cxx11_cxx0x" = yes ; then
+if test "$have_cxx11_cxx11" = yes ; then
+	AC_MSG_RESULT([-std=c++11])
+	CXXFLAGS="$CXXFLAGS -std=c++11"
+elif test "$have_cxx11_gnuxx11" = yes ; then
+	AC_MSG_RESULT([-std=gnu++11])
+	CXXFLAGS="$CXXFLAGS -std=gnu++11"
+elif test "$have_cxx11_cxx0x" = yes ; then
 	AC_MSG_RESULT([-std=c++0x])
 	CXXFLAGS="$CXXFLAGS -std=c++0x"
 elif test "$have_cxx11_gnuxx0x" = yes ; then
@@ -87,6 +125,30 @@ fi
 dnl ================================================================
 dnl C++11 language support
 dnl ================================================================
+
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 nullptr])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[]],
+		[[const char *ptr = nullptr;]])],
+	[AC_MSG_RESULT([yes])
+	 AC_DEFINE([HAVE_CPP_NULLPTR],[1],[Define 1 if the nullptr keyword is not supported.])],
+	[AC_MSG_RESULT([no])
+	 dnl Check if a workaround for a gcc bug is needed
+	 AC_MSG_CHECKING([if $CXX supports implicit conversions for ==/!=])
+	 AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+			[[const struct nullptr_t]
+			 [{]
+			 [	template<class T> inline operator T*() const { return 0; }]
+			 [} nullptr = {};]],
+			[[const char *ptr = "testing";]
+			 [return (ptr != nullptr) ? 0 : 1]])],
+		[AC_MSG_RESULT([yes])
+		 AC_DEFINE([HAVE_CPP_IMPLICIT_NULLPTR_COMPARE],[1],[Define 1 if the nullptr workaround needs ==/!= definitions.])],
+		[AC_MSG_RESULT([no])])])
+AC_LANG_POP(C++)
 
 AC_LANG_PUSH(C++)
 AC_MSG_CHECKING([if $CXX supports C++11 decltype])

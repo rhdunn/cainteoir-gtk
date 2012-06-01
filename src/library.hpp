@@ -1,6 +1,6 @@
-/* Gtkmm 3 and 3 compatibility helpers.
+/* Document Library View
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -18,13 +18,30 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-#include <stdint.h>
+#ifndef CAINTEOIRGTK_SRC_DOCUMENTLIBRARY_HPP
+#define CAINTEOIRGTK_SRC_DOCUMENTLIBRARY_HPP
 
-#include "gtk-compatibility.hpp"
+#include <cainteoir/languages.hpp>
+#include <cainteoir/document.hpp>
 
-#if !GTK_CHECK_VERSION(3, 3, 0)
-void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean)
+#include "settings.hpp"
+
+class DocumentLibrary
 {
-}
+public:
+	DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, rdf::graph &aMetadata);
+
+	operator GtkWidget *() { return layout; }
+
+	void update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show);
+
+	std::string get_filename() const;
+private:
+	GtkWidget *layout;
+	GtkTreeStore *store;
+	GtkTreeSelection *lib_selection;
+
+	rdf::graph metadata;
+};
+
 #endif

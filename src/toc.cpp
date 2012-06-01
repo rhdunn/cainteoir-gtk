@@ -18,8 +18,8 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtk/gtk.h>
+#include "config.h"
+#include "compatibility.hpp"
 
 #include "toc.hpp"
 
@@ -41,7 +41,7 @@ static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item, bool ad
 				return rdf::uri();
 		}
 
-		gchar *anchor = NULL;
+		gchar *anchor = nullptr;
 		gtk_tree_model_get(model, &iter, TOC_ANCHOR, &anchor, -1);
 
 		rdf::uri ref(anchor);
@@ -61,7 +61,7 @@ TocPane::TocPane()
 		if (i == TOC_ANCHOR) continue;
 
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, NULL);
+		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	}
 
@@ -73,7 +73,7 @@ TocPane::TocPane()
 	toc_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 	gtk_tree_selection_set_mode(toc_selection, GTK_SELECTION_MULTIPLE);
 
-	layout = gtk_scrolled_window_new(NULL, NULL);
+	layout = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view));
 }
 
@@ -91,7 +91,7 @@ void TocPane::clear()
 void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
 {
 	GtkTreeIter row;
-	gtk_tree_store_append(store, &row, NULL);
+	gtk_tree_store_append(store, &row, nullptr);
 	gtk_tree_store_set(store, &row,
 		TOC_TITLE,  title.c_str(),
 		TOC_ANCHOR, location.str().c_str(),
@@ -100,7 +100,7 @@ void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
 
 TocSelection TocPane::selection() const
 {
-	GList *selected = gtk_tree_selection_get_selected_rows(toc_selection, NULL);
+	GList *selected = gtk_tree_selection_get_selected_rows(toc_selection, nullptr);
 	rdf::uri from;
 	rdf::uri to;
 
@@ -117,7 +117,7 @@ TocSelection TocPane::selection() const
 		break;
 	}
 
-	g_list_foreach(selected, (GFunc)gtk_tree_path_free, NULL);
+	g_list_foreach(selected, (GFunc)gtk_tree_path_free, nullptr);
 	g_list_free(selected);
 
 	return TocSelection(from, to);

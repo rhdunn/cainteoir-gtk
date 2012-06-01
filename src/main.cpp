@@ -18,12 +18,13 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtk/gtk.h>
+#include "config.h"
+#include "compatibility.hpp"
+#include "i18n.h"
+
 #include <sigc++/signal.h>
 
 #include "cainteoir.hpp"
-#include "i18n.h"
 
 static void load_gtk3_theme(const std::string &theme)
 {
@@ -37,7 +38,7 @@ static void load_gtk3_theme(const std::string &theme)
 
 		GtkCssProvider *provider = gtk_css_provider_new();
 		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), NULL);
+		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), nullptr);
 	}
 	catch (const std::exception &e)
 	{
@@ -52,15 +53,15 @@ int main(int argc, char ** argv)
 
 	gtk_init(&argc, &argv);
 
-	char *theme_name = NULL;
-	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, NULL);
+	char *theme_name = nullptr;
+	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, nullptr);
 
 	load_gtk3_theme("gtk3-common.css");
 	load_gtk3_theme(std::string(theme_name) + "/gtk3.css");
 
 	g_free(theme_name);
 
-	Cainteoir window(argc > 1 ? argv[1] : NULL);
+	Cainteoir window(argc > 1 ? argv[1] : nullptr);
 
 	gtk_main();
 	return 0;

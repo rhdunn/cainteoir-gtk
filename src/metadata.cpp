@@ -1,6 +1,6 @@
 /* Metadata View
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -18,11 +18,10 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include <gtk/gtk.h>
+#include "config.h"
+#include "compatibility.hpp"
 
 #include "metadata.hpp"
-#include "gtk-compatibility.hpp"
 
 namespace rql = cainteoir::rdf::query;
 

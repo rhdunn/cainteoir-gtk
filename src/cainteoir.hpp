@@ -28,6 +28,7 @@
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
+#include "library.hpp"
 #include "navbar.hpp"
 
 class Cainteoir
@@ -59,7 +60,6 @@ private:
 	bool load_document(std::string filename, bool from_constructor);
 
 	void updateProgress(double elapsed, double total, double completed);
-	GtkWidget *create_file_chooser_menu();
 
 	TimeBar timebar;
 	TocPane toc;
@@ -74,6 +74,9 @@ private:
 	GtkWidget *metadata_view;
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
+	std::shared_ptr<DocumentLibrary> library;
+	GtkWidget *library_button;
+	GtkWidget *document_button;
 
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;

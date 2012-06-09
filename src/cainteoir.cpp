@@ -653,7 +653,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 			if (reader->type & events::begin_context)
 			{
 				const char *name = nullptr;
-				bool need_newline = false;
+				const char *newline = nullptr;
 				switch (reader->context)
 				{
 				case events::span:
@@ -671,7 +671,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 					break;
 				case events::paragraph:
 					name = "paragraph";
-					need_newline = true;
+					newline = "\n\n";
 					break;
 				case events::heading:
 					switch (reader->parameter)
@@ -683,16 +683,21 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 					case 5:  name = "heading5"; break;
 					default: name = "heading6"; break;
 					}
-					need_newline = true;
+					newline = "\n\n";
 					break;
 				case events::list:
 				case events::list_item:
-					need_newline = true;
+				case events::table:
+				case events::row:
+					newline = "\n\n";
+					break;
+				case events::cell:
+					newline = "\n";
 					break;
 				}
-				if (need_newline && need_linebreak)
+				if (newline && need_linebreak)
 				{
-					gtk_text_buffer_insert(buffer, &position, "\n\n", 2);
+					gtk_text_buffer_insert(buffer, &position, newline, -1);
 					gtk_text_buffer_get_end_iter(buffer, &position);
 					need_linebreak = false;
 				}

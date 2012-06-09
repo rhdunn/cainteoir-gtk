@@ -389,7 +389,7 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(document_view), docpane, TRUE, TRUE, 0);
 
 	GtkWidget *toc_pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(toc_pane, 300, 0);
+	gtk_widget_set_size_request(toc_pane, 200, 0);
 	gtk_box_pack_start(GTK_BOX(toc_pane), toc, TRUE, TRUE, 0);
 
 	GtkWidget *pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);

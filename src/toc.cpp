@@ -51,11 +51,43 @@ static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item, bool ad
 	return rdf::uri();
 }
 
+static void on_cursor_changed(GtkTreeView *view, void *data)
+{
+	GtkTreeSelection *toc_selection = gtk_tree_view_get_selection(view);
+	GtkTreeModel *model = gtk_tree_view_get_model(view);
+	GList *selected = gtk_tree_selection_get_selected_rows(toc_selection, nullptr);
+	GList *item = g_list_first(selected);
+
+	GtkTreeIter iter;
+	if (item && gtk_tree_model_get_iter(model, &iter, (GtkTreePath *)item->data))
+	{
+		gchar *anchor = nullptr;
+		gtk_tree_model_get(model, &iter, TOC_ANCHOR, &anchor, -1);
+
+		GtkTextView *text = GTK_TEXT_VIEW((GtkWidget *)data);
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(text);
+		GtkTextMark *mark = gtk_text_buffer_get_mark(buffer, anchor);
+
+		GtkTextIter position;
+		if (mark)
+		{
+			gtk_text_buffer_get_iter_at_mark(buffer, &position, mark);
+			gtk_text_iter_forward_char(&position);
+		}
+		else
+			gtk_text_buffer_get_start_iter(buffer, &position);
+
+		gtk_text_view_scroll_to_iter(text, &position, 0, TRUE, 0.0, 0.0);
+
+		g_free(anchor);
+	}
+}
+
 TocPane::TocPane()
 {
 	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_STRING, G_TYPE_STRING);
 
-	GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	for (int i = 0; i < TOC_COUNT; ++i)
 	{
 		if (i == TOC_ANCHOR) continue;
@@ -75,6 +107,11 @@ TocPane::TocPane()
 
 	layout = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view));
+}
+
+void TocPane::connect(GtkWidget *aTextView)
+{
+	g_signal_connect(view, "cursor-changed", G_CALLBACK(on_cursor_changed), aTextView);
 }
 
 bool TocPane::empty() const

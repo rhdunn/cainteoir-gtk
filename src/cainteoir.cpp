@@ -771,7 +771,8 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (lang.empty())
 			lang = "en";
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(info_button), TRUE);
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(library_button)))
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(info_button), TRUE);
 
 		voiceSelection->set_language(lang);
 		switch_voice_by_language(lang);

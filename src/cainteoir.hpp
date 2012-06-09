@@ -73,6 +73,9 @@ private:
 	MetadataView engine_metadata;
 	GtkWidget *metadata_view;
 
+	GtkWidget *docview;
+	GtkTextTagTable *tags;
+
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
 	std::shared_ptr<DocumentLibrary> library;
 	GtkWidget *library_button;

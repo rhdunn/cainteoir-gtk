@@ -380,6 +380,7 @@ Cainteoir::Cainteoir(const char *filename)
 	docview = gtk_text_view_new();
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(docview), GTK_WRAP_WORD);
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(docview), FALSE);
+	toc.connect(docview);
 
 	GtkWidget *docpane = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_add(GTK_CONTAINER(docpane), docview);
@@ -665,7 +666,10 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 			if (reader->type & cainteoir::events::toc_entry)
 				newdoc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
 			if (reader->type & cainteoir::events::anchor)
+			{
 				newdoc->add_anchor(reader->anchor);
+				GtkTextMark *mark = gtk_text_buffer_create_mark(buffer, reader->anchor.str().c_str(), &position, TRUE);
+			}
 			if (reader->type & cainteoir::events::text)
 			{
 				newdoc->add(reader->text);

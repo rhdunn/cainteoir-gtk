@@ -34,6 +34,8 @@ public:
 
 	operator GtkWidget *() { return layout; }
 
+	void connect(GtkWidget *aTextView);
+
 	bool empty() const;
 
 	void clear();
@@ -43,6 +45,7 @@ public:
 	TocSelection selection() const;
 private:
 	GtkWidget *layout;
+	GtkWidget *view;
 	GtkTreeStore *store;
 	GtkTreeSelection *toc_selection;
 };

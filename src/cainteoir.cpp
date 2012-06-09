@@ -27,13 +27,27 @@
 #include "cainteoir.hpp"
 
 #include <stdexcept>
+#include <stack>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 
-namespace rql = cainteoir::rdf::query;
+namespace rql    = cainteoir::rdf::query;
+namespace events = cainteoir::events;
 
 static const int CHARACTERS_PER_WORD = 6;
+
+struct tag_block
+{
+	const char *name;
+	int offset;
+
+	tag_block(const char *aName, int aOffset)
+		: name(aName)
+		, offset(aOffset)
+	{
+	}
+};
 
 static std::string get_user_file(const char * filename)
 {
@@ -113,6 +127,67 @@ static std::string select_file(
 
 	gtk_widget_destroy(dialog);
 	return ret;
+}
+
+static GtkTextTagTable *create_document_tags(GtkTextBuffer *buffer,  application_settings &settings)
+{
+	std::string paragraph = settings("style.paragraph.font", "DejaVu Serif 11").as<std::string>();
+	std::string heading   = settings("style.heading.font",   "DejaVu Serif 14").as<std::string>();
+
+	gtk_text_buffer_create_tag(buffer, "paragraph",
+		"font", paragraph.c_str(),
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "heading1",
+		"justification",     GTK_JUSTIFY_CENTER,
+		"justification-set", TRUE,
+		"font",              heading.c_str(),
+		"weight",            PANGO_WEIGHT_BOLD,
+		"scale",             PANGO_SCALE_X_LARGE,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "heading2",
+		"font",   heading.c_str(),
+		"weight", PANGO_WEIGHT_BOLD,
+		"scale",  PANGO_SCALE_LARGE,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "heading3",
+		"font",   heading.c_str(),
+		"weight", PANGO_WEIGHT_BOLD,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "heading4",
+		"font",   heading.c_str(),
+		"weight", PANGO_WEIGHT_BOLD,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "heading5",
+		"font",   heading.c_str(),
+		"weight", PANGO_WEIGHT_BOLD,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "heading6",
+		"font",   heading.c_str(),
+		"weight", PANGO_WEIGHT_BOLD,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "superscript",
+		"rise", (PANGO_SCALE*4),
+		"rise-set", TRUE,
+		"scale", PANGO_SCALE_SMALL,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "subscript",
+		"rise", -(PANGO_SCALE*4),
+		"rise-set", TRUE,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "emphasized",
+		"style", PANGO_STYLE_ITALIC,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "strong",
+		"weight", PANGO_WEIGHT_BOLD,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "underline",
+		"underline",  PANGO_UNDERLINE_SINGLE,
+		nullptr);
+	gtk_text_buffer_create_tag(buffer, "reduced",
+		"style",  PANGO_STYLE_NORMAL,
+		"weight", PANGO_WEIGHT_NORMAL,
+		nullptr);
+	return gtk_text_buffer_get_tag_table(buffer);
 }
 
 static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
@@ -223,6 +298,7 @@ Cainteoir::Cainteoir(const char *filename)
 	, voice_metadata(languages, i18n("Voice"), 2)
 	, engine_metadata(languages, i18n("Engine"), 2)
 	, settings(get_user_file("settings.dat"))
+	, tags(nullptr)
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
@@ -301,13 +377,24 @@ Cainteoir::Cainteoir(const char *filename)
 	GtkWidget *metadata_pane = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(metadata_pane), metadata_view);
 
+	docview = gtk_text_view_new();
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(docview), GTK_WRAP_WORD);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(docview), FALSE);
+
+	GtkWidget *docpane = gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_container_add(GTK_CONTAINER(docpane), docview);
+
+	GtkWidget *document_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_box_pack_start(GTK_BOX(document_view), metadata_pane, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(document_view), docpane, TRUE, TRUE, 0);
+
 	GtkWidget *toc_pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_size_request(toc_pane, 300, 0);
 	gtk_box_pack_start(GTK_BOX(toc_pane), toc, TRUE, TRUE, 0);
 
 	GtkWidget *pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
 	gtk_box_pack_start(GTK_BOX(pane), toc_pane, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pane), metadata_pane, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(pane), document_view, TRUE, TRUE, 0);
 
 	view = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
@@ -516,15 +603,90 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
+		GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
+		if (tags == nullptr)
+			tags = create_document_tags(buffer, settings);
+
+		std::stack<tag_block> contexts;
+
+		bool need_linebreak = false;
+		GtkTextIter position;
+		gtk_text_buffer_get_end_iter(buffer, &position);
 		while (reader->read())
 		{
+			if (reader->type & events::begin_context)
+			{
+				const char *name = nullptr;
+				bool need_newline = false;
+				switch (reader->context)
+				{
+				case events::span:
+					switch (reader->parameter)
+					{
+					case events::overunder:   break;
+					case events::superscript: name = "superscript"; break;
+					case events::subscript:   name = "subscript";   break;
+					case events::emphasized:  name = "emphasized";  break;
+					case events::strong:      name = "strong";      break;
+					case events::underline:   name = "underline";   break;
+					case events::monospace:   name = "monospace";   break;
+					case events::reduced:     name = "reduced";     break;
+					};
+					break;
+				case events::paragraph:
+					name = "paragraph";
+					need_newline = true;
+					break;
+				case events::heading:
+					switch (reader->parameter)
+					{
+					case 1:  name = "heading1"; break;
+					case 2:  name = "heading2"; break;
+					case 3:  name = "heading3"; break;
+					case 4:  name = "heading4"; break;
+					case 5:  name = "heading5"; break;
+					default: name = "heading6"; break;
+					}
+					need_newline = true;
+					break;
+				case events::list:
+				case events::list_item:
+					need_newline = true;
+					break;
+				}
+				if (need_newline && need_linebreak)
+				{
+					gtk_text_buffer_insert(buffer, &position, "\n\n", 2);
+					gtk_text_buffer_get_end_iter(buffer, &position);
+					need_linebreak = false;
+				}
+				contexts.push({ name, gtk_text_iter_get_offset(&position) });
+			}
 			if (reader->type & cainteoir::events::toc_entry)
 				newdoc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
 			if (reader->type & cainteoir::events::anchor)
 				newdoc->add_anchor(reader->anchor);
 			if (reader->type & cainteoir::events::text)
+			{
 				newdoc->add(reader->text);
+
+				gtk_text_buffer_insert(buffer, &position, reader->text->begin(), reader->text->size());
+				gtk_text_buffer_get_end_iter(buffer, &position);
+				need_linebreak = true;
+			}
+			if (reader->type & events::end_context)
+			{
+				const char *name = contexts.top().name;
+				if (name)
+				{
+					GtkTextIter start;
+					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
+					gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
+				}
+				contexts.pop();
+			}
 		}
+		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;
 

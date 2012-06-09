@@ -80,6 +80,7 @@ private:
 	std::shared_ptr<DocumentLibrary> library;
 	GtkWidget *library_button;
 	GtkWidget *document_button;
+	GtkWidget *info_button;
 
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;

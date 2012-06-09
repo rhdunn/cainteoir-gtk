@@ -211,6 +211,32 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 	return filter;
 }
 
+struct ViewCallbackData
+{
+	GtkWidget *document_button;
+	GtkWidget *document_pane;
+	GtkWidget *info_button;
+	GtkWidget *info_pane;
+};
+
+static void on_view_changed(GtkToggleButton *button, void *data)
+{
+	if (gtk_toggle_button_get_active(button))
+	{
+		ViewCallbackData *view = (ViewCallbackData *)data;
+		if (button == GTK_TOGGLE_BUTTON(view->document_button))
+		{
+			gtk_widget_show(view->document_pane);
+			gtk_widget_hide(view->info_pane);
+		}
+		else if (button == GTK_TOGGLE_BUTTON(view->info_button))
+		{
+			gtk_widget_hide(view->document_pane);
+			gtk_widget_show(view->info_pane);
+		}
+	}
+}
+
 typedef void (Cainteoir::*callback_function)();
 
 struct CallbackData
@@ -404,10 +430,18 @@ Cainteoir::Cainteoir(const char *filename)
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
 	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
 
+	ViewCallbackData *data = g_slice_new(ViewCallbackData);
+	data->document_pane = docpane;
+	data->info_pane = metadata_pane;
+
 	library_button  = navbar.add_paged_button(i18n("Library"),  GTK_NOTEBOOK(view), lib_page);
-	document_button = navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page);
+	info_button = data->info_button = navbar.add_paged_button(i18n("Info"), GTK_NOTEBOOK(view), doc_page);
+	document_button = data->document_button = navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page);
 	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
-	navbar.set_active_button(document_button);
+	navbar.set_active_button(info_button);
+
+	g_signal_connect(data->document_button, "toggled", G_CALLBACK(on_view_changed), data);
+	g_signal_connect(data->info_button,     "toggled", G_CALLBACK(on_view_changed), data);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);
@@ -418,6 +452,7 @@ Cainteoir::Cainteoir(const char *filename)
 	timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 	gtk_widget_show_all(window);
+	gtk_widget_hide(docpane);
 
 	gtk_widget_set_sensitive(readButton, FALSE);
 	gtk_widget_set_sensitive(recordButton, FALSE);
@@ -736,7 +771,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 		if (lang.empty())
 			lang = "en";
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(document_button), TRUE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(info_button), TRUE);
 
 		voiceSelection->set_language(lang);
 		switch_voice_by_language(lang);

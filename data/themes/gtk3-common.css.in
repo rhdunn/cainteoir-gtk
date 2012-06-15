@@ -3,14 +3,14 @@
 }
 
 .breadcrumbs .button {
-	padding-left: 12;
-	padding-right: 12;
+	padding-left: 12@GTK_PX@;
+	padding-right: 12@GTK_PX@;
 }
 
 .breadcrumbs .button {
 	border-image: none;
 	border-color: @borders;
-	border-width: 0 1 1 0;
+	border-width: 0 1@GTK_PX@ 1@GTK_PX@ 0;
 	border-radius: 0;
 }
 

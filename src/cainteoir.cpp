@@ -720,12 +720,15 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 			}
 			if (reader->type & events::end_context)
 			{
-				const char *name = contexts.top().name;
-				if (name)
+				if (!contexts.empty())
 				{
-					GtkTextIter start;
-					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
-					gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
+					const char *name = contexts.top().name;
+					if (name)
+					{
+						GtkTextIter start;
+						gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
+						gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
+					}
 				}
 				contexts.pop();
 			}

@@ -1,16 +1,19 @@
+Release Notes
+=============
 
--------------------------------------------------------------------------------
-VERSION 0.5 -- Friday June 1st 2012 [Jun 2012]
+Version 0.5: Friday June 1st 2012 [Jun 2012]
+--------------------------------------------
 
   *  moved the recent documents into a document library pane.
   *  improve the styling of the top and bottom bars.
   *  improve the linked button styling on the Ambiance and Radiance themes.
 
-bug fixes:
+### bug fixes:
+
   *  the metadata pane is now scrollable to handle large description text.
 
--------------------------------------------------------------------------------
-VERSION 0.4 -- Saturday March 31st 2012 [Mar 2012]
+Version 0.4: Saturday March 31st 2012 [Mar 2012]
+------------------------------------------------
 
   *  initial translations from OSTD [http://littlesvr.ca/ostd].
   *  hide the titlebar when maximized on GNOME 3.4 and later.
@@ -18,37 +21,41 @@ VERSION 0.4 -- Saturday March 31st 2012 [Mar 2012]
      clearing the currently open document.
   *  support filtering voices by the current document's language.
 
-bug fixes:
+### bug fixes:
+
   *  fix reading/recording section ranges (it would miss the last section).
 
--------------------------------------------------------------------------------
-VERSION 0.3 -- Sunday January 29th 2012 [Nov 2012]
+Version 0.3: Sunday January 29th 2012 [Nov 2012]
+------------------------------------------------
 
   *  redesigned the UI -- make it consistent with the GNOME 3 application designs.
   *  don't show the "unable to open document" dialog when launching the program.
   *  keep the previous document if opening a document fails.
   *  require gtk+ >= 3.0.
 
--------------------------------------------------------------------------------
-VERSION 0.2 -- Tuesday November 22nd 2011 [Nov 2011]
+Version 0.2: Tuesday November 22nd 2011 [Nov 2011]
+--------------------------------------------------
 
-new functionality:
+### new functionality:
+
   *  display the voices in a voice list and support selecting the voice.
   *  switch the voice to match the document specified language if different.
   *  show the voice and engine details in the information/metadata view.
   *  display an error dialog if an error occurs while speaking.
   *  make the recent documents dialog wider (for Gtk+ 3).
 
-bug fixes:
+### bug fixes:
+
   *  fix progress indicators when using the Radiance and Ambiance themes.
   *  don't crash if no file is selected from the recent documents UI.
   *  fix selecting the recorded file format based on file extension (was always Ogg/Vorbis).
   *  fix opening documents containing spaces.
 
--------------------------------------------------------------------------------
-VERSION 0.1 -- Sunday August 7th 2011 [Aug 2011]
+Version 0.1 -- Sunday August 7th 2011 [Aug 2011]
+------------------------------------------------
 
-cainteoir-gtk:
+### cainteoir-gtk:
+
   *  read and record text documents, reporting progress;
   *  view document metadata and table of contents;
   *  select the start and end chapter from the table of contents;

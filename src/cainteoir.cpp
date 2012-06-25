@@ -729,8 +729,8 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 						gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
 						gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
 					}
+					contexts.pop();
 				}
-				contexts.pop();
 			}
 		}
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);

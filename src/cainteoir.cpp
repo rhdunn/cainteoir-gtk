@@ -37,6 +37,33 @@ namespace events = cainteoir::events;
 
 static const int CHARACTERS_PER_WORD = 6;
 
+enum
+{
+	TARGET_STRING,
+	TARGET_URI,
+};
+
+static GtkTargetEntry dnd_drop_targets[] = {
+	{ (gchar *)"STRING",        0, TARGET_STRING },
+	{ (gchar *)"text/plain",    0, TARGET_STRING },
+	{ (gchar *)"text/uri-list", 0, TARGET_URI },
+};
+
+static void dnd_data_received(GtkWidget *, GdkDragContext *context, gint, gint, GtkSelectionData *selection, guint, guint time, gpointer data)
+{
+	guchar *seldata = gtk_selection_data_get_text(selection);
+	if (seldata)
+	{
+		std::istringstream uris((char *)seldata);
+		std::string uri;
+		bool loaded = false;
+		while (!loaded && std::getline(uris, uri, '\r'))
+			loaded = ((Cainteoir *)data)->load_document(uri, true);
+		g_free(seldata);
+	}
+	gtk_drag_finish(context, FALSE, FALSE, time);
+}
+
 struct tag_block
 {
 	const char *name;
@@ -430,6 +457,9 @@ Cainteoir::Cainteoir(const char *filename)
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
 	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
 
+	gtk_drag_dest_set(pane, GTK_DEST_DEFAULT_ALL, dnd_drop_targets, 3, (GdkDragAction)(GDK_ACTION_COPY|GDK_ACTION_MOVE|GDK_ACTION_LINK));
+	g_signal_connect(pane, "drag-data-received", G_CALLBACK(dnd_data_received), this);
+
 	ViewCallbackData *data = g_slice_new(ViewCallbackData);
 	data->document_pane = docpane;
 	data->info_pane = metadata_pane;
@@ -621,7 +651,7 @@ bool Cainteoir::on_speaking()
 	return false;
 }
 
-bool Cainteoir::load_document(std::string filename, bool from_constructor)
+bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 {
 	if (speech || filename.empty()) return false;
 
@@ -787,7 +817,7 @@ bool Cainteoir::load_document(std::string filename, bool from_constructor)
 	}
 	catch (const std::exception & e)
 	{
-		if (!from_constructor)
+		if (!suppress_error_message)
 		{
 			display_error_message(GTK_WINDOW(window),
 				i18n("Open Document"),

@@ -292,7 +292,24 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		if (reader->type & cainteoir::events::text)
 		{
 			doc->add(reader->text);
-			gtk_text_buffer_insert(buffer, &position, reader->text->begin(), reader->text->size());
+
+			const gchar *start = reader->text->begin();
+			const gchar *end   = reader->text->end();
+			while (start < end)
+			{
+				const gchar *next  = start;
+				bool valid = g_utf8_validate(start, end - start, &next);
+				if (start != next)
+					gtk_text_buffer_insert(buffer, &position, start, next - start);
+				if (!valid)
+				{
+					char text[20];
+					int n = snprintf(text, 20, "<%02X>", (uint8_t)*next++);
+					gtk_text_buffer_insert(buffer, &position, text, n);
+				}
+				start = next;
+			}
+
 			gtk_text_buffer_get_end_iter(buffer, &position);
 			need_linebreak = true;
 		}

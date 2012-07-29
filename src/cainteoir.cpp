@@ -716,11 +716,11 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 					newline = "\n\n";
 					break;
 				case events::list:
-				case events::list_item:
 				case events::table:
 				case events::row:
 					newline = "\n\n";
 					break;
+				case events::list_item:
 				case events::cell:
 					newline = "\n";
 					break;

@@ -156,7 +156,7 @@ static std::string select_file(
 	return ret;
 }
 
-static GtkTextTagTable *create_document_tags(GtkTextBuffer *buffer,  application_settings &settings)
+static void create_document_tags(GtkTextBuffer *buffer, application_settings &settings)
 {
 	std::string paragraph = settings("style.paragraph.font", "DejaVu Serif 11").as<std::string>();
 	std::string heading   = settings("style.heading.font",   "DejaVu Serif 14").as<std::string>();
@@ -214,7 +214,105 @@ static GtkTextTagTable *create_document_tags(GtkTextBuffer *buffer,  application
 		"style",  PANGO_STYLE_NORMAL,
 		"weight", PANGO_WEIGHT_NORMAL,
 		nullptr);
-	return gtk_text_buffer_get_tag_table(buffer);
+}
+
+static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
+{
+	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
+	if (!tags)
+		create_document_tags(buffer, settings);
+
+	GtkTextIter position;
+	gtk_text_buffer_get_end_iter(buffer, &position);
+
+	std::stack<tag_block> contexts;
+	bool need_linebreak = false;
+	while (reader->read())
+	{
+		if (reader->type & events::begin_context)
+		{
+			const char *name = nullptr;
+			const char *newline = nullptr;
+			switch (reader->context)
+			{
+			case events::span:
+				switch (reader->parameter)
+				{
+				case events::overunder:   break;
+				case events::superscript: name = "superscript"; break;
+				case events::subscript:   name = "subscript";   break;
+				case events::emphasized:  name = "emphasized";  break;
+				case events::strong:      name = "strong";      break;
+				case events::underline:   name = "underline";   break;
+				case events::monospace:   name = "monospace";   break;
+				case events::reduced:     name = "reduced";     break;
+				};
+				break;
+			case events::paragraph:
+				name = "paragraph";
+				newline = "\n\n";
+				break;
+			case events::heading:
+				switch (reader->parameter)
+				{
+				case 1:  name = "heading1"; break;
+				case 2:  name = "heading2"; break;
+				case 3:  name = "heading3"; break;
+				case 4:  name = "heading4"; break;
+				case 5:  name = "heading5"; break;
+				default: name = "heading6"; break;
+				}
+				newline = "\n\n";
+				break;
+			case events::list:
+			case events::table:
+			case events::row:
+				newline = "\n\n";
+				break;
+			case events::list_item:
+			case events::cell:
+				newline = "\n";
+				break;
+			}
+			if (newline && need_linebreak)
+			{
+				gtk_text_buffer_insert(buffer, &position, newline, -1);
+				gtk_text_buffer_get_end_iter(buffer, &position);
+				need_linebreak = false;
+			}
+			contexts.push({ name, gtk_text_iter_get_offset(&position) });
+		}
+		if (reader->type & cainteoir::events::toc_entry)
+			doc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
+		if (reader->type & cainteoir::events::anchor)
+		{
+			doc->add_anchor(reader->anchor);
+			GtkTextMark *mark = gtk_text_buffer_create_mark(buffer, reader->anchor.str().c_str(), &position, TRUE);
+		}
+		if (reader->type & cainteoir::events::text)
+		{
+			doc->add(reader->text);
+			gtk_text_buffer_insert(buffer, &position, reader->text->begin(), reader->text->size());
+			gtk_text_buffer_get_end_iter(buffer, &position);
+			need_linebreak = true;
+		}
+		if (reader->type & events::end_context)
+		{
+			if (!contexts.empty())
+			{
+				const char *name = contexts.top().name;
+				if (name)
+				{
+					GtkTextIter start;
+					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
+					gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
+				}
+				contexts.pop();
+			}
+		}
+	}
+
+	return buffer;
 }
 
 static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
@@ -669,100 +767,9 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
-		if (tags == nullptr)
-			tags = create_document_tags(buffer, settings);
-
-		std::stack<tag_block> contexts;
-
-		bool need_linebreak = false;
-		GtkTextIter position;
-		gtk_text_buffer_get_end_iter(buffer, &position);
-		while (reader->read())
-		{
-			if (reader->type & events::begin_context)
-			{
-				const char *name = nullptr;
-				const char *newline = nullptr;
-				switch (reader->context)
-				{
-				case events::span:
-					switch (reader->parameter)
-					{
-					case events::overunder:   break;
-					case events::superscript: name = "superscript"; break;
-					case events::subscript:   name = "subscript";   break;
-					case events::emphasized:  name = "emphasized";  break;
-					case events::strong:      name = "strong";      break;
-					case events::underline:   name = "underline";   break;
-					case events::monospace:   name = "monospace";   break;
-					case events::reduced:     name = "reduced";     break;
-					};
-					break;
-				case events::paragraph:
-					name = "paragraph";
-					newline = "\n\n";
-					break;
-				case events::heading:
-					switch (reader->parameter)
-					{
-					case 1:  name = "heading1"; break;
-					case 2:  name = "heading2"; break;
-					case 3:  name = "heading3"; break;
-					case 4:  name = "heading4"; break;
-					case 5:  name = "heading5"; break;
-					default: name = "heading6"; break;
-					}
-					newline = "\n\n";
-					break;
-				case events::list:
-				case events::table:
-				case events::row:
-					newline = "\n\n";
-					break;
-				case events::list_item:
-				case events::cell:
-					newline = "\n";
-					break;
-				}
-				if (newline && need_linebreak)
-				{
-					gtk_text_buffer_insert(buffer, &position, newline, -1);
-					gtk_text_buffer_get_end_iter(buffer, &position);
-					need_linebreak = false;
-				}
-				contexts.push({ name, gtk_text_iter_get_offset(&position) });
-			}
-			if (reader->type & cainteoir::events::toc_entry)
-				newdoc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
-			if (reader->type & cainteoir::events::anchor)
-			{
-				newdoc->add_anchor(reader->anchor);
-				GtkTextMark *mark = gtk_text_buffer_create_mark(buffer, reader->anchor.str().c_str(), &position, TRUE);
-			}
-			if (reader->type & cainteoir::events::text)
-			{
-				newdoc->add(reader->text);
-
-				gtk_text_buffer_insert(buffer, &position, reader->text->begin(), reader->text->size());
-				gtk_text_buffer_get_end_iter(buffer, &position);
-				need_linebreak = true;
-			}
-			if (reader->type & events::end_context)
-			{
-				if (!contexts.empty())
-				{
-					const char *name = contexts.top().name;
-					if (name)
-					{
-						GtkTextIter start;
-						gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
-						gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
-					}
-					contexts.pop();
-				}
-			}
-		}
+		GtkTextBuffer *buffer = create_buffer_from_document(tags, reader, newdoc, settings);
+		if (!tags)
+			tags = gtk_text_buffer_get_tag_table(buffer);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;

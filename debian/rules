@@ -19,3 +19,9 @@ configure:
 
 build: configure
 	dh build
+
+build-arch: configure
+	dh build-arch
+
+build-indep: configure
+	dh build-indep

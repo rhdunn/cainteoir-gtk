@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.6: Tuesday July 31st 2012 [Jul 2012]
+----------------------------------------------
+
+  *  display the document text in the Document tab
+  *  support drag and drop to change the open document
+  *  convert the NEWS and README files to the markdown format
+
+### bug fixes:
+
+  *  fix a crash when opening a document with mismatched html tags
+
 Version 0.5: Friday June 1st 2012 [Jun 2012]
 --------------------------------------------
 

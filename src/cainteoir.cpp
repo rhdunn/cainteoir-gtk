@@ -158,71 +158,9 @@ static std::string select_file(
 	return ret;
 }
 
-static void create_document_tags(GtkTextBuffer *buffer, application_settings &settings)
-{
-	std::string paragraph = settings("style.paragraph.font", "DejaVu Serif 11").as<std::string>();
-	std::string heading   = settings("style.heading.font",   "DejaVu Serif 14").as<std::string>();
-
-	gtk_text_buffer_create_tag(buffer, "paragraph",
-		"font", paragraph.c_str(),
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "heading1",
-		"justification",     GTK_JUSTIFY_CENTER,
-		"justification-set", TRUE,
-		"font",              heading.c_str(),
-		"weight",            PANGO_WEIGHT_BOLD,
-		"scale",             PANGO_SCALE_X_LARGE,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "heading2",
-		"font",   heading.c_str(),
-		"weight", PANGO_WEIGHT_BOLD,
-		"scale",  PANGO_SCALE_LARGE,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "heading3",
-		"font",   heading.c_str(),
-		"weight", PANGO_WEIGHT_BOLD,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "heading4",
-		"font",   heading.c_str(),
-		"weight", PANGO_WEIGHT_BOLD,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "heading5",
-		"font",   heading.c_str(),
-		"weight", PANGO_WEIGHT_BOLD,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "heading6",
-		"font",   heading.c_str(),
-		"weight", PANGO_WEIGHT_BOLD,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "superscript",
-		"rise", (PANGO_SCALE*4),
-		"rise-set", TRUE,
-		"scale", PANGO_SCALE_SMALL,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "subscript",
-		"rise", -(PANGO_SCALE*4),
-		"rise-set", TRUE,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "emphasized",
-		"style", PANGO_STYLE_ITALIC,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "strong",
-		"weight", PANGO_WEIGHT_BOLD,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "underline",
-		"underline",  PANGO_UNDERLINE_SINGLE,
-		nullptr);
-	gtk_text_buffer_create_tag(buffer, "reduced",
-		"style",  PANGO_STYLE_NORMAL,
-		"weight", PANGO_WEIGHT_NORMAL,
-		nullptr);
-}
-
 static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
 {
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
-	if (!tags)
-		create_document_tags(buffer, settings);
 
 	GtkTextIter position;
 	gtk_text_buffer_get_end_iter(buffer, &position);
@@ -468,7 +406,6 @@ Cainteoir::Cainteoir(const char *filename)
 	, voice_metadata(languages, i18n("Voice"), 2)
 	, engine_metadata(languages, i18n("Engine"), 2)
 	, settings(get_user_file("settings.dat"))
-	, tags(nullptr)
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
@@ -488,6 +425,8 @@ Cainteoir::Cainteoir(const char *filename)
 
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
+
+	tags = GTK_TEXT_TAG_TABLE(gtk_builder_get_object(ui, "document-tags"));
 
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(tts_metadata);
@@ -780,8 +719,6 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
 		GtkTextBuffer *buffer = create_buffer_from_document(tags, reader, newdoc, settings);
-		if (!tags)
-			tags = gtk_text_buffer_get_tag_table(buffer);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;

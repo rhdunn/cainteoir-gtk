@@ -415,7 +415,6 @@ Cainteoir::Cainteoir(const char *filename)
 		throw std::runtime_error("unable to load the cainteoir-gtk UI file.");
 
 	window = GTK_WIDGET(gtk_builder_get_object(ui, "cainteoir-gtk"));
-	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech"));
 	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(window), TRUE);
 
 	gtk_window_resize(GTK_WINDOW(window), settings("window.width",  700).as<int>(), settings("window.height", 445).as<int>());

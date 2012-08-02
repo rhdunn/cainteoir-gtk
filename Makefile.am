@@ -110,6 +110,9 @@ RadianceTheme_DATA = data/themes/Radiance/gtk3.css
 desktopdir = $(datadir)/applications
 desktop_DATA = src/cainteoir-gtk.desktop
 
+uidir = ${datadir}/cainteoir-gtk/ui
+ui_DATA = ui/cainteoir-gtk.ui
+
 bin_PROGRAMS += src/cainteoir-gtk
 
 src_cainteoir_gtk_SOURCES = \

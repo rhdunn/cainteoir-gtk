@@ -32,6 +32,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#define UIDIR DATADIR "/" PACKAGE "/ui"
+
 namespace rql    = cainteoir::rdf::query;
 namespace events = cainteoir::events;
 
@@ -471,11 +473,13 @@ Cainteoir::Cainteoir(const char *filename)
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkBuilder *ui = gtk_builder_new();
+	if (!gtk_builder_add_from_file(ui, UIDIR "/cainteoir-gtk.ui", NULL))
+		throw std::runtime_error("unable to load the cainteoir-gtk UI file.");
+
+	window = GTK_WIDGET(gtk_builder_get_object(ui, "cainteoir-gtk"));
 	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech"));
 	gtk_window_set_hide_titlebar_when_maximized(GTK_WINDOW(window), TRUE);
-
-	gtk_widget_set_size_request(window, 500, 300);
 
 	gtk_window_resize(GTK_WINDOW(window), settings("window.width",  700).as<int>(), settings("window.height", 445).as<int>());
 	gtk_window_move(GTK_WINDOW(window), settings("window.left", 0).as<int>(), settings("window.top",  0).as<int>());
@@ -494,9 +498,8 @@ Cainteoir::Cainteoir(const char *filename)
 	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
 	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document);
 
-	GtkWidget *topbar = gtk_toolbar_new();
+	GtkWidget *topbar = GTK_WIDGET(gtk_builder_get_object(ui, "topbar"));
 	gtk_widget_set_name(topbar, "topbar");
-	gtk_widget_set_size_request(topbar, 0, 40);
 	gtk_style_context_add_class(gtk_widget_get_style_context(topbar), GTK_STYLE_CLASS_MENUBAR);
 
 	GtkToolItem *navbar_item = gtk_tool_item_new();
@@ -509,9 +512,8 @@ Cainteoir::Cainteoir(const char *filename)
 
 	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(openButton));
 
-	GtkWidget *bottombar = gtk_toolbar_new();
+	GtkWidget *bottombar = GTK_WIDGET(gtk_builder_get_object(ui, "bottombar"));
 	gtk_widget_set_name(bottombar, "bottombar");
-	gtk_widget_set_size_request(bottombar, 0, 40);
 	gtk_style_context_add_class(gtk_widget_get_style_context(bottombar), GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
 
 	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(readButton));
@@ -565,8 +567,7 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(pane), toc_pane, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pane), document_view, TRUE, TRUE, 0);
 
-	view = gtk_notebook_new();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(view), FALSE);
+	view = GTK_WIDGET(gtk_builder_get_object(ui, "view"));
 
 	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), pane, nullptr);
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
@@ -587,12 +588,6 @@ Cainteoir::Cainteoir(const char *filename)
 
 	g_signal_connect(data->document_button, "toggled", G_CALLBACK(on_view_changed), data);
 	g_signal_connect(data->info_button,     "toggled", G_CALLBACK(on_view_changed), data);
-
-	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_container_add(GTK_CONTAINER(window), box);
-	gtk_box_pack_start(GTK_BOX(box), topbar, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box), view, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(box), bottombar, FALSE, FALSE, 0);
 
 	timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 

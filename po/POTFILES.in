@@ -1,4 +1,7 @@
 ./src/cainteoir.cpp
+./src/compatibility.cpp
+./src/library.cpp
+./src/libraryentrycellrenderer.cpp
 ./src/main.cpp
 ./src/metadata.cpp
 ./src/navbar.cpp

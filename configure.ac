@@ -9,10 +9,17 @@ AC_CONFIG_SRCDIR([src])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION(0.17)
+LT_PREREQ([2.2.6])
+LT_INIT(disable-static)
 
-LT_INIT
+dnl ================================================================
+dnl gettext support.
+dnl ================================================================
+
+IT_PROG_INTLTOOL([0.40.0])
+
+AC_SUBST([GETTEXT_PACKAGE], [cainteoir-gtk])
+AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"], [Define to the gettext package name.])
 
 dnl ================================================================
 dnl Program checks.

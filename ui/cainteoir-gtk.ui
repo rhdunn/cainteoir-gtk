@@ -18,10 +18,8 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkToolItem" id="navbar-container">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkButtonBox" id="navbar">
                     <property name="visible">True</property>
@@ -34,11 +32,9 @@
                     <child>
                       <object class="GtkToggleButton" id="library-button">
                         <property name="label" translatable="yes">Library</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -49,11 +45,9 @@
                     <child>
                       <object class="GtkToggleButton" id="info-button">
                         <property name="label" translatable="yes">Info</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -64,11 +58,9 @@
                     <child>
                       <object class="GtkToggleButton" id="document-button">
                         <property name="label" translatable="yes">Document</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -79,11 +71,9 @@
                     <child>
                       <object class="GtkToggleButton" id="voice-button">
                         <property name="label" translatable="yes">Voice</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">half</property>
                       </object>
                       <packing>
@@ -101,11 +91,9 @@
             </child>
             <child>
               <object class="GtkToolButton" id="open-button">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
-                <property name="use_action_appearance">False</property>
                 <property name="stock_id">gtk-open</property>
               </object>
               <packing>
@@ -157,10 +145,8 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkToolButton" id="play-button">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="stock_id">gtk-media-play</property>
               </object>
               <packing>
@@ -170,10 +156,8 @@
             </child>
             <child>
               <object class="GtkToolButton" id="stop-button">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="stock_id">gtk-media-stop</property>
               </object>
               <packing>
@@ -183,10 +167,8 @@
             </child>
             <child>
               <object class="GtkToolButton" id="record-button">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="stock_id">gtk-media-record</property>
               </object>
               <packing>
@@ -196,10 +178,8 @@
             </child>
             <child>
               <object class="GtkToolItem" id="timebar-container">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkBox" id="timebar">
                     <property name="visible">True</property>

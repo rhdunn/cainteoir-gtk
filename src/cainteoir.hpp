@@ -59,7 +59,7 @@ protected:
 private:
 	void updateProgress(double elapsed, double total, double completed);
 
-	TimeBar timebar;
+	std::shared_ptr<TimeBar> timebar;
 	TocPane toc;
 	NavigationBar navbar;
 

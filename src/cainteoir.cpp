@@ -333,16 +333,12 @@ static void on_button_clicked(GtkWidget *widget, void *data)
 	((cbd->window)->*(cbd->callback))();
 }
 
-static GtkWidget *create_stock_button(const char *stock, Cainteoir *window, callback_function callback)
+static void bind_button_clicked(GtkWidget *button, Cainteoir *window, callback_function callback)
 {
 	CallbackData *data = g_slice_new(CallbackData);
 	data->window   = window;
 	data->callback = callback;
-
-	GtkToolItem *button = gtk_tool_button_new_from_stock(stock);
-	gtk_container_set_border_width(GTK_CONTAINER(button), 0);
 	g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), data);
-	return GTK_WIDGET(button);
 }
 
 static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
@@ -431,10 +427,15 @@ Cainteoir::Cainteoir(const char *filename)
 	recentFilter = create_recent_filter(tts_metadata);
 	library = std::make_shared<DocumentLibrary>(languages, recentManager, tts_metadata);
 
-	readButton   = create_stock_button(GTK_STOCK_MEDIA_PLAY,   this, &Cainteoir::read);
-	stopButton   = create_stock_button(GTK_STOCK_MEDIA_STOP,   this, &Cainteoir::stop);
-	recordButton = create_stock_button(GTK_STOCK_MEDIA_RECORD, this, &Cainteoir::record);
-	openButton   = create_stock_button(GTK_STOCK_OPEN,         this, &Cainteoir::on_open_document);
+	readButton   = GTK_WIDGET(gtk_builder_get_object(ui, "play-button"));
+	stopButton   = GTK_WIDGET(gtk_builder_get_object(ui, "stop-button"));
+	recordButton = GTK_WIDGET(gtk_builder_get_object(ui, "record-button"));
+	openButton   = GTK_WIDGET(gtk_tool_button_new_from_stock(GTK_STOCK_OPEN));
+
+	bind_button_clicked(readButton,   this, &Cainteoir::read);
+	bind_button_clicked(stopButton,   this, &Cainteoir::stop);
+	bind_button_clicked(recordButton, this, &Cainteoir::record);
+	bind_button_clicked(openButton,   this, &Cainteoir::on_open_document);
 
 	GtkWidget *topbar = GTK_WIDGET(gtk_builder_get_object(ui, "topbar"));
 	gtk_widget_set_name(topbar, "topbar");
@@ -454,15 +455,10 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_widget_set_name(bottombar, "bottombar");
 	gtk_style_context_add_class(gtk_widget_get_style_context(bottombar), GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
 
-	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(readButton));
-	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(stopButton));
-	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(recordButton));
-
-	GtkToolItem *timebar_item = gtk_tool_item_new();
-	gtk_tool_item_set_expand(GTK_TOOL_ITEM(timebar_item), TRUE);
-	gtk_container_add(GTK_CONTAINER(timebar_item), timebar);
-
-	gtk_container_add(GTK_CONTAINER(bottombar), GTK_WIDGET(timebar_item));
+	timebar = std::make_shared<TimeBar>(
+		GTK_WIDGET(gtk_builder_get_object(ui, "timebar-progress")),
+		GTK_WIDGET(gtk_builder_get_object(ui, "timebar-elapsed")),
+		GTK_WIDGET(gtk_builder_get_object(ui, "timebar-total")));
 
 	doc_metadata.create_entry(rdf::dc("title"), i18n("Title"), 0);
 	doc_metadata.create_entry(rdf::dc("creator"), i18n("Author"), 1);
@@ -527,7 +523,7 @@ Cainteoir::Cainteoir(const char *filename)
 	g_signal_connect(data->document_button, "toggled", G_CALLBACK(on_view_changed), data);
 	g_signal_connect(data->info_button,     "toggled", G_CALLBACK(on_view_changed), data);
 
-	timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 	gtk_widget_show_all(window);
 	gtk_widget_hide(docpane);
@@ -673,7 +669,7 @@ bool Cainteoir::on_speaking()
 {
 	if (speech->is_speaking())
 	{
-		timebar.update(speech->elapsedTime(), speech->totalTime(), speech->completed());
+		timebar->update(speech->elapsedTime(), speech->totalTime(), speech->completed());
 		return true;
 	}
 
@@ -689,7 +685,7 @@ bool Cainteoir::on_speaking()
 	speech.reset();
 	out.reset();
 
-	timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 	gtk_widget_set_visible(readButton, TRUE);
 	gtk_widget_set_visible(stopButton, FALSE);
@@ -756,7 +752,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 
 		doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
-		timebar.update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+		timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 		std::string lang = rql::select_value<std::string>(doc->metadata,
 			rql::both(rql::matches(rql::subject,   *doc->subject),

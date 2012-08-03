@@ -38,26 +38,6 @@ static void format_time(char *s, int n, double seconds)
 	snprintf(s, n, "%02d:%02d:%02d.%01d", hours, minutes, (int)floor(seconds), ms);
 }
 
-TimeBar::TimeBar()
-{
-	progress = gtk_progress_bar_new();
-	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), FALSE);
-	gtk_widget_set_name(progress, "timebar");
-
-	elapsedTime = gtk_label_new("00:00:00.0");
-	totalTime   = gtk_label_new("00:00:00.0");
-
-	GtkWidget *hlayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-	gtk_box_pack_start(GTK_BOX(hlayout), elapsedTime, FALSE, FALSE, 4);
-	gtk_box_pack_start(GTK_BOX(hlayout), progress, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hlayout), totalTime, FALSE, FALSE, 4);
-
-	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_box_pack_start(GTK_BOX(layout), hlayout, FALSE, FALSE, 0);
-
-	gtk_widget_set_valign(layout, GTK_ALIGN_CENTER);
-}
-
 void TimeBar::update(double elapsed, double total, double completed)
 {
 	char elapsed_time[80];

@@ -24,13 +24,15 @@
 class TimeBar
 {
 public:
-	TimeBar();
-
-	operator GtkWidget *() { return layout; }
+	TimeBar(GtkWidget *aProgress, GtkWidget *aElapsedTime, GtkWidget *aTotalTime)
+		: progress(aProgress)
+		, elapsedTime(aElapsedTime)
+		, totalTime(aTotalTime)
+	{
+	}
 
 	void update(double elapsed, double total, double completed);
 private:
-	GtkWidget *layout;
 	GtkWidget *progress;
 	GtkWidget *elapsedTime;
 	GtkWidget *totalTime;

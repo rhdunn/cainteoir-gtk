@@ -455,45 +455,32 @@ Cainteoir::Cainteoir(const char *filename)
 	engine_metadata.create_entry(rdf::tts("name"), i18n("Name"), 0);
 	engine_metadata.create_entry(rdf::tts("version"), i18n("Version"), 1);
 
+	GtkWidget *toc_view = GTK_WIDGET(gtk_builder_get_object(ui, "toc-view"));
+	gtk_container_add(GTK_CONTAINER(toc_view), toc);
+
 	metadata_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
-	GtkWidget *metadata_pane = gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *metadata_pane = GTK_WIDGET(gtk_builder_get_object(ui, "metadata-pane"));
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(metadata_pane), metadata_view);
 
-	docview = gtk_text_view_new();
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(docview), GTK_WRAP_WORD);
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(docview), FALSE);
+	docview = GTK_WIDGET(gtk_builder_get_object(ui, "document"));
 	toc.connect(docview);
 
-	GtkWidget *docpane = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(docpane), docview);
-
-	GtkWidget *document_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_box_pack_start(GTK_BOX(document_view), metadata_pane, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(document_view), docpane, TRUE, TRUE, 0);
-
-	GtkWidget *toc_pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_set_size_request(toc_pane, 200, 0);
-	gtk_box_pack_start(GTK_BOX(toc_pane), toc, TRUE, TRUE, 0);
-
-	GtkWidget *pane = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
-	gtk_box_pack_start(GTK_BOX(pane), toc_pane, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pane), document_view, TRUE, TRUE, 0);
-
-	view = GTK_WIDGET(gtk_builder_get_object(ui, "view"));
-
-	int doc_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), pane, nullptr);
-	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
-	int lib_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
-
+	GtkWidget *pane = GTK_WIDGET(gtk_builder_get_object(ui, "document-page"));
 	gtk_drag_dest_set(pane, GTK_DEST_DEFAULT_ALL, dnd_drop_targets, 3, (GdkDragAction)(GDK_ACTION_COPY|GDK_ACTION_MOVE|GDK_ACTION_LINK));
 	g_signal_connect(pane, "drag-data-received", G_CALLBACK(dnd_data_received), this);
 
+	view = GTK_WIDGET(gtk_builder_get_object(ui, "view"));
+
+	int doc_page   = 0;
+	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
+	int lib_page   = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
+
 	ViewCallbackData *data = g_slice_new(ViewCallbackData);
-	data->document_pane = docpane;
+	data->document_pane = GTK_WIDGET(gtk_builder_get_object(ui, "doc-pane"));
 	data->info_pane = metadata_pane;
 
 	library_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "library-button")),  GTK_NOTEBOOK(view), lib_page);
@@ -508,7 +495,7 @@ Cainteoir::Cainteoir(const char *filename)
 	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 	gtk_widget_show_all(window);
-	gtk_widget_hide(docpane);
+	gtk_widget_hide(data->document_pane);
 
 	gtk_widget_set_sensitive(readButton, FALSE);
 	gtk_widget_set_sensitive(recordButton, FALSE);

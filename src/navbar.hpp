@@ -26,15 +26,12 @@ class NavigationBar
 public:
 	NavigationBar();
 
-	operator GtkWidget *() { return layout; }
-
-	GtkWidget *add_paged_button(const char *label, GtkNotebook *view, int page);
+	GtkWidget *add_paged_button(GtkWidget *label, GtkNotebook *view, int page);
 
 	GtkWidget *get_active_button() const;
 
 	bool set_active_button(GtkWidget *button);
 private:
-	GtkWidget *layout;
 	GtkWidget *active_button;
 	bool setting_active_button;
 };

@@ -430,7 +430,7 @@ Cainteoir::Cainteoir(const char *filename)
 	readButton   = GTK_WIDGET(gtk_builder_get_object(ui, "play-button"));
 	stopButton   = GTK_WIDGET(gtk_builder_get_object(ui, "stop-button"));
 	recordButton = GTK_WIDGET(gtk_builder_get_object(ui, "record-button"));
-	openButton   = GTK_WIDGET(gtk_tool_button_new_from_stock(GTK_STOCK_OPEN));
+	openButton   = GTK_WIDGET(gtk_builder_get_object(ui, "open-button"));
 
 	bind_button_clicked(readButton,   this, &Cainteoir::read);
 	bind_button_clicked(stopButton,   this, &Cainteoir::stop);
@@ -440,16 +440,6 @@ Cainteoir::Cainteoir(const char *filename)
 	GtkWidget *topbar = GTK_WIDGET(gtk_builder_get_object(ui, "topbar"));
 	gtk_widget_set_name(topbar, "topbar");
 	gtk_style_context_add_class(gtk_widget_get_style_context(topbar), GTK_STYLE_CLASS_MENUBAR);
-
-	GtkToolItem *navbar_item = gtk_tool_item_new();
-	gtk_container_add(GTK_CONTAINER(navbar_item), navbar);
-	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(navbar_item));
-
-	GtkToolItem *expander = gtk_tool_item_new();
-	gtk_tool_item_set_expand(GTK_TOOL_ITEM(expander), TRUE);
-	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(expander));
-
-	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(openButton));
 
 	GtkWidget *bottombar = GTK_WIDGET(gtk_builder_get_object(ui, "bottombar"));
 	gtk_widget_set_name(bottombar, "bottombar");
@@ -514,10 +504,10 @@ Cainteoir::Cainteoir(const char *filename)
 	data->document_pane = docpane;
 	data->info_pane = metadata_pane;
 
-	library_button  = navbar.add_paged_button(i18n("Library"),  GTK_NOTEBOOK(view), lib_page);
-	info_button = data->info_button = navbar.add_paged_button(i18n("Info"), GTK_NOTEBOOK(view), doc_page);
-	document_button = data->document_button = navbar.add_paged_button(i18n("Document"), GTK_NOTEBOOK(view), doc_page);
-	navbar.add_paged_button(i18n("Voice"), GTK_NOTEBOOK(view), voice_page);
+	library_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "library-button")),  GTK_NOTEBOOK(view), lib_page);
+	info_button = data->info_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "info-button")), GTK_NOTEBOOK(view), doc_page);
+	document_button = data->document_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "document-button")), GTK_NOTEBOOK(view), doc_page);
+	navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "voice-button")), GTK_NOTEBOOK(view), voice_page);
 	navbar.set_active_button(info_button);
 
 	g_signal_connect(data->document_button, "toggled", G_CALLBACK(on_view_changed), data);

@@ -437,14 +437,6 @@ Cainteoir::Cainteoir(const char *filename)
 	bind_button_clicked(recordButton, this, &Cainteoir::record);
 	bind_button_clicked(openButton,   this, &Cainteoir::on_open_document);
 
-	GtkWidget *topbar = GTK_WIDGET(gtk_builder_get_object(ui, "topbar"));
-	gtk_widget_set_name(topbar, "topbar");
-	gtk_style_context_add_class(gtk_widget_get_style_context(topbar), GTK_STYLE_CLASS_MENUBAR);
-
-	GtkWidget *bottombar = GTK_WIDGET(gtk_builder_get_object(ui, "bottombar"));
-	gtk_widget_set_name(bottombar, "bottombar");
-	gtk_style_context_add_class(gtk_widget_get_style_context(bottombar), GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-
 	timebar = std::make_shared<TimeBar>(
 		GTK_WIDGET(gtk_builder_get_object(ui, "timebar-progress")),
 		GTK_WIDGET(gtk_builder_get_object(ui, "timebar-elapsed")),

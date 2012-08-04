@@ -61,8 +61,8 @@ static void add_document(GtkTreeStore *store, rdf::graph &metadata, rdf::uri sub
 DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, rdf::graph &aMetadata)
 {
 	store = gtk_tree_store_new(LIB_COUNT, G_TYPE_STRING, G_TYPE_STRING);
-
-	GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	lib_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
 	GtkCellRenderer *renderer = cainteoir_library_entry_cell_renderer_new();
 	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer,
@@ -70,30 +70,8 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 		nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 
-	gtk_widget_set_name(view, "toc");
+	gtk_widget_set_name(view, "library");
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
-
-	lib_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-
-	GtkWidget *scrolled_view = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(scrolled_view), GTK_WIDGET(view));
-
-	GtkWidget *breadcrumbs = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_style_context_add_class(gtk_widget_get_style_context(breadcrumbs), "breadcrumbs");
-
-	gtk_container_add(GTK_CONTAINER(breadcrumbs), gtk_button_new_with_label(i18n("All")));
-	gtk_container_add(GTK_CONTAINER(breadcrumbs), gtk_button_new_with_label(i18n("Recent")));
-
-	GtkWidget *topbar = gtk_toolbar_new();
-	gtk_widget_set_name(topbar, "breadcrumb-bar");
-
-	GtkToolItem *navbar_item = gtk_tool_item_new();
-	gtk_container_add(GTK_CONTAINER(navbar_item), breadcrumbs);
-	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(navbar_item));
-
-	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_box_pack_start(GTK_BOX(layout), topbar, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(layout), scrolled_view, TRUE, TRUE, 0);
 
 	update_recent(aRecent, aMetadata, 45);
 }

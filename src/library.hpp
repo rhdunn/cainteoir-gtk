@@ -31,13 +31,13 @@ class DocumentLibrary
 public:
 	DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, rdf::graph &aMetadata);
 
-	operator GtkWidget *() { return layout; }
+	operator GtkWidget *() { return view; }
 
 	void update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show);
 
 	std::string get_filename() const;
 private:
-	GtkWidget *layout;
+	GtkWidget *view;
 	GtkTreeStore *store;
 	GtkTreeSelection *lib_selection;
 

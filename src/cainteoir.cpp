@@ -425,7 +425,10 @@ Cainteoir::Cainteoir(const char *filename)
 
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(tts_metadata);
+
+	GtkWidget *library_view = GTK_WIDGET(gtk_builder_get_object(ui, "library-view"));
 	library = std::make_shared<DocumentLibrary>(languages, recentManager, tts_metadata);
+	gtk_container_add(GTK_CONTAINER(library_view), *library);
 
 	readButton   = GTK_WIDGET(gtk_builder_get_object(ui, "play-button"));
 	stopButton   = GTK_WIDGET(gtk_builder_get_object(ui, "stop-button"));
@@ -476,8 +479,8 @@ Cainteoir::Cainteoir(const char *filename)
 	view = GTK_WIDGET(gtk_builder_get_object(ui, "view"));
 
 	int doc_page   = 0;
+	int lib_page   = 1;
 	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
-	int lib_page   = gtk_notebook_append_page(GTK_NOTEBOOK(view), *library, nullptr);
 
 	ViewCallbackData *data = g_slice_new(ViewCallbackData);
 	data->document_pane = GTK_WIDGET(gtk_builder_get_object(ui, "doc-pane"));

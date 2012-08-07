@@ -83,10 +83,10 @@ private:
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;
 
-	GtkWidget *readButton;
-	GtkWidget *stopButton;
-	GtkWidget *recordButton;
-	GtkWidget *openButton;
+	GtkAction *readAction;
+	GtkAction *stopAction;
+	GtkAction *recordAction;
+	GtkAction *openAction;
 
 	rdf::graph tts_metadata;
 	cainteoir::tts::engines tts;

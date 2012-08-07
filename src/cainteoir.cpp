@@ -327,18 +327,18 @@ struct CallbackData
 	callback_function callback;
 };
 
-static void on_button_clicked(GtkWidget *widget, void *data)
+static void on_action_activate(GtkAction *action, void *data)
 {
 	CallbackData *cbd = (CallbackData *)data;
 	((cbd->window)->*(cbd->callback))();
 }
 
-static void bind_button_clicked(GtkWidget *button, Cainteoir *window, callback_function callback)
+static void bind_action_activate(GtkAction *action, Cainteoir *window, callback_function callback)
 {
 	CallbackData *data = g_slice_new(CallbackData);
 	data->window   = window;
 	data->callback = callback;
-	g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), data);
+	g_signal_connect(action, "activate", G_CALLBACK(on_action_activate), data);
 }
 
 static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
@@ -430,15 +430,15 @@ Cainteoir::Cainteoir(const char *filename)
 	library = std::make_shared<DocumentLibrary>(languages, recentManager, tts_metadata);
 	gtk_container_add(GTK_CONTAINER(library_view), *library);
 
-	readButton   = GTK_WIDGET(gtk_builder_get_object(ui, "play-button"));
-	stopButton   = GTK_WIDGET(gtk_builder_get_object(ui, "stop-button"));
-	recordButton = GTK_WIDGET(gtk_builder_get_object(ui, "record-button"));
-	openButton   = GTK_WIDGET(gtk_builder_get_object(ui, "open-button"));
+	readAction   = GTK_ACTION(gtk_builder_get_object(ui, "play-action"));
+	stopAction   = GTK_ACTION(gtk_builder_get_object(ui, "stop-action"));
+	recordAction = GTK_ACTION(gtk_builder_get_object(ui, "record-action"));
+	openAction   = GTK_ACTION(gtk_builder_get_object(ui, "open-action"));
 
-	bind_button_clicked(readButton,   this, &Cainteoir::read);
-	bind_button_clicked(stopButton,   this, &Cainteoir::stop);
-	bind_button_clicked(recordButton, this, &Cainteoir::record);
-	bind_button_clicked(openButton,   this, &Cainteoir::on_open_document);
+	bind_action_activate(readAction,   this, &Cainteoir::read);
+	bind_action_activate(stopAction,   this, &Cainteoir::stop);
+	bind_action_activate(recordAction, this, &Cainteoir::record);
+	bind_action_activate(openAction,   this, &Cainteoir::on_open_document);
 
 	timebar = std::make_shared<TimeBar>(
 		GTK_WIDGET(gtk_builder_get_object(ui, "timebar-progress")),
@@ -500,9 +500,9 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_widget_show_all(window);
 	gtk_widget_hide(data->document_pane);
 
-	gtk_widget_set_sensitive(readButton, FALSE);
-	gtk_widget_set_sensitive(recordButton, FALSE);
-	gtk_widget_set_visible(stopButton, FALSE);
+	gtk_action_set_sensitive(readAction, FALSE);
+	gtk_action_set_sensitive(recordAction, FALSE);
+	gtk_action_set_visible(stopAction, FALSE);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
 	switch_voice(tts.voice());
@@ -629,10 +629,10 @@ void Cainteoir::on_speak(const char * status)
 	cainteoir::document::range_type selection = doc->children(toc.selection());
 	speech = tts.speak(doc, out, selection.first, selection.second);
 
-	gtk_widget_set_visible(readButton, FALSE);
-	gtk_widget_set_visible(stopButton, TRUE);
-	gtk_widget_set_sensitive(recordButton, FALSE);
-	gtk_widget_set_sensitive(openButton, FALSE);
+	gtk_action_set_visible(readAction, FALSE);
+	gtk_action_set_visible(stopAction, TRUE);
+	gtk_action_set_sensitive(recordAction, FALSE);
+	gtk_action_set_sensitive(openAction, FALSE);
 
 	g_timeout_add(100, (GSourceFunc)on_timer_speaking, this);
 }
@@ -659,10 +659,10 @@ bool Cainteoir::on_speaking()
 
 	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
-	gtk_widget_set_visible(readButton, TRUE);
-	gtk_widget_set_visible(stopButton, FALSE);
-	gtk_widget_set_sensitive(recordButton, TRUE);
-	gtk_widget_set_sensitive(openButton, TRUE);
+	gtk_action_set_visible(readAction, TRUE);
+	gtk_action_set_visible(stopAction, FALSE);
+	gtk_action_set_sensitive(recordAction, TRUE);
+	gtk_action_set_sensitive(openAction, TRUE);
 
 	return false;
 }
@@ -671,8 +671,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 {
 	if (speech || filename.empty()) return false;
 
-	gtk_widget_set_sensitive(readButton, FALSE);
-	gtk_widget_set_sensitive(recordButton, FALSE);
+	gtk_action_set_sensitive(readAction, FALSE);
+	gtk_action_set_sensitive(recordAction, FALSE);
 
 	bool ret = true;
 	try
@@ -752,8 +752,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 
 	if (doc->text_length() != 0)
 	{
-		gtk_widget_set_sensitive(readButton, TRUE);
-		gtk_widget_set_sensitive(recordButton, TRUE);
+		gtk_action_set_sensitive(readAction, TRUE);
+		gtk_action_set_sensitive(recordAction, TRUE);
 	}
 	return ret;
 }

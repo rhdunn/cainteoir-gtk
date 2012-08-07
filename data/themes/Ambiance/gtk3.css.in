@@ -35,7 +35,7 @@ GtkNotebook, #toc, GtkScrolledWindow * {
 		to (shade (@dark_bg_color, 0.9)));
 
 	color: @dark_fg_color;
-	text-shadow: 0 -1@GTK_PX@ shade (@dark_bg_color, 0.7);
+	text-shadow: 0 -1 shade (@dark_bg_color, 0.7);
 
 	-unico-border-gradient: -gtk-gradient (linear, left top, left bottom,
 		from (shade (@dark_bg_color, 0.9)),
@@ -56,7 +56,7 @@ GtkNotebook, #toc, GtkScrolledWindow * {
 		to (shade (@dark_bg_color, 0.6)));
 
 	-unico-glow-color: black;
-	-unico-glow-radius: 3@GTK_PX@;
+	-unico-glow-radius: 3;
 }
 
 /* Make the buttons in the navbar appear to be part of one single

@@ -177,9 +177,9 @@ void VoiceList::refresh()
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object,    rdf::tts("Voice"))));
 
-	foreach_iter(voice, voicelist)
+	for (auto &voice : voicelist)
 	{
-		rql::results statements = rql::select(mMetadata, rql::matches(rql::subject, rql::subject(*voice)));
+		rql::results statements = rql::select(mMetadata, rql::matches(rql::subject, rql::subject(voice)));
 		if (filter_by_doc_language)
 		{
 			std::string lang = rql::select_value<std::string>(statements,
@@ -200,37 +200,37 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 	GtkTreeIter row;
 	gtk_tree_store_append(store, &row, nullptr);
 
-	foreach_iter(statement, voice)
+	for (auto &statement : voice)
 	{
-		if (rql::predicate(*statement) == rdf::tts("name"))
+		if (rql::predicate(statement) == rdf::tts("name"))
 			gtk_tree_store_set(store, &row,
-				VLC_URI,   rql::subject(*statement).str().c_str(),
-				VLC_VOICE, rql::value(*statement).c_str(),
+				VLC_URI,   rql::subject(statement).str().c_str(),
+				VLC_VOICE, rql::value(statement).c_str(),
 				-1);
-		else if (rql::predicate(*statement) == rdf::tts("voiceOf"))
+		else if (rql::predicate(statement) == rdf::tts("voiceOf"))
 		{
 			std::string engine = rql::select_value<std::string>(aMetadata,
-				rql::both(rql::matches(rql::subject,   rql::object(*statement)),
+				rql::both(rql::matches(rql::subject,   rql::object(statement)),
 				          rql::matches(rql::predicate, rdf::tts("name"))));
 			gtk_tree_store_set(store, &row, VLC_ENGINE, engine.c_str(), -1);
 		}
-		else if (rql::predicate(*statement) == rdf::dc("language"))
+		else if (rql::predicate(statement) == rdf::dc("language"))
 		{
-			cainteoir::language::tag lang = cainteoir::language::make_lang(rql::value(*statement));
+			cainteoir::language::tag lang = cainteoir::language::make_lang(rql::value(statement));
 			gtk_tree_store_set(store, &row, VLC_LANGUAGE, languages.language(lang), -1);
 			gtk_tree_store_set(store, &row, VLC_REGION, languages.region(lang), -1);
 		}
-		else if (rql::predicate(*statement) == rdf::tts("gender"))
+		else if (rql::predicate(statement) == rdf::tts("gender"))
 		{
-			if (rql::object(*statement) == rdf::tts("male"))
+			if (rql::object(statement) == rdf::tts("male"))
 				gtk_tree_store_set(store, &row, VLC_GENDER, i18n("male"), -1);
-			else if (rql::object(*statement) == rdf::tts("female"))
+			else if (rql::object(statement) == rdf::tts("female"))
 				gtk_tree_store_set(store, &row, VLC_GENDER, i18n("female"), -1);
 		}
-		else if (rql::predicate(*statement) == rdf::tts("frequency"))
-			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(*statement).c_str(), -1);
-		else if (rql::predicate(*statement) == rdf::tts("channels"))
-			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(*statement) == "1" ? i18n("mono") : i18n("stereo"), -1);
+		else if (rql::predicate(statement) == rdf::tts("frequency"))
+			gtk_tree_store_set(store, &row, VLC_FREQUENCY, rql::value(statement).c_str(), -1);
+		else if (rql::predicate(statement) == rdf::tts("channels"))
+			gtk_tree_store_set(store, &row, VLC_CHANNELS, rql::value(statement) == "1" ? i18n("mono") : i18n("stereo"), -1);
 	}
 }
 
@@ -286,15 +286,15 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 
 void VoiceSelectionView::show(const rdf::uri &voice)
 {
-	foreach_iter (item, parameters)
+	for (auto &item : parameters)
 	{
-		std::shared_ptr<tts::parameter> parameter = mEngines->parameter(item->type);
+		std::shared_ptr<tts::parameter> parameter = mEngines->parameter(item.type);
 
-		gtk_range_set_range(GTK_RANGE(item->param), parameter->minimum(), parameter->maximum());
-		gtk_range_set_value(GTK_RANGE(item->param), parameter->value());
+		gtk_range_set_range(GTK_RANGE(item.param), parameter->minimum(), parameter->maximum());
+		gtk_range_set_value(GTK_RANGE(item.param), parameter->value());
 
-		gtk_label_set_markup(GTK_LABEL(item->label), parameter->name());
-		gtk_label_set_markup(GTK_LABEL(item->units), parameter->units());
+		gtk_label_set_markup(GTK_LABEL(item.label), parameter->name());
+		gtk_label_set_markup(GTK_LABEL(item.units), parameter->units());
 	}
 
 	voices.set_voice(voice);
@@ -304,9 +304,9 @@ void VoiceSelectionView::show(const rdf::uri &voice)
 
 void VoiceSelectionView::apply()
 {
-	foreach_iter (item, parameters)
+	for (auto &item : parameters)
 	{
-		mEngines->parameter(item->type)->set_value(gtk_range_get_value(GTK_RANGE(item->param)));
+		mEngines->parameter(item.type)->set_value(gtk_range_get_value(GTK_RANGE(item.param)));
 	}
 
 	on_voice_change.emit(voices.get_voice());

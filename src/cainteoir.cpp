@@ -587,11 +587,11 @@ void Cainteoir::record()
 		rql::results filetypes = rql::select(tts_metadata,
 			rql::matches(rql::predicate, rdf::tts("extension")));
 
-		foreach_iter(filetype, filetypes)
+		for (auto &filetype : filetypes)
 		{
-			if (rql::value(*filetype) == ext)
+			if (rql::value(filetype) == ext)
 			{
-				const rdf::uri &uri = rql::subject(*filetype);
+				const rdf::uri &uri = rql::subject(filetype);
 
 				std::string type = rql::select_value<std::string>(tts_metadata,
 					rql::both(rql::matches(rql::subject,   uri),
@@ -700,8 +700,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 		std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
 
-		foreach_iter(entry, doc->toc)
-			toc.add(entry->depth, entry->location, entry->title);
+		for (auto &entry : doc->toc)
+			toc.add(entry.depth, entry.location, entry.title);
 
 		if (toc.empty())
 			gtk_widget_hide(toc);
@@ -763,11 +763,11 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	voice_metadata.add_metadata(tts_metadata, voice, rdf::tts("name"));
 	voice_metadata.add_metadata(tts_metadata, voice, rdf::dc("language"));
 
-	foreach_iter(statement, rql::select(tts_metadata, rql::matches(rql::subject, voice)))
+	for (auto &statement : rql::select(tts_metadata, rql::matches(rql::subject, voice)))
 	{
-		if (rql::predicate(*statement) == rdf::tts("voiceOf"))
+		if (rql::predicate(statement) == rdf::tts("voiceOf"))
 		{
-			const rdf::uri &engine = rql::object(*statement);
+			const rdf::uri &engine = rql::object(statement);
 			if (!engine.empty())
 			{
 				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
@@ -804,9 +804,9 @@ bool Cainteoir::switch_voice_by_language(const std::string &lang)
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object,    rdf::tts("Voice"))));
 
-	foreach_iter(voice, voicelist)
+	for (auto &voice : voicelist)
 	{
-		const rdf::uri &uri = rql::subject(*voice);
+		const rdf::uri &uri = rql::subject(voice);
 
 		std::string lang = rql::select_value<std::string>(tts_metadata,
 			rql::both(rql::matches(rql::subject,   uri),

@@ -120,9 +120,9 @@ static std::string select_file(
 		nullptr);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
 
-	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
+	for (auto &format : formats)
 	{
-		rql::results data = rql::select(metadata, rql::matches(rql::subject, rql::subject(*format)));
+		rql::results data = rql::select(metadata, rql::matches(rql::subject, rql::subject(format)));
 
 		GtkFileFilter *filter = gtk_file_filter_new();
 		gtk_file_filter_set_name(filter, rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))).c_str());
@@ -130,9 +130,9 @@ static std::string select_file(
 		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
 
 		bool active_filter = false;
-		for(auto item = mimetypes.begin(), last = mimetypes.end(); item != last; ++item)
+		for (auto &item : mimetypes)
 		{
-			const std::string & mimetype = rql::value(*item);
+			const std::string &mimetype = rql::value(item);
 			gtk_file_filter_add_mime_type(filter, mimetype.c_str());
 			if (default_mimetype == mimetype)
 				active_filter = true;
@@ -280,14 +280,14 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
 		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
 
-	for(auto format = formats.begin(), last = formats.end(); format != last; ++format)
+	for (auto &format : formats)
 	{
 		rql::results mimetypes = rql::select(aMetadata,
 			rql::both(rql::matches(rql::predicate, rdf::tts("mimetype")),
-			          rql::matches(rql::subject, rql::subject(*format))));
+			          rql::matches(rql::subject, rql::subject(format))));
 
-		for(auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
-			gtk_recent_filter_add_mime_type(filter, rql::value(*mimetype).c_str());
+		for (auto &mimetype : mimetypes)
+			gtk_recent_filter_add_mime_type(filter, rql::value(mimetype).c_str());
 	}
 
 	return filter;

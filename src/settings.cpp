@@ -39,16 +39,16 @@ application_settings::application_settings(const std::string &aFilename)
 void application_settings::save()
 {
 	std::ofstream os(filename.c_str());
-	for (auto item = values.begin(), last = values.end(); item != last; ++item)
-		os << item->first << '=' << item->second.value << std::endl;
+	for (auto &item : values)
+		os << item.first << '=' << item.second.value << std::endl;
 }
 
 rdf::literal & application_settings::operator()(const std::string & name, const rdf::literal & default_value)
 {
-	for (auto item = values.begin(), last = values.end(); item != last; ++item)
+	for (auto &item : values)
 	{
-		if (item->first == name)
-			return item->second;
+		if (item.first == name)
+			return item.second;
 	}
 
 	rdf::literal & value = values[name];

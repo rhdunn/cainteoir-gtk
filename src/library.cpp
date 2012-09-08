@@ -93,9 +93,9 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 
 		const char *mime = gtk_recent_info_get_mime_type(info);
 
-		for (auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
+		for (auto &mimetype : mimetypes)
 		{
-			if (rql::value(*mimetype) == mime)
+			if (rql::value(mimetype) == mime)
 			{
 				char *uri  = gtk_recent_info_get_uri_display(info);
 				try

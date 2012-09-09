@@ -42,8 +42,8 @@ static gint sort_recent_items_mru(GtkRecentInfo *a, GtkRecentInfo *b, gpointer u
 
 static void add_document(GtkTreeStore *store, rdf::graph &metadata, rdf::uri subject, int pos)
 {
-	rql::results data = rql::select(metadata, rql::matches(rql::subject, subject));
-	std::string title = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
+	rql::results data = rql::select(metadata, rql::subject == subject);
+	std::string title = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 	if (title.empty())
 	{
 		title = subject.str();
@@ -80,7 +80,7 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 {
 	GList *items = g_list_sort(gtk_recent_manager_get_items(aRecent), (GCompareFunc)sort_recent_items_mru);
 
-	rql::results mimetypes = rql::select(aMetadata, rql::matches(rql::predicate, rdf::tts("mimetype")));
+	rql::results mimetypes = rql::select(aMetadata, rql::predicate == rdf::tts("mimetype"));
 
 	int index = 0;
 	for (GList *item = g_list_first(items); item && index != max_items_to_show; item = g_list_next(item))

@@ -59,8 +59,7 @@ void MetadataView::clear()
 
 void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & aUri, const rdf::uri & aPredicate)
 {
-	rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, aUri));
-	for (auto &query : selection)
+	for (auto &query : rql::select(aMetadata, rql::subject == aUri))
 	{
 		if (rql::predicate(query).ns == rdf::dc || rql::predicate(query).ns == rdf::dcterms)
 		{
@@ -77,7 +76,7 @@ void MetadataView::add_metadata(const rdf::graph & aMetadata, const rdf::uri & a
 			}
 			else
 			{
-				rql::results selection = rql::select(aMetadata, rql::matches(rql::subject, object));
+				rql::results selection = rql::select(aMetadata, rql::subject == object);
 
 				if (rql::predicate(query).ref == "creator" && aPredicate == rdf::dc("creator"))
 				{

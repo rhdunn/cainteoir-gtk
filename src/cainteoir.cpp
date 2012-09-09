@@ -122,15 +122,13 @@ static std::string select_file(
 
 	for (auto &format : formats)
 	{
-		rql::results data = rql::select(metadata, rql::matches(rql::subject, rql::subject(format)));
+		rql::results data = rql::select(metadata, rql::subject == rql::subject(format));
 
 		GtkFileFilter *filter = gtk_file_filter_new();
-		gtk_file_filter_set_name(filter, rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title"))).c_str());
-
-		rql::results mimetypes = rql::select(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
+		gtk_file_filter_set_name(filter, rql::select_value<std::string>(data, rql::predicate == rdf::dc("title")).c_str());
 
 		bool active_filter = false;
-		for (auto &item : mimetypes)
+		for (auto &item : rql::select(data, rql::predicate == rdf::tts("mimetype")))
 		{
 			const std::string &mimetype = rql::value(item);
 			gtk_file_filter_add_mime_type(filter, mimetype.c_str());
@@ -276,17 +274,13 @@ static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
 {
 	GtkRecentFilter *filter = gtk_recent_filter_new();
 
-	rql::results formats = rql::select(aMetadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
-
-	for (auto &format : formats)
+	for (auto &format : rql::select(aMetadata,
+	                                rql::predicate == rdf::rdf("type") &&
+	                                rql::object    == rdf::tts("DocumentFormat")))
 	{
-		rql::results mimetypes = rql::select(aMetadata,
-			rql::both(rql::matches(rql::predicate, rdf::tts("mimetype")),
-			          rql::matches(rql::subject, rql::subject(format))));
-
-		for (auto &mimetype : mimetypes)
+		for (auto &mimetype : rql::select(aMetadata,
+		                                  rql::predicate == rdf::tts("mimetype") &&
+		                                  rql::subject   == rql::subject(format)))
 			gtk_recent_filter_add_mime_type(filter, rql::value(mimetype).c_str());
 	}
 
@@ -518,8 +512,8 @@ void Cainteoir::on_open_document()
 	else
 	{
 		rql::results formats = rql::select(tts_metadata,
-			rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-			          rql::matches(rql::object, rdf::tts("DocumentFormat"))));
+		                                   rql::predicate == rdf::rdf("type") &&
+		                                   rql::object    == rdf::tts("DocumentFormat"));
 
 		filename = select_file(GTK_WINDOW(window),
 			i18n("Open Document"),
@@ -565,8 +559,8 @@ void Cainteoir::record()
 	// TODO: Generate a default name from the file metadata ($(recording.basepath)/author - title.ogg)
 
 	rql::results formats = rql::select(tts_metadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object, rdf::tts("AudioFormat"))));
+	                                   rql::predicate == rdf::rdf("type") &&
+	                                   rql::object    == rdf::tts("AudioFormat"));
 
 	std::string filename = select_file(GTK_WINDOW(window),
 		i18n("Record Document"),
@@ -584,22 +578,17 @@ void Cainteoir::record()
 	{
 		std::string ext = '*' + filename.substr(extpos);
 
-		rql::results filetypes = rql::select(tts_metadata,
-			rql::matches(rql::predicate, rdf::tts("extension")));
-
-		for (auto &filetype : filetypes)
+		for (auto &filetype : rql::select(tts_metadata, rql::predicate == rdf::tts("extension")))
 		{
 			if (rql::value(filetype) == ext)
 			{
 				const rdf::uri &uri = rql::subject(filetype);
 
-				std::string type = rql::select_value<std::string>(tts_metadata,
-					rql::both(rql::matches(rql::subject,   uri),
-					          rql::matches(rql::predicate, rdf::tts("name"))));
+				auto type     = rql::select_value<std::string>(tts_metadata,
+				                rql::subject == uri && rql::predicate == rdf::tts("name"));
 
-				std::string mimetype = rql::select_value<std::string>(tts_metadata,
-					rql::both(rql::matches(rql::subject,   uri),
-					          rql::matches(rql::predicate, rdf::tts("mimetype"))));
+				auto mimetype = rql::select_value<std::string>(tts_metadata,
+				                rql::subject == uri && rql::predicate == rdf::tts("mimetype"));
 
 				settings("recording.filename") = filename;
 				settings("recording.mimetype") = mimetype;
@@ -696,9 +685,9 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		doc->subject = std::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
 		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
-		rql::results data = rql::select(doc->metadata, rql::matches(rql::subject, *doc->subject));
-		std::string mimetype = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::tts("mimetype")));
-		std::string title    = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
+		rql::results data     = rql::select(doc->metadata, rql::subject == *doc->subject);
+		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
+		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
 		for (auto &entry : doc->toc)
 			toc.add(entry.depth, entry.location, entry.title);
@@ -727,8 +716,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 		std::string lang = rql::select_value<std::string>(doc->metadata,
-			rql::both(rql::matches(rql::subject,   *doc->subject),
-			          rql::matches(rql::predicate, rdf::dc("language"))));
+		                   rql::subject == *doc->subject && rql::predicate == rdf::dc("language"));
 		if (lang.empty())
 			lang = "en";
 
@@ -763,17 +751,13 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	voice_metadata.add_metadata(tts_metadata, voice, rdf::tts("name"));
 	voice_metadata.add_metadata(tts_metadata, voice, rdf::dc("language"));
 
-	for (auto &statement : rql::select(tts_metadata, rql::matches(rql::subject, voice)))
+	auto voiceof = rql::select(tts_metadata,
+	                           rql::subject == voice && rql::predicate == rdf::tts("voiceOf")).front();
+	const rdf::uri &engine = rql::object(voiceof);
+	if (!engine.empty())
 	{
-		if (rql::predicate(statement) == rdf::tts("voiceOf"))
-		{
-			const rdf::uri &engine = rql::object(statement);
-			if (!engine.empty())
-			{
-				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
-				engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("version"));
-			}
-		}
+		engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
+		engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("version"));
 	}
 
 	if (tts.select_voice(tts_metadata, voice))
@@ -792,25 +776,20 @@ bool Cainteoir::switch_voice_by_language(const std::string &lang)
 	// Does the current voice support this language? ...
 
 	std::string current = rql::select_value<std::string>(tts_metadata,
-		rql::both(rql::matches(rql::subject,   tts.voice()),
-		          rql::matches(rql::predicate, rdf::dc("language"))));
+	                      rql::subject == tts.voice() && rql::predicate == rdf::dc("language"));
 
 	if (cainteoir::language::make_lang(current) == language)
 		return true;
 
 	// The current voice does not support this language, so search the available voices ...
 
-	rql::results voicelist = rql::select(tts_metadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object,    rdf::tts("Voice"))));
-
-	for (auto &voice : voicelist)
+	for (auto &voice : rql::select(tts_metadata,
+	                               rql::predicate == rdf::rdf("type") && rql::object == rdf::tts("Voice")))
 	{
 		const rdf::uri &uri = rql::subject(voice);
 
 		std::string lang = rql::select_value<std::string>(tts_metadata,
-			rql::both(rql::matches(rql::subject,   uri),
-			          rql::matches(rql::predicate, rdf::dc("language"))));
+		                   rql::subject == uri && rql::predicate == rdf::dc("language"));
 
 		if (cainteoir::language::make_lang(lang) == language && switch_voice(uri))
 			return true;

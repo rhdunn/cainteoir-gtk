@@ -173,17 +173,14 @@ void VoiceList::refresh()
 		selected_voice = voice;
 
 	gtk_tree_store_clear(store);
-	rql::results voicelist = rql::select(mMetadata,
-		rql::both(rql::matches(rql::predicate, rdf::rdf("type")),
-		          rql::matches(rql::object,    rdf::tts("Voice"))));
-
-	for (auto &voice : voicelist)
+	for (auto &voice : rql::select(mMetadata,
+	                               rql::predicate == rdf::rdf("type") && rql::object == rdf::tts("Voice")))
 	{
-		rql::results statements = rql::select(mMetadata, rql::matches(rql::subject, rql::subject(voice)));
+		rql::results statements = rql::select(mMetadata, rql::subject == rql::subject(voice));
 		if (filter_by_doc_language)
 		{
 			std::string lang = rql::select_value<std::string>(statements,
-				rql::matches(rql::predicate, rdf::dc("language")));
+			                   rql::predicate == rdf::dc("language"));
 
 			if (cainteoir::language::make_lang(lang) == doc_lang)
 				add_voice(mMetadata, statements, languages);
@@ -210,8 +207,8 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 		else if (rql::predicate(statement) == rdf::tts("voiceOf"))
 		{
 			std::string engine = rql::select_value<std::string>(aMetadata,
-				rql::both(rql::matches(rql::subject,   rql::object(statement)),
-				          rql::matches(rql::predicate, rdf::tts("name"))));
+			                     rql::subject   == rql::object(statement) &&
+			                     rql::predicate == rdf::tts("name"));
 			gtk_tree_store_set(store, &row, VLC_ENGINE, engine.c_str(), -1);
 		}
 		else if (rql::predicate(statement) == rdf::dc("language"))

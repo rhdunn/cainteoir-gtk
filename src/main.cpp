@@ -32,13 +32,13 @@ static void load_gtk3_theme(const std::string &theme)
 
 	try
 	{
-		cainteoir::mmap_buffer theme(theme_path.c_str());
+		auto theme = cainteoir::make_file_buffer(theme_path.c_str());
 
 		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
 
 		GtkCssProvider *provider = gtk_css_provider_new();
 		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme.begin(), theme.size(), nullptr);
+		gtk_css_provider_load_from_data (GTK_CSS_PROVIDER (provider), theme->begin(), theme->size(), nullptr);
 	}
 	catch (const std::exception &e)
 	{

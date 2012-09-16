@@ -390,7 +390,7 @@ static gboolean on_timer_speaking(Cainteoir *window)
 }
 
 Cainteoir::Cainteoir(const char *filename)
-	: tts(tts_metadata, cainteoir::text_support)
+	: tts(tts_metadata)
 	, doc(new document())
 	, doc_metadata(languages, i18n("Document"), 5)
 	, voice_metadata(languages, i18n("Voice"), 2)
@@ -399,6 +399,9 @@ Cainteoir::Cainteoir(const char *filename)
 {
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
+
+	cainteoir::supportedDocumentFormats(tts_metadata, cainteoir::text_support);
+	cainteoir::supportedAudioFormats(tts_metadata);
 
 	GtkBuilder *ui = gtk_builder_new();
 	if (!gtk_builder_add_from_file(ui, UIDIR "/cainteoir-gtk.ui", NULL))

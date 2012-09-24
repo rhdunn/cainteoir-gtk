@@ -375,6 +375,15 @@
       </object>
     </child>
     <child type="tag">
+      <object class="GtkTextTag" id="monospace">
+        <property name="name">monospace</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="size_points">11</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
       <object class="GtkTextTag" id="heading1">
         <property name="name">heading1</property>
         <property name="background_rgba">rgb(255,255,255)</property>

@@ -1,3 +1,9 @@
+cainteoir-gtk (0.7~unstable1) unstable; urgency=low
+ 
+  * debian/rules: do not use 'dpkg-buildflags --export=configure' on ubuntu oneiric
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Mon, 1 Oct 2012 23:09:00 +0000
+
 cainteoir-gtk (0.7~unstable0) unstable; urgency=low
  
   * Initial upstream release.

@@ -9,13 +9,12 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-configure:
+override_dh_auto_configure:
 	dh_testdir
 	./autogen.sh
-	dh_auto_configure
+	dh_auto_configure -- $(shell dpkg-buildflags --export=configure)
 
-%:
-	dh $@
+configure: override_dh_auto_configure
 
 build: configure
 	dh build
@@ -25,3 +24,15 @@ build-arch: configure
 
 build-indep: configure
 	dh build-indep
+
+clean:
+	dh clean
+
+binary:
+	dh binary
+
+binary-arch:
+	dh binary-arch
+
+binary-indep:
+	dh binary-indep

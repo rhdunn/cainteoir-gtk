@@ -1,4 +1,7 @@
 ./src/cainteoir.cpp
+./src/compatibility.cpp
+./src/library.cpp
+./src/libraryentrycellrenderer.cpp
 ./src/main.cpp
 ./src/metadata.cpp
 ./src/navbar.cpp
@@ -6,3 +9,4 @@
 ./src/timebar.cpp
 ./src/toc.cpp
 ./src/voice_selection.cpp
+[type: gettext/glade]./ui/cainteoir-gtk.ui

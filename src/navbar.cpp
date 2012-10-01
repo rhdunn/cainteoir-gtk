@@ -41,25 +41,16 @@ NavigationBar::NavigationBar()
 	: active_button(nullptr)
 	, setting_active_button(false)
 {
-	layout = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_widget_set_name(layout, "navbar");
-
-	GtkStyleContext *context = gtk_widget_get_style_context(layout);
-	gtk_style_context_add_class(context, "linked");
 }
 
-GtkWidget *NavigationBar::add_paged_button(const char *label, GtkNotebook *view, int page)
+GtkWidget *NavigationBar::add_paged_button(GtkWidget *label, GtkNotebook *view, int page)
 {
 	NavButtonData *data = g_slice_new(NavButtonData);
 	data->parent = this;
 	data->view = view;
 	data->page = page;
-
-	GtkWidget *button = gtk_toggle_button_new_with_label(label);
-	g_signal_connect(button, "toggled", G_CALLBACK(on_navbutton_toggled), data);
-
-	gtk_box_pack_start(GTK_BOX(layout), button, FALSE, FALSE, 0);
-	return button;
+	g_signal_connect(label, "toggled", G_CALLBACK(on_navbutton_toggled), data);
+	return label;
 }
 
 GtkWidget *NavigationBar::get_active_button() const

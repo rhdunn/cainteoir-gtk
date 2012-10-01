@@ -31,6 +31,7 @@ noinst_bindir =
 
 EXTRA_DIST = config.rpath ChangeLog
 CLEANFILES =
+DISTCLEANFILES =
 SUBDIRS = po
 
 ############################# libtool #########################################
@@ -52,12 +53,22 @@ LIBCAINTEOIR_VERSION=$(CURRENT):$(REVISION):$(AGE)
 
 ############################# gettext #########################################
 
+INTLTOOL_FILES = \
+	intltool-extract.in \
+	intltool-merge.in \
+	intltool-update.in
+
+EXTRA_DIST += ${INTLTOOL_FILES}
+
+DISTCLEANFILES += ${INTLTOOL_FILES} po/.intltool-merge-cache
+
 check-gettext:
 	@if test x$(USE_NLS) != "xyes" ; then echo "Missing gettext. Rerun configure and check for" \
 	"'checking whether to use NLS... yes'!" ; exit 1 ; fi
 
 update-po: check-gettext
-	@find $(srcdir)/src/ -name "*.cpp" -print | sort > $(srcdir)/po/POTFILES.in.2 ; \
+	@find $(srcdir)/src/ -name "*.cpp" -print | sort > $(srcdir)/po/POTFILES.in.2 ;
+	@find $(srcdir)/ui/ -name "*.ui" -print | sed -e 's,^,\[type: gettext/glade\],g' | sort >> $(srcdir)/po/POTFILES.in.2 ; \
 	if diff $(srcdir)/po/POTFILES.in $(srcdir)/po/POTFILES.in.2 >/dev/null 2>&1 ; then \
 		rm -f $(srcdir)/po/POTFILES.in.2 ; \
 	else \
@@ -109,6 +120,9 @@ RadianceTheme_DATA = data/themes/Radiance/gtk3.css
 
 desktopdir = $(datadir)/applications
 desktop_DATA = src/cainteoir-gtk.desktop
+
+uidir = ${datadir}/cainteoir-gtk/ui
+ui_DATA = ui/cainteoir-gtk.ui
 
 bin_PROGRAMS += src/cainteoir-gtk
 

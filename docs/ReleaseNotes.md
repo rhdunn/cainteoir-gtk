@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.7: Monday October 1st 2012 [Sep 2012]
+-----------------------------------------------
+
+  *  switch to glib-gettextize/intltool for localization
+  *  update the translations and support more languages
+  *  use a GtkBuilder UI file for most of the UI layout (requires glade >= 3.13.1 to edit)
+  *  make the top-bar styling work for the Ambiance theme in Ubuntu 12.10
+  *  use C++11 range-based for loops
+
 Version 0.6: Tuesday July 31st 2012 [Jul 2012]
 ----------------------------------------------
 

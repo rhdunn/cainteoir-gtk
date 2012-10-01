@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([Cainteoir Text-to-Speech], [0.6], [https://github.com/rhdunn/cainteoir-gtk/issues], [cainteoir-gtk], [https://github.com/rhdunn/cainteoir-gtk])
+AC_INIT([Cainteoir Text-to-Speech], [0.7], [https://github.com/rhdunn/cainteoir-gtk/issues], [cainteoir-gtk], [https://github.com/rhdunn/cainteoir-gtk])
 AM_INIT_AUTOMAKE()
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES])
@@ -9,10 +9,17 @@ AC_CONFIG_SRCDIR([src])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION(0.17)
+LT_PREREQ([2.2.6])
+LT_INIT(disable-static)
 
-LT_INIT
+dnl ================================================================
+dnl gettext support.
+dnl ================================================================
+
+IT_PROG_INTLTOOL([0.40.0])
+
+AC_SUBST([GETTEXT_PACKAGE], [cainteoir-gtk])
+AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"], [Define to the gettext package name.])
 
 dnl ================================================================
 dnl Program checks.
@@ -175,6 +182,18 @@ AC_COMPILE_IFELSE(
 AC_LANG_POP(C++)
 
 AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 range-based for loops])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[]],
+		[[int a[] = { 1, 2, 3 };]
+		 [for (int &b : a) ++b;]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 range-based for loops not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+AC_LANG_PUSH(C++)
 AC_MSG_CHECKING([if $CXX supports C++11 brace initialization])
 AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
@@ -183,6 +202,19 @@ AC_COMPILE_IFELSE(
 	[AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])
 	 AC_MSG_ERROR([C++11 brace initialization not supported by $CXX.])])
+AC_LANG_POP(C++)
+
+dnl Check clang bug 12670 [http://llvm.org/bugs/show_bug.cgi?id=12670]
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([if $CXX supports C++11 brace initialization of a class in a struct])
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[#include <complex>]],
+		[[struct A { std::complex<float> c; };]
+		 [A a { { 0.1, 0.2 } };]])],
+	[AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])
+	 AC_MSG_ERROR([C++11 brace initialization of a class in a struct not supported by $CXX.])])
 AC_LANG_POP(C++)
 
 dnl ================================================================

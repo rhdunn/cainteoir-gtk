@@ -1,4 +1,4 @@
-@define-color borders #a7aba7;
+@define-color borders  #a7aba7;
 @define-color progress #1a73a7;
 
 #toc row,
@@ -20,13 +20,6 @@ GtkNotebook {
 
 .primary-toolbar {
 	background-image: none;
-}
-
-#breadcrumb-bar {
-	background-color: #f4f4f4;
-	border-style: solid;
-	border-color: @borders;
-	border-width: 0 0 1@GTK_PX@ 0;
 }
 
 /* The toc pane is coloured white by default, with the notebook

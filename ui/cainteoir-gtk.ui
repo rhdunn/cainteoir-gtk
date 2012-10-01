@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkWindow" id="cainteoir-gtk">
+    <property name="width_request">500</property>
+    <property name="height_request">300</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Cainteoir Text-to-Speech</property>
+    <child>
+      <object class="GtkBox" id="layout1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkToolbar" id="topbar">
+            <property name="height_request">40</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <style>
+              <class name="menubar"/>
+            </style>
+            <child>
+              <object class="GtkToolItem" id="navbar-container">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButtonBox" id="navbar">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="homogeneous">True</property>
+                    <property name="layout_style">start</property>
+                    <style>
+                      <class name="linked"/>
+                    </style>
+                    <child>
+                      <object class="GtkToggleButton" id="library-button">
+                        <property name="related_action">library-view-action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="info-button">
+                        <property name="related_action">info-view-action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="document-button">
+                        <property name="related_action">document-view-action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="voice-button">
+                        <property name="related_action">voice-view-action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="relief">half</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="open-button">
+                <property name="related_action">open-action</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkNotebook" id="view">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="show_tabs">False</property>
+            <child>
+              <object class="GtkBox" id="document-page">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">30</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="toc-view">
+                    <property name="width_request">200</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="document-view">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkScrolledWindow" id="metadata-pane">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow" id="doc-pane">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <child>
+                          <object class="GtkTextView" id="document">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="editable">False</property>
+                            <property name="wrap_mode">word</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="tab">
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkBox" id="library-page">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="library-view">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child type="tab">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolbar" id="bottombar">
+            <property name="height_request">40</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <style>
+              <class name="primary-toolbar"/>
+            </style>
+            <child>
+              <object class="GtkToolButton" id="play-button">
+                <property name="related_action">play-action</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="stop-button">
+                <property name="related_action">stop-action</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="record-button">
+                <property name="related_action">record-action</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="timebar-container">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkBox" id="timebar">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="timebar-elapsed">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">00:00:00</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkProgressBar" id="timebar-progress">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="valign">center</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="padding">5</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="timebar-total">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">00:00:00</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkTextTagTable" id="document-tags">
+    <child type="tag">
+      <object class="GtkTextTag" id="strong">
+        <property name="name">strong</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="emphasized">
+        <property name="name">emphasized</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="style">italic</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="underline">
+        <property name="name">underline</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="underline">single</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="reduced">
+        <property name="name">reduced</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="paragraph">
+        <property name="name">paragraph</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="size_points">11</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="monospace">
+        <property name="name">monospace</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="size_points">11</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="heading1">
+        <property name="name">heading1</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="size_points">24</property>
+        <property name="justification">center</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="heading2">
+        <property name="name">heading2</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="size">24576</property>
+        <property name="size_points">18</property>
+        <property name="justification">center</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="heading3">
+        <property name="name">heading3</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="size">24576</property>
+        <property name="size_points">11</property>
+        <property name="justification">center</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="heading4">
+        <property name="name">heading4</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="size">24576</property>
+        <property name="size_points">11</property>
+        <property name="justification">center</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="heading5">
+        <property name="name">heading5</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="size">24576</property>
+        <property name="size_points">11</property>
+        <property name="justification">center</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="heading6">
+        <property name="name">heading6</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="weight">700</property>
+        <property name="size">24576</property>
+        <property name="size_points">11</property>
+        <property name="justification">center</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="superscript">
+        <property name="name">superscript</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="scale">0.83333330000000005</property>
+        <property name="rise">4096</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="suberscript">
+        <property name="name">suberscript</property>
+        <property name="background_rgba">rgb(255,255,255)</property>
+        <property name="foreground_rgba">rgb(0,0,0)</property>
+        <property name="scale">0.83333330000000005</property>
+        <property name="rise">-4096</property>
+        <property name="paragraph_background_rgba">rgb(255,255,255)</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkToggleAction" id="document-view-action">
+    <property name="label" translatable="yes">Document</property>
+  </object>
+  <object class="GtkToggleAction" id="info-view-action">
+    <property name="label" translatable="yes">Info</property>
+  </object>
+  <object class="GtkToggleAction" id="library-view-action">
+    <property name="label" translatable="yes">Library</property>
+  </object>
+  <object class="GtkAction" id="open-action">
+    <property name="stock_id">gtk-open</property>
+  </object>
+  <object class="GtkAction" id="play-action">
+    <property name="stock_id">gtk-media-play</property>
+  </object>
+  <object class="GtkAction" id="record-action">
+    <property name="stock_id">gtk-media-record</property>
+  </object>
+  <object class="GtkAction" id="stop-action">
+    <property name="stock_id">gtk-media-stop</property>
+  </object>
+  <object class="GtkToggleAction" id="voice-view-action">
+    <property name="label" translatable="yes">Voice</property>
+  </object>
+</interface>

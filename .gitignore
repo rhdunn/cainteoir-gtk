@@ -14,6 +14,7 @@ release.log
 
 src/cainteoir-gtk
 po/*.gmo
+po/stamp-it
 
 # autotools output:
 
@@ -54,6 +55,10 @@ ABOUT-NLS
 config.guess
 config.rpath
 config.sub
+intltool-extract.in
+intltool-merge.in
+intltool-update.in
+mkinstalldirs
 m4/
 po/*~
 

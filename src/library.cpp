@@ -42,8 +42,8 @@ static gint sort_recent_items_mru(GtkRecentInfo *a, GtkRecentInfo *b, gpointer u
 
 static void add_document(GtkTreeStore *store, rdf::graph &metadata, rdf::uri subject, int pos)
 {
-	rql::results data = rql::select(metadata, rql::matches(rql::subject, subject));
-	std::string title = rql::select_value<std::string>(data, rql::matches(rql::predicate, rdf::dc("title")));
+	rql::results data = rql::select(metadata, rql::subject == subject);
+	std::string title = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 	if (title.empty())
 	{
 		title = subject.str();
@@ -61,8 +61,8 @@ static void add_document(GtkTreeStore *store, rdf::graph &metadata, rdf::uri sub
 DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, rdf::graph &aMetadata)
 {
 	store = gtk_tree_store_new(LIB_COUNT, G_TYPE_STRING, G_TYPE_STRING);
-
-	GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	lib_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
 	GtkCellRenderer *renderer = cainteoir_library_entry_cell_renderer_new();
 	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer,
@@ -70,30 +70,8 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 		nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 
-	gtk_widget_set_name(view, "toc");
+	gtk_widget_set_name(view, "library");
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
-
-	lib_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-
-	GtkWidget *scrolled_view = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(scrolled_view), GTK_WIDGET(view));
-
-	GtkWidget *breadcrumbs = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_style_context_add_class(gtk_widget_get_style_context(breadcrumbs), "breadcrumbs");
-
-	gtk_container_add(GTK_CONTAINER(breadcrumbs), gtk_button_new_with_label(i18n("All")));
-	gtk_container_add(GTK_CONTAINER(breadcrumbs), gtk_button_new_with_label(i18n("Recent")));
-
-	GtkWidget *topbar = gtk_toolbar_new();
-	gtk_widget_set_name(topbar, "breadcrumb-bar");
-
-	GtkToolItem *navbar_item = gtk_tool_item_new();
-	gtk_container_add(GTK_CONTAINER(navbar_item), breadcrumbs);
-	gtk_container_add(GTK_CONTAINER(topbar), GTK_WIDGET(navbar_item));
-
-	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_box_pack_start(GTK_BOX(layout), topbar, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(layout), scrolled_view, TRUE, TRUE, 0);
 
 	update_recent(aRecent, aMetadata, 45);
 }
@@ -102,7 +80,7 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 {
 	GList *items = g_list_sort(gtk_recent_manager_get_items(aRecent), (GCompareFunc)sort_recent_items_mru);
 
-	rql::results mimetypes = rql::select(aMetadata, rql::matches(rql::predicate, rdf::tts("mimetype")));
+	rql::results mimetypes = rql::select(aMetadata, rql::predicate == rdf::tts("mimetype"));
 
 	int index = 0;
 	for (GList *item = g_list_first(items); item && index != max_items_to_show; item = g_list_next(item))
@@ -115,9 +93,9 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 
 		const char *mime = gtk_recent_info_get_mime_type(info);
 
-		for (auto mimetype = mimetypes.begin(), last = mimetypes.end(); mimetype != last; ++mimetype)
+		for (auto &mimetype : mimetypes)
 		{
-			if (rql::value(*mimetype) == mime)
+			if (rql::value(mimetype) == mime)
 			{
 				char *uri  = gtk_recent_info_get_uri_display(info);
 				try

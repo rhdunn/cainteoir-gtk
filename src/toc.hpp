@@ -32,7 +32,7 @@ class TocPane
 public:
 	TocPane();
 
-	operator GtkWidget *() { return layout; }
+	operator GtkWidget *() { return view; }
 
 	void connect(GtkWidget *aTextView);
 
@@ -44,7 +44,6 @@ public:
 
 	TocSelection selection() const;
 private:
-	GtkWidget *layout;
 	GtkWidget *view;
 	GtkTreeStore *store;
 	GtkTreeSelection *toc_selection;

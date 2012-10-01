@@ -104,9 +104,6 @@ TocPane::TocPane()
 
 	toc_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 	gtk_tree_selection_set_mode(toc_selection, GTK_SELECTION_MULTIPLE);
-
-	layout = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(layout), GTK_WIDGET(view));
 }
 
 void TocPane::connect(GtkWidget *aTextView)

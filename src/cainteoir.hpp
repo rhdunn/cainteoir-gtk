@@ -59,7 +59,7 @@ protected:
 private:
 	void updateProgress(double elapsed, double total, double completed);
 
-	TimeBar timebar;
+	std::shared_ptr<TimeBar> timebar;
 	TocPane toc;
 	NavigationBar navbar;
 
@@ -83,10 +83,10 @@ private:
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;
 
-	GtkWidget *readButton;
-	GtkWidget *stopButton;
-	GtkWidget *recordButton;
-	GtkWidget *openButton;
+	GtkAction *readAction;
+	GtkAction *stopAction;
+	GtkAction *recordAction;
+	GtkAction *openAction;
 
 	rdf::graph tts_metadata;
 	cainteoir::tts::engines tts;

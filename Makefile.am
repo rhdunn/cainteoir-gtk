@@ -53,13 +53,6 @@ LIBCAINTEOIR_VERSION=$(CURRENT):$(REVISION):$(AGE)
 
 ############################# gettext #########################################
 
-INTLTOOL_FILES = \
-	intltool-extract.in \
-	intltool-merge.in \
-	intltool-update.in
-
-EXTRA_DIST += ${INTLTOOL_FILES}
-
 DISTCLEANFILES += ${INTLTOOL_FILES} po/.intltool-merge-cache
 
 check-gettext:

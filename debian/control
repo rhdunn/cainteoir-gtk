@@ -3,7 +3,7 @@ Section: sound
 Priority: extra
 Maintainer: Reece H. Dunn <msclrhd@gmail.com>
 Build-Depends: debhelper (>= 7.0.50~),
-               autoconf, automake, libtool, autopoint, gettext, pkg-config,
+               autoconf, automake, libtool, autopoint, gettext, intltool, pkg-config,
                libcainteoir0, libcainteoir-dev,
                libgtk-3-dev, libsigc++-2.0-dev
 Standards-Version: 3.9.3

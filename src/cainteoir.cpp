@@ -766,6 +766,8 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	if (tts.select_voice(tts_metadata, voice))
 	{
 		voiceSelection->show(tts.voice());
+		if (!speech || !speech->is_speaking())
+			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 		return true;
 	}
 

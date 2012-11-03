@@ -167,6 +167,7 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 	bool need_linebreak = false;
 	while (reader->read())
 	{
+		doc->add(*reader);
 		if (reader->type & events::begin_context)
 		{
 			const char *name = nullptr;
@@ -222,15 +223,8 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		}
 		if (reader->type & cainteoir::events::toc_entry)
 			doc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
-		if (reader->type & cainteoir::events::anchor)
-		{
-			doc->add_anchor(reader->anchor);
-			GtkTextMark *mark = gtk_text_buffer_create_mark(buffer, reader->anchor.str().c_str(), &position, TRUE);
-		}
 		if (reader->type & cainteoir::events::text)
 		{
-			doc->add(reader->text);
-
 			const gchar *start = reader->text->begin();
 			const gchar *end   = reader->text->end();
 			while (start < end)

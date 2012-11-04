@@ -163,7 +163,7 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 	GtkTextIter position;
 	gtk_text_buffer_get_end_iter(buffer, &position);
 
-	std::string anchor;
+	std::list<std::string> anchor;
 	std::stack<tag_block> contexts;
 	bool need_linebreak = false;
 	while (reader->read())
@@ -225,14 +225,12 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		if (reader->type & cainteoir::events::toc_entry)
 			doc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
 		if (reader->type & cainteoir::events::anchor)
-			anchor = reader->anchor.str();
+			anchor.push_back(reader->anchor.str());
 		if (reader->type & cainteoir::events::text)
 		{
-			if (!anchor.empty())
-			{
-				(void)gtk_text_buffer_create_mark(buffer, anchor.c_str(), &position, TRUE);
-				anchor.clear();
-			}
+			for (auto &a : anchor)
+				(void)gtk_text_buffer_create_mark(buffer, a.c_str(), &position, TRUE);
+			anchor.clear();
 
 			const gchar *start = reader->text->begin();
 			const gchar *end   = reader->text->end();

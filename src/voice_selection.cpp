@@ -231,9 +231,10 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 	}
 }
 
-VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
+VoiceSelectionView::VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
 	: mEngines(&aEngines)
-	, voices(settings, aMetadata, languages)
+	, voices(aSettings, aMetadata, languages)
+	, settings(aSettings)
 {
 	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
@@ -255,10 +256,10 @@ VoiceSelectionView::VoiceSelectionView(application_settings &settings, tts::engi
 	parameterView = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);
 
-	create_entry(tts::parameter::rate, 0);
-	create_entry(tts::parameter::volume, 1);
-	create_entry(tts::parameter::pitch, 2);
-	create_entry(tts::parameter::pitch_range, 3);
+	create_entry(tts::parameter::rate, 0, "voice.rate");
+	create_entry(tts::parameter::volume, 1, "voice.volume");
+	create_entry(tts::parameter::pitch, 2, "voice.pitch");
+	create_entry(tts::parameter::pitch_range, 3, "voice.pitch-range");
 
 	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
@@ -303,16 +304,19 @@ void VoiceSelectionView::apply()
 {
 	for (auto &item : parameters)
 	{
-		mEngines->parameter(item.type)->set_value(gtk_range_get_value(GTK_RANGE(item.param)));
+		int value = gtk_range_get_value(GTK_RANGE(item.param));
+		mEngines->parameter(item.type)->set_value(value);
+		settings(item.id) = value;
 	}
 
 	on_voice_change.emit(voices.get_voice());
 }
 
-void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
+void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row, const char *aID)
 {
 	VoiceParameter item;
 	item.type = aParameter;
+	item.id = aID;
 
 	item.param = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
 	gtk_range_set_increments(GTK_RANGE(item.param), 1.0, 5.0);
@@ -331,4 +335,7 @@ void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row)
 	gtk_grid_attach(GTK_GRID(parameterView), item.units, 2, row, 1, 1);
 
 	parameters.push_back(item);
+
+	int value = mEngines->parameter(item.type)->value();
+	mEngines->parameter(item.type)->set_value(settings(item.id, value).as<int>());
 }

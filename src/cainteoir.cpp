@@ -505,7 +505,13 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_action_set_visible(stopAction, FALSE);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
-	switch_voice(tts.voice());
+
+	rdf::uri voice = tts_metadata.href(settings("voice.name", std::string()).as<std::string>());
+	bool set_voice = false;
+	if (!voice.empty())
+		set_voice = switch_voice(voice);
+	if (!set_voice)
+		switch_voice(tts.voice());
 }
 
 void Cainteoir::on_open_document()
@@ -758,8 +764,11 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	voice_metadata.add_metadata(tts_metadata, voice, rdf::dc("language"));
 
 	auto voiceof = rql::select(tts_metadata,
-	                           rql::subject == voice && rql::predicate == rdf::tts("voiceOf")).front();
-	const rdf::uri &engine = rql::object(voiceof);
+	                           rql::subject == voice && rql::predicate == rdf::tts("voiceOf"));
+	if (voiceof.empty())
+		return false;
+
+	const rdf::uri &engine = rql::object(voiceof.front());
 	if (!engine.empty())
 	{
 		engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
@@ -771,6 +780,7 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 		voiceSelection->show(tts.voice());
 		if (!speech || !speech->is_speaking())
 			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+		settings("voice.name") = voice.str();
 		return true;
 	}
 

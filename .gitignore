@@ -15,6 +15,8 @@ src/cainteoir-gtk
 po/*.gmo
 po/stamp-it
 
+tests/content
+
 # autotools output:
 
 Makefile

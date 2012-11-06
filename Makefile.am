@@ -146,3 +146,11 @@ src_cainteoir_gtk_SOURCES = \
 
 EXTRA_DIST += ${man1_MANS}
 
+############################# tests ###########################################
+
+noinst_bin_PROGRAMS += tests/content
+tests_content_CXXFLAGS = ${AM_CXXFLAGS} -I src
+tests_content_SOURCES  = tests/content.cpp tests/tester.hpp src/document.cpp
+
+check: tests/content
+	tests/content

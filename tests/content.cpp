@@ -146,6 +146,54 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,
 		false, PANGO_WEIGHT_NORMAL);
 
+	style.display = cainteoir::display::list_item;
+	test_tag(create_text_tag_from_style(style), "display",
+		false, NULL,
+		false, 0,
+		false, 0,
+		false, GTK_JUSTIFY_LEFT,
+		false, false,
+		false, PANGO_UNDERLINE_NONE,
+		false, PANGO_STYLE_NORMAL,
+		false, PANGO_VARIANT_NORMAL,
+		false, PANGO_WEIGHT_NORMAL);
+
+	style.display = cainteoir::display::table;
+	test_tag(create_text_tag_from_style(style), "display",
+		false, NULL,
+		false, 0,
+		false, 0,
+		false, GTK_JUSTIFY_LEFT,
+		false, false,
+		false, PANGO_UNDERLINE_NONE,
+		false, PANGO_STYLE_NORMAL,
+		false, PANGO_VARIANT_NORMAL,
+		false, PANGO_WEIGHT_NORMAL);
+
+	style.display = cainteoir::display::table_row;
+	test_tag(create_text_tag_from_style(style), "display",
+		false, NULL,
+		false, 0,
+		false, 0,
+		false, GTK_JUSTIFY_LEFT,
+		false, false,
+		false, PANGO_UNDERLINE_NONE,
+		false, PANGO_STYLE_NORMAL,
+		false, PANGO_VARIANT_NORMAL,
+		false, PANGO_WEIGHT_NORMAL);
+
+	style.display = cainteoir::display::table_cell;
+	test_tag(create_text_tag_from_style(style), "display",
+		false, NULL,
+		false, 0,
+		false, 0,
+		false, GTK_JUSTIFY_LEFT,
+		false, false,
+		false, PANGO_UNDERLINE_NONE,
+		false, PANGO_STYLE_NORMAL,
+		false, PANGO_VARIANT_NORMAL,
+		false, PANGO_WEIGHT_NORMAL);
+
 	style.display = cainteoir::display::none;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,

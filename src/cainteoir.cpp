@@ -68,11 +68,11 @@ static void dnd_data_received(GtkWidget *, GdkDragContext *context, gint, gint, 
 
 struct tag_block
 {
-	const char *name;
+	const cainteoir::styles *style;
 	int offset;
 
-	tag_block(const char *aName, int aOffset)
-		: name(aName)
+	tag_block(const cainteoir::styles *aStyle, int aOffset)
+		: style(aStyle)
 		, offset(aOffset)
 	{
 	}
@@ -171,7 +171,7 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		doc->add(*reader);
 		if (reader->type & events::begin_context)
 		{
-			const char *name = nullptr;
+			const cainteoir::styles *style = nullptr;
 			const char *newline = nullptr;
 			switch (reader->context)
 			{
@@ -179,28 +179,28 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 				switch (reader->parameter)
 				{
 				case events::overunder:   break;
-				case events::superscript: name = "superscript"; break;
-				case events::subscript:   name = "subscript";   break;
-				case events::emphasized:  name = "emphasized";  break;
-				case events::strong:      name = "strong";      break;
-				case events::underline:   name = "underline";   break;
-				case events::monospace:   name = "monospace";   break;
-				case events::reduced:     name = "reduced";     break;
+				case events::superscript: style = &cainteoir::superscript; break;
+				case events::subscript:   style = &cainteoir::subscript;   break;
+				case events::emphasized:  style = &cainteoir::emphasized;  break;
+				case events::strong:      style = &cainteoir::strong;      break;
+				case events::underline:   style = &cainteoir::underlined;  break;
+				case events::monospace:   style = &cainteoir::monospace;   break;
+				case events::reduced:     style = &cainteoir::reduced;     break;
 				};
 				break;
 			case events::paragraph:
-				name = "paragraph";
+				style = &cainteoir::paragraph;
 				newline = "\n\n";
 				break;
 			case events::heading:
 				switch (reader->parameter)
 				{
-				case 1:  name = "heading1"; break;
-				case 2:  name = "heading2"; break;
-				case 3:  name = "heading3"; break;
-				case 4:  name = "heading4"; break;
-				case 5:  name = "heading5"; break;
-				default: name = "heading6"; break;
+				case 1:  style = &cainteoir::heading1; break;
+				case 2:  style = &cainteoir::heading2; break;
+				case 3:  style = &cainteoir::heading3; break;
+				case 4:  style = &cainteoir::heading4; break;
+				case 5:  style = &cainteoir::heading5; break;
+				default: style = &cainteoir::heading6; break;
 				}
 				newline = "\n\n";
 				break;
@@ -220,7 +220,7 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 				gtk_text_buffer_get_end_iter(buffer, &position);
 				need_linebreak = false;
 			}
-			contexts.push({ name, gtk_text_iter_get_offset(&position) });
+			contexts.push({ style, gtk_text_iter_get_offset(&position) });
 		}
 		if (reader->type & cainteoir::events::toc_entry)
 			doc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
@@ -256,12 +256,12 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		{
 			if (!contexts.empty())
 			{
-				const char *name = contexts.top().name;
-				if (name)
+				const cainteoir::styles *style = contexts.top().style;
+				if (style)
 				{
 					GtkTextIter start;
 					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
-					gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
+					gtk_text_buffer_apply_tag_by_name(buffer, style->name.c_str(), &start, &position);
 				}
 				contexts.pop();
 			}
@@ -419,7 +419,32 @@ Cainteoir::Cainteoir(const char *filename)
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
 
-	tags = GTK_TEXT_TAG_TABLE(gtk_builder_get_object(ui, "document-tags"));
+	tags = gtk_text_tag_table_new();
+
+	std::initializer_list<const cainteoir::styles *> styles =
+	{
+		&cainteoir::superscript,
+		&cainteoir::subscript,
+		&cainteoir::emphasized,
+		&cainteoir::strong,
+		&cainteoir::reduced,
+		&cainteoir::underlined,
+		&cainteoir::monospace,
+		&cainteoir::paragraph,
+		&cainteoir::heading1,
+		&cainteoir::heading2,
+		&cainteoir::heading3,
+		&cainteoir::heading4,
+		&cainteoir::heading5,
+		&cainteoir::heading6,
+	};
+
+	for (auto &style : styles)
+	{
+		GtkTextTag *tag = create_text_tag_from_style(*style);
+		gtk_text_tag_table_add(tags, tag);
+		g_object_unref(tag);
+	}
 
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(tts_metadata);

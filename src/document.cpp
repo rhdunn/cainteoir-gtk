@@ -22,9 +22,9 @@
 #include "compatibility.hpp"
 #include "document.hpp"
 
-GtkTextTag *create_text_tag_from_style(const char *aName, const cainteoir::styles &aStyles)
+GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles)
 {
-	GtkTextTag *tag = gtk_text_tag_new(aName);
+	GtkTextTag *tag = gtk_text_tag_new(aStyles.name.c_str());
 
 	switch (aStyles.vertical_align)
 	{

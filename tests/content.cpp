@@ -108,10 +108,10 @@ TEST_CASE("cainteoir::styles.display")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("display");
 
 	style.display = cainteoir::display::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -123,7 +123,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.display = cainteoir::display::block;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -135,7 +135,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.display = cainteoir::display::inlined;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -147,7 +147,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.display = cainteoir::display::none;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -163,10 +163,10 @@ TEST_CASE("cainteoir::styles.vertical_align")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("vertical-align");
 
 	style.vertical_align = cainteoir::vertical_align::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -178,7 +178,7 @@ TEST_CASE("cainteoir::styles.vertical_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.vertical_align = cainteoir::vertical_align::baseline;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,
 		false, 0,
 		true,  0,
@@ -190,7 +190,7 @@ TEST_CASE("cainteoir::styles.vertical_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.vertical_align = cainteoir::vertical_align::sub;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,
 		false, 0,
 		true,  -4096,
@@ -202,7 +202,7 @@ TEST_CASE("cainteoir::styles.vertical_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.vertical_align = cainteoir::vertical_align::super;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,
 		false, 0,
 		true,  4096,
@@ -218,10 +218,10 @@ TEST_CASE("cainteoir::styles.text_align")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("text-align");
 
 	style.text_align = cainteoir::text_align::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -233,7 +233,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_align = cainteoir::text_align::left;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -245,7 +245,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_align = cainteoir::text_align::right;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -257,7 +257,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_align = cainteoir::text_align::center;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -269,7 +269,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_align = cainteoir::text_align::justify;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -285,10 +285,10 @@ TEST_CASE("cainteoir::styles.text_decoration")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("text-decoration");
 
 	style.text_decoration = cainteoir::text_decoration::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -300,7 +300,7 @@ TEST_CASE("cainteoir::styles.text_decoration")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_decoration = cainteoir::text_decoration::none;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -312,7 +312,7 @@ TEST_CASE("cainteoir::styles.text_decoration")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_decoration = cainteoir::text_decoration::underline;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -324,7 +324,7 @@ TEST_CASE("cainteoir::styles.text_decoration")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.text_decoration = cainteoir::text_decoration::line_through;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -340,10 +340,10 @@ TEST_CASE("cainteoir::styles.font_style")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("font-style");
 
 	style.font_style = cainteoir::font_style::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -355,7 +355,7 @@ TEST_CASE("cainteoir::styles.font_style")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.font_style = cainteoir::font_style::normal;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -367,7 +367,7 @@ TEST_CASE("cainteoir::styles.font_style")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.font_style = cainteoir::font_style::italic;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -379,7 +379,7 @@ TEST_CASE("cainteoir::styles.font_style")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.font_style = cainteoir::font_style::oblique;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -395,10 +395,10 @@ TEST_CASE("cainteoir::styles.font_variant")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("font-variant");
 
 	style.font_variant = cainteoir::font_variant::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-variant",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -410,7 +410,7 @@ TEST_CASE("cainteoir::styles.font_variant")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.font_variant = cainteoir::font_variant::normal;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-variant",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -422,7 +422,7 @@ TEST_CASE("cainteoir::styles.font_variant")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.font_variant = cainteoir::font_variant::small_caps;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-variant",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -438,10 +438,10 @@ TEST_CASE("cainteoir::styles.font_weight")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("font-weight");
 
 	style.font_weight = cainteoir::font_weight::inherit;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-weight",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -453,7 +453,7 @@ TEST_CASE("cainteoir::styles.font_weight")
 		false, PANGO_WEIGHT_NORMAL);
 
 	style.font_weight = cainteoir::font_weight::normal;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-weight",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -465,7 +465,7 @@ TEST_CASE("cainteoir::styles.font_weight")
 		true,  PANGO_WEIGHT_NORMAL);
 
 	style.font_weight = cainteoir::font_weight::bold;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-weight",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -481,10 +481,10 @@ TEST_CASE("cainteoir::styles.font_family")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("font-family");
 
 	style.font_family = std::string();
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-family",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -496,7 +496,7 @@ TEST_CASE("cainteoir::styles.font_family")
 		false,  PANGO_WEIGHT_NORMAL);
 
 	style.font_family = "serif";
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-family",
 		true,  "serif",
 		false, 0,
 		false, 0,
@@ -508,7 +508,7 @@ TEST_CASE("cainteoir::styles.font_family")
 		false,  PANGO_WEIGHT_NORMAL);
 
 	style.font_family = "Tahoma";
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-family",
 		true,  "Tahoma",
 		false, 0,
 		false, 0,
@@ -524,10 +524,10 @@ TEST_CASE("cainteoir::styles.font_size")
 {
 	g_type_init();
 
-	cainteoir::styles style;
+	cainteoir::styles style("font-size");
 
 	style.font_size = 0;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,
 		false, 0,
 		false, 0,
@@ -539,7 +539,7 @@ TEST_CASE("cainteoir::styles.font_size")
 		false,  PANGO_WEIGHT_NORMAL);
 
 	style.font_size = 10;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,
 		true,  10,
 		false, 0,
@@ -551,7 +551,7 @@ TEST_CASE("cainteoir::styles.font_size")
 		false,  PANGO_WEIGHT_NORMAL);
 
 	style.font_size = 12;
-	test_tag(create_text_tag_from_style("test", style), "test",
+	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,
 		true,  12,
 		false, 0,

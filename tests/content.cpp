@@ -28,6 +28,10 @@ REGISTER_TESTSUITE("content");
 static void test_tag_(GtkTextTag *aTag, const char *aName,
                       bool aFontFamilySet, const char *aFontFamily,
                       bool aFontSizeSet, int aFontSize,
+                      bool aMarginLeftSet, int aMarginLeft,
+                      bool aMarginTopSet, int aMarginTop,
+                      bool aMarginRightSet, int aMarginRight,
+                      bool aMarginBottomSet, int aMarginBottom,
                       bool aRiseSet, int aRise,
                       bool aJustificationSet, GtkJustification aJustification,
                       bool aStrikeThroughSet, bool aStrikeThrough,
@@ -40,6 +44,14 @@ static void test_tag_(GtkTextTag *aTag, const char *aName,
 	gchar *name = nullptr;
 	gboolean rise_set = FALSE;
 	gint rise = 0;
+	gboolean margin_left_set = FALSE;
+	gint margin_left = 0;
+	gboolean margin_top_set = FALSE;
+	gint margin_top = 0;
+	gboolean margin_right_set = FALSE;
+	gint margin_right = 0;
+	gboolean margin_bottom_set = FALSE;
+	gint margin_bottom = 0;
 	gboolean justification_set = FALSE;
 	GtkJustification justification = GTK_JUSTIFY_LEFT;
 	gboolean strikethrough_set = FALSE;
@@ -60,6 +72,10 @@ static void test_tag_(GtkTextTag *aTag, const char *aName,
 	g_object_get(G_OBJECT(aTag),
 		"name", &name,
 		"rise-set", &rise_set, "rise", &rise,
+		"pixels-above-lines-set", &margin_top_set, "pixels-above-lines", &margin_top,
+		"pixels-below-lines-set", &margin_bottom_set, "pixels-below-lines", &margin_bottom,
+		"left-margin-set", &margin_left_set, "left-margin", &margin_left,
+		"right-margin-set", &margin_right_set, "right-margin", &margin_right,
 		"justification-set", &justification_set, "justification", &justification,
 		"strikethrough-set", &strikethrough_set, "strikethrough", &strikethrough,
 		"underline-set", &underline_set, "underline", &underline,
@@ -73,6 +89,14 @@ static void test_tag_(GtkTextTag *aTag, const char *aName,
 	assert_location(strcmp(name, aName) == 0, location, line);
 	assert_location(rise_set == aRiseSet, location, line);
 	assert_location(rise == aRise, location, line);
+	assert_location(margin_left_set == aMarginLeftSet, location, line);
+	assert_location(margin_left == aMarginLeft, location, line);
+	assert_location(margin_top_set == aMarginTopSet, location, line);
+	assert_location(margin_top == aMarginTop, location, line);
+	assert_location(margin_right_set == aMarginRightSet, location, line);
+	assert_location(margin_right == aMarginRight, location, line);
+	assert_location(margin_bottom_set == aMarginBottomSet, location, line);
+	assert_location(margin_bottom == aMarginBottom, location, line);
 	assert_location(justification_set == aJustificationSet, location, line);
 	assert_location(justification == aJustification, location, line);
 	assert_location(strikethrough_set == aStrikeThroughSet, location, line);
@@ -101,8 +125,29 @@ static void test_tag_(GtkTextTag *aTag, const char *aName,
 	g_object_unref(aTag);
 }
 
-#define test_tag(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) \
-	test_tag_(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, __FILE__, __LINE__)
+#define test_tag(aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at, au, av , aw, ax, ay, az, ba, bb) \
+	test_tag_(aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at, au, av, aw, ax, ay, az, ba, bb, __FILE__, __LINE__)
+
+TEST_CASE("cainteoir::styles -- defaults")
+{
+	g_type_init();
+
+	cainteoir::styles style("defaults");
+	test_tag(create_text_tag_from_style(style), "defaults",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+}
 
 TEST_CASE("cainteoir::styles.display")
 {
@@ -112,99 +157,131 @@ TEST_CASE("cainteoir::styles.display")
 
 	style.display = cainteoir::display::inherit;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::block;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::inlined;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::list_item;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::table;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::table_row;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::table_cell;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.display = cainteoir::display::none;
 	test_tag(create_text_tag_from_style(style), "display",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.vertical_align")
@@ -213,53 +290,53 @@ TEST_CASE("cainteoir::styles.vertical_align")
 
 	cainteoir::styles style("vertical-align");
 
-	style.vertical_align = cainteoir::vertical_align::inherit;
-	test_tag(create_text_tag_from_style(style), "vertical-align",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
-
 	style.vertical_align = cainteoir::vertical_align::baseline;
 	test_tag(create_text_tag_from_style(style), "vertical-align",
-		false, NULL,
-		false, 0,
-		true,  0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		true,  0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.vertical_align = cainteoir::vertical_align::sub;
 	test_tag(create_text_tag_from_style(style), "vertical-align",
-		false, NULL,
-		false, 0,
-		true,  -4096,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		true,  -4096,                    // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.vertical_align = cainteoir::vertical_align::super;
 	test_tag(create_text_tag_from_style(style), "vertical-align",
-		false, NULL,
-		false, 0,
-		true,  4096,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		true,  4096,                     // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.text_align")
@@ -268,65 +345,69 @@ TEST_CASE("cainteoir::styles.text_align")
 
 	cainteoir::styles style("text-align");
 
-	style.text_align = cainteoir::text_align::inherit;
-	test_tag(create_text_tag_from_style(style), "text-align",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
-
 	style.text_align = cainteoir::text_align::left;
 	test_tag(create_text_tag_from_style(style), "text-align",
-		false, NULL,
-		false, 0,
-		false, 0,
-		true,  GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		true,  GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.text_align = cainteoir::text_align::right;
 	test_tag(create_text_tag_from_style(style), "text-align",
-		false, NULL,
-		false, 0,
-		false, 0,
-		true,  GTK_JUSTIFY_RIGHT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		true,  GTK_JUSTIFY_RIGHT,        // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.text_align = cainteoir::text_align::center;
 	test_tag(create_text_tag_from_style(style), "text-align",
-		false, NULL,
-		false, 0,
-		false, 0,
-		true,  GTK_JUSTIFY_CENTER,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		true,  GTK_JUSTIFY_CENTER,       // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.text_align = cainteoir::text_align::justify;
 	test_tag(create_text_tag_from_style(style), "text-align",
-		false, NULL,
-		false, 0,
-		false, 0,
-		true,  GTK_JUSTIFY_FILL,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		true,  GTK_JUSTIFY_FILL,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.text_decoration")
@@ -335,53 +416,53 @@ TEST_CASE("cainteoir::styles.text_decoration")
 
 	cainteoir::styles style("text-decoration");
 
-	style.text_decoration = cainteoir::text_decoration::inherit;
-	test_tag(create_text_tag_from_style(style), "text-decoration",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
-
 	style.text_decoration = cainteoir::text_decoration::none;
 	test_tag(create_text_tag_from_style(style), "text-decoration",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		true,  false,
-		true,  PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		true,  false,                    // strike-through
+		true,  PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.text_decoration = cainteoir::text_decoration::underline;
 	test_tag(create_text_tag_from_style(style), "text-decoration",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		true,  PANGO_UNDERLINE_SINGLE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		true,  PANGO_UNDERLINE_SINGLE,   // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.text_decoration = cainteoir::text_decoration::line_through;
 	test_tag(create_text_tag_from_style(style), "text-decoration",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		true,  true,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		true,  true,                     // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.font_style")
@@ -390,53 +471,53 @@ TEST_CASE("cainteoir::styles.font_style")
 
 	cainteoir::styles style("font-style");
 
-	style.font_style = cainteoir::font_style::inherit;
-	test_tag(create_text_tag_from_style(style), "font-style",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
-
 	style.font_style = cainteoir::font_style::normal;
 	test_tag(create_text_tag_from_style(style), "font-style",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		true,  PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		true,  PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.font_style = cainteoir::font_style::italic;
 	test_tag(create_text_tag_from_style(style), "font-style",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		true,  PANGO_STYLE_ITALIC,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		true,  PANGO_STYLE_ITALIC,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.font_style = cainteoir::font_style::oblique;
 	test_tag(create_text_tag_from_style(style), "font-style",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		true,  PANGO_STYLE_OBLIQUE,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		true,  PANGO_STYLE_OBLIQUE,      // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.font_variant")
@@ -445,41 +526,37 @@ TEST_CASE("cainteoir::styles.font_variant")
 
 	cainteoir::styles style("font-variant");
 
-	style.font_variant = cainteoir::font_variant::inherit;
-	test_tag(create_text_tag_from_style(style), "font-variant",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
-
 	style.font_variant = cainteoir::font_variant::normal;
 	test_tag(create_text_tag_from_style(style), "font-variant",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		true,  PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		true,  PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.font_variant = cainteoir::font_variant::small_caps;
 	test_tag(create_text_tag_from_style(style), "font-variant",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		true,  PANGO_VARIANT_SMALL_CAPS,
-		false, PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		true,  PANGO_VARIANT_SMALL_CAPS, // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.font_weight")
@@ -488,41 +565,37 @@ TEST_CASE("cainteoir::styles.font_weight")
 
 	cainteoir::styles style("font-weight");
 
-	style.font_weight = cainteoir::font_weight::inherit;
-	test_tag(create_text_tag_from_style(style), "font-weight",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false, PANGO_WEIGHT_NORMAL);
-
 	style.font_weight = cainteoir::font_weight::normal;
 	test_tag(create_text_tag_from_style(style), "font-weight",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		true,  PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		true,  PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.font_weight = cainteoir::font_weight::bold;
 	test_tag(create_text_tag_from_style(style), "font-weight",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		true,  PANGO_WEIGHT_BOLD);
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		true,  PANGO_WEIGHT_BOLD);       // font-weight
 }
 
 TEST_CASE("cainteoir::styles.font_family")
@@ -531,41 +604,37 @@ TEST_CASE("cainteoir::styles.font_family")
 
 	cainteoir::styles style("font-family");
 
-	style.font_family = std::string();
-	test_tag(create_text_tag_from_style(style), "font-family",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false,  PANGO_WEIGHT_NORMAL);
-
 	style.font_family = "serif";
 	test_tag(create_text_tag_from_style(style), "font-family",
-		true,  "serif",
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false,  PANGO_WEIGHT_NORMAL);
+		true,  "serif",                  // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.font_family = "Tahoma";
 	test_tag(create_text_tag_from_style(style), "font-family",
-		true,  "Tahoma",
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false,  PANGO_WEIGHT_NORMAL);
+		true,  "Tahoma",                 // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
 TEST_CASE("cainteoir::styles.font_size")
@@ -574,39 +643,191 @@ TEST_CASE("cainteoir::styles.font_size")
 
 	cainteoir::styles style("font-size");
 
-	style.font_size = {};
-	test_tag(create_text_tag_from_style(style), "font-size",
-		false, NULL,
-		false, 0,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false,  PANGO_WEIGHT_NORMAL);
-
 	style.font_size = { 10, cainteoir::size_units::points };
 	test_tag(create_text_tag_from_style(style), "font-size",
-		false, NULL,
-		true,  10,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false,  PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		true,  10,                       // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
 	style.font_size = { 2, cainteoir::size_units::picas };
 	test_tag(create_text_tag_from_style(style), "font-size",
-		false, NULL,
-		true,  24,
-		false, 0,
-		false, GTK_JUSTIFY_LEFT,
-		false, false,
-		false, PANGO_UNDERLINE_NONE,
-		false, PANGO_STYLE_NORMAL,
-		false, PANGO_VARIANT_NORMAL,
-		false,  PANGO_WEIGHT_NORMAL);
+		false, NULL,                     // font-family
+		true,  24,                       // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+}
+
+TEST_CASE("cainteoir::styles.margin.left")
+{
+	g_type_init();
+
+	cainteoir::styles style("margin-left");
+
+	style.margin.left = { 10, cainteoir::size_units::pixels };
+	test_tag(create_text_tag_from_style(style), "margin-left",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		true,  10,                       // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+
+	style.margin.left = { 1, cainteoir::size_units::inches };
+	test_tag(create_text_tag_from_style(style), "margin-left",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		true,  96,                       // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+}
+
+TEST_CASE("cainteoir::styles.margin.top")
+{
+	g_type_init();
+
+	cainteoir::styles style("margin-top");
+
+	style.margin.top = { 10, cainteoir::size_units::pixels };
+	test_tag(create_text_tag_from_style(style), "margin-top",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		true,  10,                       // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+
+	style.margin.top = { 1, cainteoir::size_units::inches };
+	test_tag(create_text_tag_from_style(style), "margin-top",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		true,  96,                       // margin-top
+		false, 0,                        // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+}
+
+TEST_CASE("cainteoir::styles.margin.right")
+{
+	g_type_init();
+
+	cainteoir::styles style("margin-right");
+
+	style.margin.right = { 10, cainteoir::size_units::pixels };
+	test_tag(create_text_tag_from_style(style), "margin-right",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		true,  10,                       // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+
+	style.margin.right = { 1, cainteoir::size_units::inches };
+	test_tag(create_text_tag_from_style(style), "margin-right",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		true,  96,                       // margin-right
+		false, 0,                        // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+}
+
+TEST_CASE("cainteoir::styles.margin.bottom")
+{
+	g_type_init();
+
+	cainteoir::styles style("margin-bottom");
+
+	style.margin.bottom = { 10, cainteoir::size_units::pixels };
+	test_tag(create_text_tag_from_style(style), "margin-bottom",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		true,  10,                       // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
+
+	style.margin.bottom = { 1, cainteoir::size_units::inches };
+	test_tag(create_text_tag_from_style(style), "margin-bottom",
+		false, NULL,                     // font-family
+		false, 0,                        // font-size
+		false, 0,                        // margin-left
+		false, 0,                        // margin-top
+		false, 0,                        // margin-right
+		true,  96,                       // margin-bottom
+		false, 0,                        // rise
+		false, GTK_JUSTIFY_LEFT,         // justification
+		false, false,                    // strike-through
+		false, PANGO_UNDERLINE_NONE,     // underline
+		false, PANGO_STYLE_NORMAL,       // font-style
+		false, PANGO_VARIANT_NORMAL,     // font-variant
+		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }

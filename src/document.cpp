@@ -120,5 +120,17 @@ GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles)
 	if (aStyles.font_size.units() != cainteoir::size_units::inherit)
 		g_object_set(G_OBJECT(tag), "size-set", TRUE, "size-points", gdouble(aStyles.font_size.as(cainteoir::size_units::points).value()), NULL);
 
+	if (aStyles.margin.top.units() != cainteoir::size_units::inherit)
+		g_object_set(G_OBJECT(tag), "pixels-above-lines-set", TRUE, "pixels-above-lines", gint(aStyles.margin.top.as(cainteoir::size_units::pixels).value()), NULL);
+
+	if (aStyles.margin.bottom.units() != cainteoir::size_units::inherit)
+		g_object_set(G_OBJECT(tag), "pixels-below-lines-set", TRUE, "pixels-below-lines", gint(aStyles.margin.bottom.as(cainteoir::size_units::pixels).value()), NULL);
+
+	if (aStyles.margin.left.units() != cainteoir::size_units::inherit)
+		g_object_set(G_OBJECT(tag), "left-margin-set", TRUE, "left-margin", gint(aStyles.margin.left.as(cainteoir::size_units::pixels).value()), NULL);
+
+	if (aStyles.margin.right.units() != cainteoir::size_units::inherit)
+		g_object_set(G_OBJECT(tag), "right-margin-set", TRUE, "right-margin", gint(aStyles.margin.right.as(cainteoir::size_units::pixels).value()), NULL);
+
 	return tag;
 }

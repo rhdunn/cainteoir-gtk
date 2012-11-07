@@ -171,8 +171,7 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		doc->add(*reader);
 		if (reader->type & events::begin_context)
 		{
-			const cainteoir::styles *style = nullptr;
-			const char *newline = nullptr;
+			const cainteoir::styles *style = &cainteoir::unknown;
 			switch (reader->context)
 			{
 			case events::span:
@@ -190,7 +189,6 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 				break;
 			case events::paragraph:
 				style = &cainteoir::paragraph;
-				newline = "\n\n";
 				break;
 			case events::heading:
 				switch (reader->parameter)
@@ -202,23 +200,38 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 				case 5:  style = &cainteoir::heading5; break;
 				default: style = &cainteoir::heading6; break;
 				}
-				newline = "\n\n";
 				break;
 			case events::list:
-			case events::table:
-			case events::row:
-				newline = "\n\n";
+				switch (reader->parameter)
+				{
+				case events::bullet: style = &cainteoir::bullet_list; break;
+				case events::number: style = &cainteoir::number_list; break;
+				}
 				break;
 			case events::list_item:
+				style = &cainteoir::list_item;
+				break;
+			case events::table:
+				style = &cainteoir::table;
+				break;
+			case events::row:
+				style = &cainteoir::table_row;
+				break;
 			case events::cell:
-				newline = "\n";
+				style = &cainteoir::table_cell;
 				break;
 			}
-			if (newline && need_linebreak)
+			if (need_linebreak) switch (style->display)
 			{
-				gtk_text_buffer_insert(buffer, &position, newline, -1);
+			case cainteoir::display::block:
+			case cainteoir::display::list_item:
+			case cainteoir::display::table:
+			case cainteoir::display::table_row:
+			case cainteoir::display::table_cell:
+				gtk_text_buffer_insert(buffer, &position, "\n", 1);
 				gtk_text_buffer_get_end_iter(buffer, &position);
 				need_linebreak = false;
+				break;
 			}
 			contexts.push({ style, gtk_text_iter_get_offset(&position) });
 		}
@@ -257,7 +270,7 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 			if (!contexts.empty())
 			{
 				const cainteoir::styles *style = contexts.top().style;
-				if (style)
+				if (style != &cainteoir::unknown)
 				{
 					GtkTextIter start;
 					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
@@ -437,6 +450,12 @@ Cainteoir::Cainteoir(const char *filename)
 		&cainteoir::heading4,
 		&cainteoir::heading5,
 		&cainteoir::heading6,
+		&cainteoir::bullet_list,
+		&cainteoir::number_list,
+		&cainteoir::list_item,
+		&cainteoir::table,
+		&cainteoir::table_row,
+		&cainteoir::table_cell,
 	};
 
 	for (auto &style : styles)

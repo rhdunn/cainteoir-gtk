@@ -574,7 +574,7 @@ TEST_CASE("cainteoir::styles.font_size")
 
 	cainteoir::styles style("font-size");
 
-	style.font_size = 0;
+	style.font_size = {};
 	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,
 		false, 0,
@@ -586,7 +586,7 @@ TEST_CASE("cainteoir::styles.font_size")
 		false, PANGO_VARIANT_NORMAL,
 		false,  PANGO_WEIGHT_NORMAL);
 
-	style.font_size = 10;
+	style.font_size = { 10, cainteoir::size_units::points };
 	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,
 		true,  10,
@@ -598,10 +598,10 @@ TEST_CASE("cainteoir::styles.font_size")
 		false, PANGO_VARIANT_NORMAL,
 		false,  PANGO_WEIGHT_NORMAL);
 
-	style.font_size = 12;
+	style.font_size = { 2, cainteoir::size_units::picas };
 	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,
-		true,  12,
+		true,  24,
 		false, 0,
 		false, GTK_JUSTIFY_LEFT,
 		false, false,

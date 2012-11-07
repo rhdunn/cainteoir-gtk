@@ -117,8 +117,8 @@ GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles)
 	if (!aStyles.font_family.empty())
 		g_object_set(G_OBJECT(tag), "family-set", TRUE, "family", aStyles.font_family.c_str(), NULL);
 
-	if (aStyles.font_size != 0)
-		g_object_set(G_OBJECT(tag), "size-set", TRUE, "size-points", gdouble(aStyles.font_size), NULL);
+	if (aStyles.font_size.units() != cainteoir::size_units::inherit)
+		g_object_set(G_OBJECT(tag), "size-set", TRUE, "size-points", gdouble(aStyles.font_size.as(cainteoir::size_units::points).value()), NULL);
 
 	return tag;
 }

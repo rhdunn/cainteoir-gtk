@@ -68,11 +68,11 @@ static void dnd_data_received(GtkWidget *, GdkDragContext *context, gint, gint, 
 
 struct tag_block
 {
-	const cainteoir::styles *style;
+	GtkTextTag *tag;
 	int offset;
 
-	tag_block(const cainteoir::styles *aStyle, int aOffset)
-		: style(aStyle)
+	tag_block(GtkTextTag *aTag, int aOffset)
+		: tag(aTag)
 		, offset(aOffset)
 	{
 	}
@@ -156,8 +156,9 @@ static std::string select_file(
 	return ret;
 }
 
-static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
+static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
 {
+	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
 
 	GtkTextIter position;
@@ -169,59 +170,21 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 	while (reader->read())
 	{
 		doc->add(*reader);
+
 		if (reader->type & events::begin_context)
 		{
-			const cainteoir::styles *style = &cainteoir::unknown;
-			switch (reader->context)
+			GtkTextTag *tag = nullptr;
+			if (reader->styles)
 			{
-			case events::span:
-				switch (reader->parameter)
+				tag = gtk_text_tag_table_lookup(tags, reader->styles->name.c_str());
+				if (!tag)
 				{
-				case events::overunder:   break;
-				case events::superscript: style = &cainteoir::superscript; break;
-				case events::subscript:   style = &cainteoir::subscript;   break;
-				case events::emphasized:  style = &cainteoir::emphasized;  break;
-				case events::strong:      style = &cainteoir::strong;      break;
-				case events::underline:   style = &cainteoir::underlined;  break;
-				case events::monospace:   style = &cainteoir::monospace;   break;
-				case events::reduced:     style = &cainteoir::reduced;     break;
-				};
-				break;
-			case events::paragraph:
-				style = &cainteoir::paragraph;
-				break;
-			case events::heading:
-				switch (reader->parameter)
-				{
-				case 1:  style = &cainteoir::heading1; break;
-				case 2:  style = &cainteoir::heading2; break;
-				case 3:  style = &cainteoir::heading3; break;
-				case 4:  style = &cainteoir::heading4; break;
-				case 5:  style = &cainteoir::heading5; break;
-				default: style = &cainteoir::heading6; break;
+					tag = create_text_tag_from_style(*reader->styles);
+					gtk_text_tag_table_add(tags, tag);
 				}
-				break;
-			case events::list:
-				switch (reader->parameter)
-				{
-				case events::bullet: style = &cainteoir::bullet_list; break;
-				case events::number: style = &cainteoir::number_list; break;
-				}
-				break;
-			case events::list_item:
-				style = &cainteoir::list_item;
-				break;
-			case events::table:
-				style = &cainteoir::table;
-				break;
-			case events::row:
-				style = &cainteoir::table_row;
-				break;
-			case events::cell:
-				style = &cainteoir::table_cell;
-				break;
 			}
-			if (need_linebreak) switch (style->display)
+
+			if (need_linebreak && reader->styles) switch (reader->styles->display)
 			{
 			case cainteoir::display::block:
 			case cainteoir::display::list_item:
@@ -233,10 +196,10 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 				need_linebreak = false;
 				break;
 			}
-			contexts.push({ style, gtk_text_iter_get_offset(&position) });
+			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
 		}
 		if (reader->type & cainteoir::events::toc_entry)
-			doc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
+			doc->toc.push_back(toc_entry_data(reader->styles->toc_level, reader->anchor, reader->text->str()));
 		if (reader->type & cainteoir::events::anchor)
 			anchor.push_back(reader->anchor.str());
 		if (reader->type & cainteoir::events::text)
@@ -269,12 +232,12 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		{
 			if (!contexts.empty())
 			{
-				const cainteoir::styles *style = contexts.top().style;
-				if (style != &cainteoir::unknown)
+				GtkTextTag *tag = contexts.top().tag;
+				if (tag)
 				{
 					GtkTextIter start;
 					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
-					gtk_text_buffer_apply_tag_by_name(buffer, style->name.c_str(), &start, &position);
+					gtk_text_buffer_apply_tag(buffer, tag, &start, &position);
 				}
 				contexts.pop();
 			}
@@ -431,39 +394,6 @@ Cainteoir::Cainteoir(const char *filename)
 
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
-
-	tags = gtk_text_tag_table_new();
-
-	std::initializer_list<const cainteoir::styles *> styles =
-	{
-		&cainteoir::superscript,
-		&cainteoir::subscript,
-		&cainteoir::emphasized,
-		&cainteoir::strong,
-		&cainteoir::reduced,
-		&cainteoir::underlined,
-		&cainteoir::monospace,
-		&cainteoir::paragraph,
-		&cainteoir::heading1,
-		&cainteoir::heading2,
-		&cainteoir::heading3,
-		&cainteoir::heading4,
-		&cainteoir::heading5,
-		&cainteoir::heading6,
-		&cainteoir::bullet_list,
-		&cainteoir::number_list,
-		&cainteoir::list_item,
-		&cainteoir::table,
-		&cainteoir::table_row,
-		&cainteoir::table_cell,
-	};
-
-	for (auto &style : styles)
-	{
-		GtkTextTag *tag = create_text_tag_from_style(*style);
-		gtk_text_tag_table_add(tags, tag);
-		g_object_unref(tag);
-	}
 
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(tts_metadata);
@@ -728,7 +658,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		GtkTextBuffer *buffer = create_buffer_from_document(tags, reader, newdoc, settings);
+		GtkTextBuffer *buffer = create_buffer_from_document(reader, newdoc, settings);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;

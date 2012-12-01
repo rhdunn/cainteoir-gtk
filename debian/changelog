@@ -1,3 +1,9 @@
+cainteoir-gtk (0.8~unstable0) unstable; urgency=low
+ 
+  * Initial upstream release.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Sat, 1 Dec 2012 13:13:00 +0000
+
 cainteoir-gtk (0.7~unstable2) unstable; urgency=low
  
   * debian/control: depend on intltool for intltoolize

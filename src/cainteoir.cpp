@@ -68,11 +68,11 @@ static void dnd_data_received(GtkWidget *, GdkDragContext *context, gint, gint, 
 
 struct tag_block
 {
-	const char *name;
+	GtkTextTag *tag;
 	int offset;
 
-	tag_block(const char *aName, int aOffset)
-		: name(aName)
+	tag_block(GtkTextTag *aTag, int aOffset)
+		: tag(aTag)
 		, offset(aOffset)
 	{
 	}
@@ -156,75 +156,58 @@ static std::string select_file(
 	return ret;
 }
 
-static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
+static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
 {
+	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
 
 	GtkTextIter position;
 	gtk_text_buffer_get_end_iter(buffer, &position);
 
+	std::list<std::string> anchor;
 	std::stack<tag_block> contexts;
 	bool need_linebreak = false;
 	while (reader->read())
 	{
 		doc->add(*reader);
+
 		if (reader->type & events::begin_context)
 		{
-			const char *name = nullptr;
-			const char *newline = nullptr;
-			switch (reader->context)
+			GtkTextTag *tag = nullptr;
+			if (reader->styles)
 			{
-			case events::span:
-				switch (reader->parameter)
+				tag = gtk_text_tag_table_lookup(tags, reader->styles->name.c_str());
+				if (!tag)
 				{
-				case events::overunder:   break;
-				case events::superscript: name = "superscript"; break;
-				case events::subscript:   name = "subscript";   break;
-				case events::emphasized:  name = "emphasized";  break;
-				case events::strong:      name = "strong";      break;
-				case events::underline:   name = "underline";   break;
-				case events::monospace:   name = "monospace";   break;
-				case events::reduced:     name = "reduced";     break;
-				};
-				break;
-			case events::paragraph:
-				name = "paragraph";
-				newline = "\n\n";
-				break;
-			case events::heading:
-				switch (reader->parameter)
-				{
-				case 1:  name = "heading1"; break;
-				case 2:  name = "heading2"; break;
-				case 3:  name = "heading3"; break;
-				case 4:  name = "heading4"; break;
-				case 5:  name = "heading5"; break;
-				default: name = "heading6"; break;
+					tag = create_text_tag_from_style(*reader->styles);
+					gtk_text_tag_table_add(tags, tag);
 				}
-				newline = "\n\n";
-				break;
-			case events::list:
-			case events::table:
-			case events::row:
-				newline = "\n\n";
-				break;
-			case events::list_item:
-			case events::cell:
-				newline = "\n";
-				break;
 			}
-			if (newline && need_linebreak)
+
+			if (need_linebreak && reader->styles) switch (reader->styles->display)
 			{
-				gtk_text_buffer_insert(buffer, &position, newline, -1);
+			case cainteoir::display::block:
+			case cainteoir::display::list_item:
+			case cainteoir::display::table:
+			case cainteoir::display::table_row:
+			case cainteoir::display::table_cell:
+				gtk_text_buffer_insert(buffer, &position, "\n", 1);
 				gtk_text_buffer_get_end_iter(buffer, &position);
 				need_linebreak = false;
+				break;
 			}
-			contexts.push({ name, gtk_text_iter_get_offset(&position) });
+			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
 		}
 		if (reader->type & cainteoir::events::toc_entry)
-			doc->toc.push_back(toc_entry_data((int)reader->parameter, reader->anchor, reader->text->str()));
+			doc->toc.push_back(toc_entry_data(reader->styles->toc_level, reader->anchor, reader->text->str()));
+		if (reader->type & cainteoir::events::anchor)
+			anchor.push_back(reader->anchor.str());
 		if (reader->type & cainteoir::events::text)
 		{
+			for (auto &a : anchor)
+				(void)gtk_text_buffer_create_mark(buffer, a.c_str(), &position, TRUE);
+			anchor.clear();
+
 			const gchar *start = reader->text->begin();
 			const gchar *end   = reader->text->end();
 			while (start < end)
@@ -249,12 +232,12 @@ static GtkTextBuffer *create_buffer_from_document(GtkTextTagTable *tags, std::sh
 		{
 			if (!contexts.empty())
 			{
-				const char *name = contexts.top().name;
-				if (name)
+				GtkTextTag *tag = contexts.top().tag;
+				if (tag)
 				{
 					GtkTextIter start;
 					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
-					gtk_text_buffer_apply_tag_by_name(buffer, name, &start, &position);
+					gtk_text_buffer_apply_tag(buffer, tag, &start, &position);
 				}
 				contexts.pop();
 			}
@@ -412,8 +395,6 @@ Cainteoir::Cainteoir(const char *filename)
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
 
-	tags = GTK_TEXT_TAG_TABLE(gtk_builder_get_object(ui, "document-tags"));
-
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(tts_metadata);
 
@@ -496,7 +477,13 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_action_set_visible(stopAction, FALSE);
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
-	switch_voice(tts.voice());
+
+	rdf::uri voice = tts_metadata.href(settings("voice.name", std::string()).as<std::string>());
+	bool set_voice = false;
+	if (!voice.empty())
+		set_voice = switch_voice(voice);
+	if (!set_voice)
+		switch_voice(tts.voice());
 }
 
 void Cainteoir::on_open_document()
@@ -671,7 +658,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		GtkTextBuffer *buffer = create_buffer_from_document(tags, reader, newdoc, settings);
+		GtkTextBuffer *buffer = create_buffer_from_document(reader, newdoc, settings);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;
@@ -749,8 +736,11 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	voice_metadata.add_metadata(tts_metadata, voice, rdf::dc("language"));
 
 	auto voiceof = rql::select(tts_metadata,
-	                           rql::subject == voice && rql::predicate == rdf::tts("voiceOf")).front();
-	const rdf::uri &engine = rql::object(voiceof);
+	                           rql::subject == voice && rql::predicate == rdf::tts("voiceOf"));
+	if (voiceof.empty())
+		return false;
+
+	const rdf::uri &engine = rql::object(voiceof.front());
 	if (!engine.empty())
 	{
 		engine_metadata.add_metadata(tts_metadata, engine, rdf::tts("name"));
@@ -762,6 +752,7 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 		voiceSelection->show(tts.voice());
 		if (!speech || !speech->is_speaking())
 			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+		settings("voice.name") = voice.str();
 		return true;
 	}
 

@@ -1,6 +1,6 @@
 /* Document Processing
  *
- * Copyright (C) 2011 Reece H. Dunn
+ * Copyright (C) 2011-2012 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -23,9 +23,12 @@
 
 #include <cainteoir/document.hpp>
 #include <cainteoir/engines.hpp>
+#include <cainteoir/content.hpp>
 
 #include "toc.hpp"
 #include <vector>
+
+GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles);
 
 struct toc_entry_data
 {

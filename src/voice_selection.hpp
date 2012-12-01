@@ -65,6 +65,7 @@ private:
 struct VoiceParameter
 {
 	tts::parameter::type type;
+	const char *id;
 	GtkWidget *label;
 	GtkWidget *param;
 	GtkWidget *units;
@@ -73,7 +74,7 @@ struct VoiceParameter
 class VoiceSelectionView
 {
 public:
-	VoiceSelectionView(application_settings &settings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
+	VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
 
 	GtkWidget *gobj() { return layout; }
 
@@ -85,12 +86,13 @@ public:
 
 	void apply();
 private:
-	void create_entry(tts::parameter::type, int row);
+	void create_entry(tts::parameter::type, int row, const char *aID);
 
 	GtkWidget *layout;
 
 	std::list<VoiceParameter> parameters;
 	tts::engines *mEngines;
+	application_settings &settings;
 
 	VoiceList voices;
 	GtkWidget *parameterView;

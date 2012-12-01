@@ -27,9 +27,7 @@
 void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
 #endif
 
-#ifndef HAVE_CPP_NULLPTR
-#	include <stddef.h>
-
+#ifndef HAVE_CXX11_NULLPTR
 	const struct nullptr_t 
 	{
 		template <typename T>
@@ -41,7 +39,7 @@ void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
 		void operator&() const;
 	} nullptr = {};
 
-#ifndef HAVE_CPP_IMPLICIT_NULLPTR_COMPARE
+#ifndef HAVE_CXX11_IMPLICIT_NULLPTR_COMPARE
 	template <typename T>
 	inline bool operator==(const T &a, const nullptr_t &b)
 	{
@@ -68,5 +66,50 @@ void gtk_window_set_hide_titlebar_when_maximized(GtkWindow *, gboolean);
 #endif
 #endif
 
+#ifndef HAVE_CXX11_STD_BEGIN
+	namespace std
+	{
+		template <typename C>
+		inline auto begin(C &c) -> decltype(c.begin())
+		{
+			return c.begin();
+		}
+
+		template <typename C>
+		inline auto begin(const C &c) -> decltype(c.begin())
+		{
+			return c.begin();
+		}
+
+		template <typename T, size_t N>
+		inline const T *begin(T (&a)[N])
+		{
+			return a;
+		}
+	}
+#endif
+
+#ifndef HAVE_CXX11_STD_END
+	namespace std
+	{
+		template <typename C>
+		inline auto end(C &c) -> decltype(c.end())
+		{
+			return c.end();
+		}
+
+		template <typename C>
+		inline auto end(const C &c) -> decltype(c.end())
+		{
+			return c.end();
+		}
+
+		template <typename T, size_t N>
+		inline const T *end(T (&a)[N])
+		{
+			return a + N;
+		}
+	}
+#endif
 
 #endif

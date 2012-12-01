@@ -1,3 +1,9 @@
+cainteoir-gtk (0.8~unstable1) unstable; urgency=low
+ 
+  * tests/tester.hpp: fix float comparison on 32-bit builds.
+ 
+ -- Reece H. Dunn <msclrhd@gmail.com>  Sat, 1 Dec 2012 17:01:00 +0000
+
 cainteoir-gtk (0.8~unstable0) unstable; urgency=low
  
   * Initial upstream release.

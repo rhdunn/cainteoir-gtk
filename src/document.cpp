@@ -22,94 +22,96 @@
 #include "compatibility.hpp"
 #include "document.hpp"
 
-GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles)
+namespace css = cainteoir::css;
+
+GtkTextTag *create_text_tag_from_style(const css::styles &aStyles)
 {
 	GtkTextTag *tag = gtk_text_tag_new(aStyles.name.c_str());
 
 	switch (aStyles.vertical_align)
 	{
-	case cainteoir::vertical_align::inherit:
+	case css::vertical_align::inherit:
 		break;
-	case cainteoir::vertical_align::baseline:
+	case css::vertical_align::baseline:
 		g_object_set(G_OBJECT(tag), "rise-set", TRUE, "rise", 0, NULL);
 		break;
-	case cainteoir::vertical_align::sub:
+	case css::vertical_align::sub:
 		g_object_set(G_OBJECT(tag), "rise-set", TRUE, "rise", -4096, NULL);
 		break;
-	case cainteoir::vertical_align::super:
+	case css::vertical_align::super:
 		g_object_set(G_OBJECT(tag), "rise-set", TRUE, "rise", 4096, NULL);
 		break;
 	}
 
 	switch (aStyles.text_align)
 	{
-	case cainteoir::text_align::inherit:
+	case css::text_align::inherit:
 		break;
-	case cainteoir::text_align::left:
+	case css::text_align::left:
 		g_object_set(G_OBJECT(tag), "justification-set", TRUE, "justification", GTK_JUSTIFY_LEFT, NULL);
 		break;
-	case cainteoir::text_align::right:
+	case css::text_align::right:
 		g_object_set(G_OBJECT(tag), "justification-set", TRUE, "justification", GTK_JUSTIFY_RIGHT, NULL);
 		break;
-	case cainteoir::text_align::center:
+	case css::text_align::center:
 		g_object_set(G_OBJECT(tag), "justification-set", TRUE, "justification", GTK_JUSTIFY_CENTER, NULL);
 		break;
-	case cainteoir::text_align::justify:
+	case css::text_align::justify:
 		g_object_set(G_OBJECT(tag), "justification-set", TRUE, "justification", GTK_JUSTIFY_FILL, NULL);
 		break;
 	}
 
 	switch (aStyles.text_decoration)
 	{
-	case cainteoir::text_decoration::inherit:
+	case css::text_decoration::inherit:
 		break;
-	case cainteoir::text_decoration::none:
+	case css::text_decoration::none:
 		g_object_set(G_OBJECT(tag), "strikethrough-set", TRUE, "strikethrough", FALSE, NULL);
 		g_object_set(G_OBJECT(tag), "underline-set", TRUE, "underline", PANGO_UNDERLINE_NONE, NULL);
 		break;
-	case cainteoir::text_decoration::underline:
+	case css::text_decoration::underline:
 		g_object_set(G_OBJECT(tag), "underline-set", TRUE, "underline", PANGO_UNDERLINE_SINGLE, NULL);
 		break;
-	case cainteoir::text_decoration::line_through:
+	case css::text_decoration::line_through:
 		g_object_set(G_OBJECT(tag), "strikethrough-set", TRUE, "strikethrough", TRUE, NULL);
 		break;
 	}
 
 	switch (aStyles.font_style)
 	{
-	case cainteoir::font_style::inherit:
+	case css::font_style::inherit:
 		break;
-	case cainteoir::font_style::normal:
+	case css::font_style::normal:
 		g_object_set(G_OBJECT(tag), "style-set", TRUE, "style", PANGO_STYLE_NORMAL, NULL);
 		break;
-	case cainteoir::font_style::italic:
+	case css::font_style::italic:
 		g_object_set(G_OBJECT(tag), "style-set", TRUE, "style", PANGO_STYLE_ITALIC, NULL);
 		break;
-	case cainteoir::font_style::oblique:
+	case css::font_style::oblique:
 		g_object_set(G_OBJECT(tag), "style-set", TRUE, "style", PANGO_STYLE_OBLIQUE, NULL);
 		break;
 	}
 
-	switch (aStyles.font_variant)
+	switch (aStyles.font_variant_caps)
 	{
-	case cainteoir::font_variant::inherit:
+	case css::font_variant_caps::inherit:
 		break;
-	case cainteoir::font_variant::normal:
+	case css::font_variant_caps::normal:
 		g_object_set(G_OBJECT(tag), "variant-set", TRUE, "variant", PANGO_VARIANT_NORMAL, NULL);
 		break;
-	case cainteoir::font_variant::small_caps:
+	case css::font_variant_caps::small_caps:
 		g_object_set(G_OBJECT(tag), "variant-set", TRUE, "variant", PANGO_VARIANT_SMALL_CAPS, NULL);
 		break;
 	}
 
 	switch (aStyles.font_weight)
 	{
-	case cainteoir::font_weight::inherit:
+	case css::font_weight::inherit:
 		break;
-	case cainteoir::font_weight::normal:
+	case css::font_weight::normal:
 		g_object_set(G_OBJECT(tag), "weight-set", TRUE, "weight", PANGO_WEIGHT_NORMAL, NULL);
 		break;
-	case cainteoir::font_weight::bold:
+	case css::font_weight::bold:
 		g_object_set(G_OBJECT(tag), "weight-set", TRUE, "weight", PANGO_WEIGHT_BOLD, NULL);
 		break;
 	}
@@ -117,20 +119,20 @@ GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles)
 	if (!aStyles.font_family.empty())
 		g_object_set(G_OBJECT(tag), "family-set", TRUE, "family", aStyles.font_family.c_str(), NULL);
 
-	if (aStyles.font_size.units() != cainteoir::size_units::inherit)
-		g_object_set(G_OBJECT(tag), "size-set", TRUE, "size-points", gdouble(aStyles.font_size.as(cainteoir::size_units::points).value()), NULL);
+	if (aStyles.font_size.units() != css::length::inherit)
+		g_object_set(G_OBJECT(tag), "size-set", TRUE, "size-points", gdouble(aStyles.font_size.as(css::length::points).value()), NULL);
 
-	if (aStyles.margin.top.units() != cainteoir::size_units::inherit)
-		g_object_set(G_OBJECT(tag), "pixels-above-lines-set", TRUE, "pixels-above-lines", gint(aStyles.margin.top.as(cainteoir::size_units::pixels).value()), NULL);
+	if (aStyles.margin.top.units() != css::length::inherit)
+		g_object_set(G_OBJECT(tag), "pixels-above-lines-set", TRUE, "pixels-above-lines", gint(aStyles.margin.top.as(css::length::pixels).value()), NULL);
 
-	if (aStyles.margin.bottom.units() != cainteoir::size_units::inherit)
-		g_object_set(G_OBJECT(tag), "pixels-below-lines-set", TRUE, "pixels-below-lines", gint(aStyles.margin.bottom.as(cainteoir::size_units::pixels).value()), NULL);
+	if (aStyles.margin.bottom.units() != css::length::inherit)
+		g_object_set(G_OBJECT(tag), "pixels-below-lines-set", TRUE, "pixels-below-lines", gint(aStyles.margin.bottom.as(css::length::pixels).value()), NULL);
 
-	if (aStyles.margin.left.units() != cainteoir::size_units::inherit)
-		g_object_set(G_OBJECT(tag), "left-margin-set", TRUE, "left-margin", gint(aStyles.margin.left.as(cainteoir::size_units::pixels).value()), NULL);
+	if (aStyles.margin.left.units() != css::length::inherit)
+		g_object_set(G_OBJECT(tag), "left-margin-set", TRUE, "left-margin", gint(aStyles.margin.left.as(css::length::pixels).value()), NULL);
 
-	if (aStyles.margin.right.units() != cainteoir::size_units::inherit)
-		g_object_set(G_OBJECT(tag), "right-margin-set", TRUE, "right-margin", gint(aStyles.margin.right.as(cainteoir::size_units::pixels).value()), NULL);
+	if (aStyles.margin.right.units() != css::length::inherit)
+		g_object_set(G_OBJECT(tag), "right-margin-set", TRUE, "right-margin", gint(aStyles.margin.right.as(css::length::pixels).value()), NULL);
 
 	return tag;
 }

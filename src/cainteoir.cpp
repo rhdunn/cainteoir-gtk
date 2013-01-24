@@ -186,11 +186,11 @@ static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::doc
 
 			if (need_linebreak && reader->styles) switch (reader->styles->display)
 			{
-			case cainteoir::display::block:
-			case cainteoir::display::list_item:
-			case cainteoir::display::table:
-			case cainteoir::display::table_row:
-			case cainteoir::display::table_cell:
+			case cainteoir::css::display::block:
+			case cainteoir::css::display::list_item:
+			case cainteoir::css::display::table:
+			case cainteoir::css::display::table_row:
+			case cainteoir::css::display::table_cell:
 				gtk_text_buffer_insert(buffer, &position, "\n", 1);
 				gtk_text_buffer_get_end_iter(buffer, &position);
 				need_linebreak = false;
@@ -199,7 +199,7 @@ static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::doc
 			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
 		}
 		if (reader->type & cainteoir::events::toc_entry)
-			doc->toc.push_back(toc_entry_data(reader->styles->toc_level, reader->anchor, reader->text->str()));
+			doc->toc.push_back(toc_entry_data(reader->styles->aria_level, reader->anchor, reader->text->str()));
 		if (reader->type & cainteoir::events::anchor)
 			anchor.push_back(reader->anchor.str());
 		if (reader->type & cainteoir::events::text)

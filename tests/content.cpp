@@ -25,6 +25,8 @@
 
 REGISTER_TESTSUITE("content");
 
+namespace css = cainteoir::css;
+
 static void test_tag_(GtkTextTag *aTag, const char *aName,
                       bool aFontFamilySet, const char *aFontFamily,
                       bool aFontSizeSet, int aFontSize,
@@ -128,11 +130,11 @@ static void test_tag_(GtkTextTag *aTag, const char *aName,
 #define test_tag(aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at, au, av , aw, ax, ay, az, ba, bb) \
 	test_tag_(aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as, at, au, av, aw, ax, ay, az, ba, bb, __FILE__, __LINE__)
 
-TEST_CASE("cainteoir::styles -- defaults")
+TEST_CASE("css::styles -- defaults")
 {
 	g_type_init();
 
-	cainteoir::styles style("defaults");
+	css::styles style("defaults");
 	test_tag(create_text_tag_from_style(style), "defaults",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -149,13 +151,13 @@ TEST_CASE("cainteoir::styles -- defaults")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.display")
+TEST_CASE("css::styles.display")
 {
 	g_type_init();
 
-	cainteoir::styles style("display");
+	css::styles style("display");
 
-	style.display = cainteoir::display::inherit;
+	style.display = css::display::inherit;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -171,7 +173,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::block;
+	style.display = css::display::block;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -187,7 +189,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::inlined;
+	style.display = css::display::inlined;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -203,7 +205,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::list_item;
+	style.display = css::display::list_item;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -219,7 +221,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::table;
+	style.display = css::display::table;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -235,7 +237,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::table_row;
+	style.display = css::display::table_row;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -251,7 +253,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::table_cell;
+	style.display = css::display::table_cell;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -267,7 +269,7 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.display = cainteoir::display::none;
+	style.display = css::display::none;
 	test_tag(create_text_tag_from_style(style), "display",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -284,13 +286,13 @@ TEST_CASE("cainteoir::styles.display")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.vertical_align")
+TEST_CASE("css::styles.vertical_align")
 {
 	g_type_init();
 
-	cainteoir::styles style("vertical-align");
+	css::styles style("vertical-align");
 
-	style.vertical_align = cainteoir::vertical_align::baseline;
+	style.vertical_align = css::vertical_align::baseline;
 	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -306,7 +308,7 @@ TEST_CASE("cainteoir::styles.vertical_align")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.vertical_align = cainteoir::vertical_align::sub;
+	style.vertical_align = css::vertical_align::sub;
 	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -322,7 +324,7 @@ TEST_CASE("cainteoir::styles.vertical_align")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.vertical_align = cainteoir::vertical_align::super;
+	style.vertical_align = css::vertical_align::super;
 	test_tag(create_text_tag_from_style(style), "vertical-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -339,13 +341,13 @@ TEST_CASE("cainteoir::styles.vertical_align")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.text_align")
+TEST_CASE("css::styles.text_align")
 {
 	g_type_init();
 
-	cainteoir::styles style("text-align");
+	css::styles style("text-align");
 
-	style.text_align = cainteoir::text_align::left;
+	style.text_align = css::text_align::left;
 	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -361,7 +363,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.text_align = cainteoir::text_align::right;
+	style.text_align = css::text_align::right;
 	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -377,7 +379,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.text_align = cainteoir::text_align::center;
+	style.text_align = css::text_align::center;
 	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -393,7 +395,7 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.text_align = cainteoir::text_align::justify;
+	style.text_align = css::text_align::justify;
 	test_tag(create_text_tag_from_style(style), "text-align",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -410,13 +412,13 @@ TEST_CASE("cainteoir::styles.text_align")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.text_decoration")
+TEST_CASE("css::styles.text_decoration")
 {
 	g_type_init();
 
-	cainteoir::styles style("text-decoration");
+	css::styles style("text-decoration");
 
-	style.text_decoration = cainteoir::text_decoration::none;
+	style.text_decoration = css::text_decoration::none;
 	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -432,7 +434,7 @@ TEST_CASE("cainteoir::styles.text_decoration")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.text_decoration = cainteoir::text_decoration::underline;
+	style.text_decoration = css::text_decoration::underline;
 	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -448,7 +450,7 @@ TEST_CASE("cainteoir::styles.text_decoration")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.text_decoration = cainteoir::text_decoration::line_through;
+	style.text_decoration = css::text_decoration::line_through;
 	test_tag(create_text_tag_from_style(style), "text-decoration",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -465,13 +467,13 @@ TEST_CASE("cainteoir::styles.text_decoration")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.font_style")
+TEST_CASE("css::styles.font_style")
 {
 	g_type_init();
 
-	cainteoir::styles style("font-style");
+	css::styles style("font-style");
 
-	style.font_style = cainteoir::font_style::normal;
+	style.font_style = css::font_style::normal;
 	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -487,7 +489,7 @@ TEST_CASE("cainteoir::styles.font_style")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.font_style = cainteoir::font_style::italic;
+	style.font_style = css::font_style::italic;
 	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -503,7 +505,7 @@ TEST_CASE("cainteoir::styles.font_style")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.font_style = cainteoir::font_style::oblique;
+	style.font_style = css::font_style::oblique;
 	test_tag(create_text_tag_from_style(style), "font-style",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -520,13 +522,13 @@ TEST_CASE("cainteoir::styles.font_style")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.font_variant")
+TEST_CASE("css::styles.font_variant_caps")
 {
 	g_type_init();
 
-	cainteoir::styles style("font-variant");
+	css::styles style("font-variant");
 
-	style.font_variant = cainteoir::font_variant::normal;
+	style.font_variant_caps = css::font_variant_caps::normal;
 	test_tag(create_text_tag_from_style(style), "font-variant",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -542,7 +544,7 @@ TEST_CASE("cainteoir::styles.font_variant")
 		true,  PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.font_variant = cainteoir::font_variant::small_caps;
+	style.font_variant_caps = css::font_variant_caps::small_caps;
 	test_tag(create_text_tag_from_style(style), "font-variant",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -559,13 +561,13 @@ TEST_CASE("cainteoir::styles.font_variant")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.font_weight")
+TEST_CASE("css::styles.font_weight")
 {
 	g_type_init();
 
-	cainteoir::styles style("font-weight");
+	css::styles style("font-weight");
 
-	style.font_weight = cainteoir::font_weight::normal;
+	style.font_weight = css::font_weight::normal;
 	test_tag(create_text_tag_from_style(style), "font-weight",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -581,7 +583,7 @@ TEST_CASE("cainteoir::styles.font_weight")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		true,  PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.font_weight = cainteoir::font_weight::bold;
+	style.font_weight = css::font_weight::bold;
 	test_tag(create_text_tag_from_style(style), "font-weight",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -598,11 +600,11 @@ TEST_CASE("cainteoir::styles.font_weight")
 		true,  PANGO_WEIGHT_BOLD);       // font-weight
 }
 
-TEST_CASE("cainteoir::styles.font_family")
+TEST_CASE("css::styles.font_family")
 {
 	g_type_init();
 
-	cainteoir::styles style("font-family");
+	css::styles style("font-family");
 
 	style.font_family = "serif";
 	test_tag(create_text_tag_from_style(style), "font-family",
@@ -637,13 +639,13 @@ TEST_CASE("cainteoir::styles.font_family")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.font_size")
+TEST_CASE("css::styles.font_size")
 {
 	g_type_init();
 
-	cainteoir::styles style("font-size");
+	css::styles style("font-size");
 
-	style.font_size = { 10, cainteoir::size_units::points };
+	style.font_size = { 10, css::length::points };
 	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,                     // font-family
 		true,  10,                       // font-size
@@ -659,7 +661,7 @@ TEST_CASE("cainteoir::styles.font_size")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.font_size = { 2, cainteoir::size_units::picas };
+	style.font_size = { 2, css::length::picas };
 	test_tag(create_text_tag_from_style(style), "font-size",
 		false, NULL,                     // font-family
 		true,  24,                       // font-size
@@ -676,13 +678,13 @@ TEST_CASE("cainteoir::styles.font_size")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.margin.left")
+TEST_CASE("css::styles.margin.left")
 {
 	g_type_init();
 
-	cainteoir::styles style("margin-left");
+	css::styles style("margin-left");
 
-	style.margin.left = { 10, cainteoir::size_units::pixels };
+	style.margin.left = { 10, css::length::pixels };
 	test_tag(create_text_tag_from_style(style), "margin-left",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -698,7 +700,7 @@ TEST_CASE("cainteoir::styles.margin.left")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.margin.left = { 1, cainteoir::size_units::inches };
+	style.margin.left = { 1, css::length::inches };
 	test_tag(create_text_tag_from_style(style), "margin-left",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -715,13 +717,13 @@ TEST_CASE("cainteoir::styles.margin.left")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.margin.top")
+TEST_CASE("css::styles.margin.top")
 {
 	g_type_init();
 
-	cainteoir::styles style("margin-top");
+	css::styles style("margin-top");
 
-	style.margin.top = { 10, cainteoir::size_units::pixels };
+	style.margin.top = { 10, css::length::pixels };
 	test_tag(create_text_tag_from_style(style), "margin-top",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -737,7 +739,7 @@ TEST_CASE("cainteoir::styles.margin.top")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.margin.top = { 1, cainteoir::size_units::inches };
+	style.margin.top = { 1, css::length::inches };
 	test_tag(create_text_tag_from_style(style), "margin-top",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -754,13 +756,13 @@ TEST_CASE("cainteoir::styles.margin.top")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.margin.right")
+TEST_CASE("css::styles.margin.right")
 {
 	g_type_init();
 
-	cainteoir::styles style("margin-right");
+	css::styles style("margin-right");
 
-	style.margin.right = { 10, cainteoir::size_units::pixels };
+	style.margin.right = { 10, css::length::pixels };
 	test_tag(create_text_tag_from_style(style), "margin-right",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -776,7 +778,7 @@ TEST_CASE("cainteoir::styles.margin.right")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.margin.right = { 1, cainteoir::size_units::inches };
+	style.margin.right = { 1, css::length::inches };
 	test_tag(create_text_tag_from_style(style), "margin-right",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -793,13 +795,13 @@ TEST_CASE("cainteoir::styles.margin.right")
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 }
 
-TEST_CASE("cainteoir::styles.margin.bottom")
+TEST_CASE("css::styles.margin.bottom")
 {
 	g_type_init();
 
-	cainteoir::styles style("margin-bottom");
+	css::styles style("margin-bottom");
 
-	style.margin.bottom = { 10, cainteoir::size_units::pixels };
+	style.margin.bottom = { 10, css::length::pixels };
 	test_tag(create_text_tag_from_style(style), "margin-bottom",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size
@@ -815,7 +817,7 @@ TEST_CASE("cainteoir::styles.margin.bottom")
 		false, PANGO_VARIANT_NORMAL,     // font-variant
 		false, PANGO_WEIGHT_NORMAL);     // font-weight
 
-	style.margin.bottom = { 1, cainteoir::size_units::inches };
+	style.margin.bottom = { 1, css::length::inches };
 	test_tag(create_text_tag_from_style(style), "margin-bottom",
 		false, NULL,                     // font-family
 		false, 0,                        // font-size

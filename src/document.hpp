@@ -28,7 +28,7 @@
 #include "toc.hpp"
 #include <vector>
 
-GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles);
+GtkTextTag *create_text_tag_from_style(const cainteoir::css::styles &aStyles);
 
 struct toc_entry_data
 {

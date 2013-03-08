@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2013 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -156,7 +156,7 @@ static std::string select_file(
 	return ret;
 }
 
-static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<cainteoir::document> &doc, application_settings &settings)
+static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<cainteoir::document> &doc)
 {
 	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
@@ -654,7 +654,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		GtkTextBuffer *buffer = create_buffer_from_document(reader, newdoc, settings);
+		GtkTextBuffer *buffer = create_buffer_from_document(reader, newdoc);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;

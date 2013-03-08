@@ -156,7 +156,7 @@ static std::string select_file(
 	return ret;
 }
 
-static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<cainteoir::document> &doc)
+static GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
 {
 	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
@@ -167,24 +167,22 @@ static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::doc
 	std::list<std::string> anchor;
 	std::stack<tag_block> contexts;
 	bool need_linebreak = false;
-	while (reader->read())
+	for (auto &entry : doc->children())
 	{
-		doc->add(*reader);
-
-		if (reader->type & events::begin_context)
+		if (entry.type & events::begin_context)
 		{
 			GtkTextTag *tag = nullptr;
-			if (reader->styles)
+			if (entry.styles)
 			{
-				tag = gtk_text_tag_table_lookup(tags, reader->styles->name.c_str());
+				tag = gtk_text_tag_table_lookup(tags, entry.styles->name.c_str());
 				if (!tag)
 				{
-					tag = create_text_tag_from_style(*reader->styles);
+					tag = create_text_tag_from_style(*entry.styles);
 					gtk_text_tag_table_add(tags, tag);
 				}
 			}
 
-			if (need_linebreak && reader->styles) switch (reader->styles->display)
+			if (need_linebreak && entry.styles) switch (entry.styles->display)
 			{
 			case cainteoir::css::display::block:
 			case cainteoir::css::display::list_item:
@@ -198,16 +196,16 @@ static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::doc
 			}
 			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
 		}
-		if (reader->type & cainteoir::events::anchor)
-			anchor.push_back(reader->anchor.str());
-		if (reader->type & cainteoir::events::text)
+		if (entry.type & cainteoir::events::anchor)
+			anchor.push_back(entry.anchor.str());
+		if (entry.type & cainteoir::events::text)
 		{
 			for (auto &a : anchor)
 				(void)gtk_text_buffer_create_mark(buffer, a.c_str(), &position, TRUE);
 			anchor.clear();
 
-			const gchar *start = reader->text->begin();
-			const gchar *end   = reader->text->end();
+			const gchar *start = entry.text->begin();
+			const gchar *end   = entry.text->end();
 			while (start < end)
 			{
 				const gchar *next  = start;
@@ -226,7 +224,7 @@ static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::doc
 			gtk_text_buffer_get_end_iter(buffer, &position);
 			need_linebreak = true;
 		}
-		if (reader->type & events::end_context)
+		if (entry.type & events::end_context)
 		{
 			if (!contexts.empty())
 			{
@@ -649,12 +647,12 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (filename.find("file://") == 0)
 			filename.erase(0, 7);
 
-		std::shared_ptr<cainteoir::document> newdoc = std::make_shared<cainteoir::document>();
 		auto reader = cainteoir::createDocumentReader(filename.c_str(), rdf_metadata, std::string());
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		GtkTextBuffer *buffer = create_buffer_from_document(reader, newdoc);
+		auto newdoc = std::make_shared<cainteoir::document>(reader);
+		GtkTextBuffer *buffer = create_buffer_from_document(newdoc);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		doc = newdoc;

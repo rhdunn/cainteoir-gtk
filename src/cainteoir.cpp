@@ -198,8 +198,6 @@ static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::doc
 			}
 			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
 		}
-		if (reader->type & cainteoir::events::toc_entry)
-			doc->toc.push_back(toc_entry_data(reader->styles->aria_level, reader->anchor, reader->text->str()));
 		if (reader->type & cainteoir::events::anchor)
 			anchor.push_back(reader->anchor.str());
 		if (reader->type & cainteoir::events::text)
@@ -672,7 +670,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
-		for (auto &entry : doc->toc)
+		for (auto &entry : doc->toc())
 			toc.add(entry.depth, entry.location, entry.title);
 
 		if (toc.empty())

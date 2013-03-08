@@ -30,23 +30,8 @@
 
 GtkTextTag *create_text_tag_from_style(const cainteoir::css::styles &aStyles);
 
-struct toc_entry_data
-{
-	int depth;
-	rdf::uri location;
-	std::string title;
-
-	toc_entry_data(int aDepth, const rdf::uri &aLocation, const std::string &aTitle)
-		: depth(aDepth)
-		, location(aLocation)
-		, title(aTitle)
-	{
-	}
-};
-
 struct document : public cainteoir::document
 {
-	std::vector<toc_entry_data> toc;
 	std::shared_ptr<const rdf::uri> subject;
 	rdf::graph metadata;
 };

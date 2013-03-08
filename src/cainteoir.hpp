@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2013 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -30,6 +30,7 @@
 #include "timebar.hpp"
 #include "library.hpp"
 #include "navbar.hpp"
+#include "toc.hpp"
 
 class Cainteoir
 {

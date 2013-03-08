@@ -1,6 +1,6 @@
 /* Document Processing
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2013 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -22,12 +22,10 @@
 #define CAINTEOIRGTK_SRC_DOCUMENT_HPP
 
 #include <cainteoir/document.hpp>
-#include <cainteoir/engines.hpp>
 #include <cainteoir/content.hpp>
 
-#include "toc.hpp"
-#include <vector>
-
 GtkTextTag *create_text_tag_from_style(const cainteoir::css::styles &aStyles);
+
+GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc);
 
 #endif

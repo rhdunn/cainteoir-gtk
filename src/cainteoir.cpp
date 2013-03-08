@@ -27,15 +27,13 @@
 #include "cainteoir.hpp"
 
 #include <stdexcept>
-#include <stack>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #define UIDIR DATADIR "/" PACKAGE "/ui"
 
-namespace rql    = cainteoir::rdf::query;
-namespace events = cainteoir::events;
+namespace rql = cainteoir::rdf::query;
 
 static const int CHARACTERS_PER_WORD = 6;
 
@@ -65,18 +63,6 @@ static void dnd_data_received(GtkWidget *, GdkDragContext *context, gint, gint, 
 	}
 	gtk_drag_finish(context, FALSE, FALSE, time);
 }
-
-struct tag_block
-{
-	GtkTextTag *tag;
-	int offset;
-
-	tag_block(GtkTextTag *aTag, int aOffset)
-		: tag(aTag)
-		, offset(aOffset)
-	{
-	}
-};
 
 static std::string get_user_file(const char * filename)
 {
@@ -154,93 +140,6 @@ static std::string select_file(
 
 	gtk_widget_destroy(dialog);
 	return ret;
-}
-
-static GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
-{
-	GtkTextTagTable *tags = gtk_text_tag_table_new();
-	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
-
-	GtkTextIter position;
-	gtk_text_buffer_get_end_iter(buffer, &position);
-
-	std::list<std::string> anchor;
-	std::stack<tag_block> contexts;
-	bool need_linebreak = false;
-	for (auto &entry : doc->children())
-	{
-		if (entry.type & events::begin_context)
-		{
-			GtkTextTag *tag = nullptr;
-			if (entry.styles)
-			{
-				tag = gtk_text_tag_table_lookup(tags, entry.styles->name.c_str());
-				if (!tag)
-				{
-					tag = create_text_tag_from_style(*entry.styles);
-					gtk_text_tag_table_add(tags, tag);
-				}
-			}
-
-			if (need_linebreak && entry.styles) switch (entry.styles->display)
-			{
-			case cainteoir::css::display::block:
-			case cainteoir::css::display::list_item:
-			case cainteoir::css::display::table:
-			case cainteoir::css::display::table_row:
-			case cainteoir::css::display::table_cell:
-				gtk_text_buffer_insert(buffer, &position, "\n", 1);
-				gtk_text_buffer_get_end_iter(buffer, &position);
-				need_linebreak = false;
-				break;
-			}
-			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
-		}
-		if (entry.type & cainteoir::events::anchor)
-			anchor.push_back(entry.anchor.str());
-		if (entry.type & cainteoir::events::text)
-		{
-			for (auto &a : anchor)
-				(void)gtk_text_buffer_create_mark(buffer, a.c_str(), &position, TRUE);
-			anchor.clear();
-
-			const gchar *start = entry.text->begin();
-			const gchar *end   = entry.text->end();
-			while (start < end)
-			{
-				const gchar *next  = start;
-				bool valid = g_utf8_validate(start, end - start, &next);
-				if (start != next)
-					gtk_text_buffer_insert(buffer, &position, start, next - start);
-				if (!valid)
-				{
-					char text[20];
-					int n = snprintf(text, 20, "<%02X>", (uint8_t)*next++);
-					gtk_text_buffer_insert(buffer, &position, text, n);
-				}
-				start = next;
-			}
-
-			gtk_text_buffer_get_end_iter(buffer, &position);
-			need_linebreak = true;
-		}
-		if (entry.type & events::end_context)
-		{
-			if (!contexts.empty())
-			{
-				GtkTextTag *tag = contexts.top().tag;
-				if (tag)
-				{
-					GtkTextIter start;
-					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
-					gtk_text_buffer_apply_tag(buffer, tag, &start, &position);
-				}
-				contexts.pop();
-			}
-		}
-	}
-
-	return buffer;
 }
 
 static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)

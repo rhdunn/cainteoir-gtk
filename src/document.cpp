@@ -1,6 +1,6 @@
 /* Document Processing
  *
- * Copyright (C) 2012 Reece H. Dunn
+ * Copyright (C) 2012-2013 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -22,7 +22,22 @@
 #include "compatibility.hpp"
 #include "document.hpp"
 
-namespace css = cainteoir::css;
+#include <stack>
+
+namespace css    = cainteoir::css;
+namespace events = cainteoir::events;
+
+struct tag_block
+{
+	GtkTextTag *tag;
+	int offset;
+
+	tag_block(GtkTextTag *aTag, int aOffset)
+		: tag(aTag)
+		, offset(aOffset)
+	{
+	}
+};
 
 GtkTextTag *create_text_tag_from_style(const css::styles &aStyles)
 {
@@ -135,4 +150,91 @@ GtkTextTag *create_text_tag_from_style(const css::styles &aStyles)
 		g_object_set(G_OBJECT(tag), "right-margin-set", TRUE, "right-margin", gint(aStyles.margin.right.as(css::length::pixels).value()), NULL);
 
 	return tag;
+}
+
+GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
+{
+	GtkTextTagTable *tags = gtk_text_tag_table_new();
+	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
+
+	GtkTextIter position;
+	gtk_text_buffer_get_end_iter(buffer, &position);
+
+	std::list<std::string> anchor;
+	std::stack<tag_block> contexts;
+	bool need_linebreak = false;
+	for (auto &entry : doc->children())
+	{
+		if (entry.type & events::begin_context)
+		{
+			GtkTextTag *tag = nullptr;
+			if (entry.styles)
+			{
+				tag = gtk_text_tag_table_lookup(tags, entry.styles->name.c_str());
+				if (!tag)
+				{
+					tag = create_text_tag_from_style(*entry.styles);
+					gtk_text_tag_table_add(tags, tag);
+				}
+			}
+
+			if (need_linebreak && entry.styles) switch (entry.styles->display)
+			{
+			case cainteoir::css::display::block:
+			case cainteoir::css::display::list_item:
+			case cainteoir::css::display::table:
+			case cainteoir::css::display::table_row:
+			case cainteoir::css::display::table_cell:
+				gtk_text_buffer_insert(buffer, &position, "\n", 1);
+				gtk_text_buffer_get_end_iter(buffer, &position);
+				need_linebreak = false;
+				break;
+			}
+			contexts.push({ tag, gtk_text_iter_get_offset(&position) });
+		}
+		if (entry.type & cainteoir::events::anchor)
+			anchor.push_back(entry.anchor.str());
+		if (entry.type & cainteoir::events::text)
+		{
+			for (auto &a : anchor)
+				(void)gtk_text_buffer_create_mark(buffer, a.c_str(), &position, TRUE);
+			anchor.clear();
+
+			const gchar *start = entry.text->begin();
+			const gchar *end   = entry.text->end();
+			while (start < end)
+			{
+				const gchar *next  = start;
+				bool valid = g_utf8_validate(start, end - start, &next);
+				if (start != next)
+					gtk_text_buffer_insert(buffer, &position, start, next - start);
+				if (!valid)
+				{
+					char text[20];
+					int n = snprintf(text, 20, "<%02X>", (uint8_t)*next++);
+					gtk_text_buffer_insert(buffer, &position, text, n);
+				}
+				start = next;
+			}
+
+			gtk_text_buffer_get_end_iter(buffer, &position);
+			need_linebreak = true;
+		}
+		if (entry.type & events::end_context)
+		{
+			if (!contexts.empty())
+			{
+				GtkTextTag *tag = contexts.top().tag;
+				if (tag)
+				{
+					GtkTextIter start;
+					gtk_text_buffer_get_iter_at_offset(buffer, &start, contexts.top().offset);
+					gtk_text_buffer_apply_tag(buffer, tag, &start, &position);
+				}
+				contexts.pop();
+			}
+		}
+	}
+
+	return buffer;
 }

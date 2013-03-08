@@ -156,7 +156,7 @@ static std::string select_file(
 	return ret;
 }
 
-static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<document> &doc, application_settings &settings)
+static GtkTextBuffer *create_buffer_from_document(std::shared_ptr<cainteoir::document_reader> &reader, std::shared_ptr<cainteoir::document> &doc, application_settings &settings)
 {
 	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
@@ -366,7 +366,6 @@ static gboolean on_timer_speaking(Cainteoir *window)
 
 Cainteoir::Cainteoir(const char *filename)
 	: tts(tts_metadata)
-	, doc(new document())
 	, doc_metadata(languages, i18n("Document"), 5)
 	, voice_metadata(languages, i18n("Voice"), 2)
 	, engine_metadata(languages, i18n("Engine"), 2)
@@ -465,7 +464,7 @@ Cainteoir::Cainteoir(const char *filename)
 	g_signal_connect(data->document_button, "toggled", G_CALLBACK(on_view_changed), data);
 	g_signal_connect(data->info_button,     "toggled", G_CALLBACK(on_view_changed), data);
 
-	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+	timebar->update(0.0, 0.0, 0.0);
 
 	gtk_widget_show_all(window);
 	gtk_widget_hide(data->document_pane);
@@ -532,7 +531,7 @@ void Cainteoir::save_settings()
 
 void Cainteoir::read()
 {
-	out = cainteoir::open_audio_device(nullptr, "pulse", 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
+	out = cainteoir::open_audio_device(nullptr, "pulse", 0.3, rdf_metadata, subject, tts_metadata, tts.voice());
 	on_speak(i18n("reading"));
 }
 
@@ -576,7 +575,7 @@ void Cainteoir::record()
 				settings("recording.mimetype") = mimetype;
 				settings.save();
 
-				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, doc->metadata, *doc->subject, tts_metadata, tts.voice());
+				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, rdf_metadata, subject, tts_metadata, tts.voice());
 				on_speak(i18n("recording"));
 				return;
 			}
@@ -650,8 +649,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (filename.find("file://") == 0)
 			filename.erase(0, 7);
 
-		std::shared_ptr<document> newdoc = std::make_shared<document>();
-		auto reader = cainteoir::createDocumentReader(filename.c_str(), newdoc->metadata, std::string());
+		std::shared_ptr<cainteoir::document> newdoc = std::make_shared<cainteoir::document>();
+		auto reader = cainteoir::createDocumentReader(filename.c_str(), rdf_metadata, std::string());
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
@@ -663,10 +662,10 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		toc.clear();
 		doc_metadata.clear();
 
-		doc->subject = std::shared_ptr<const rdf::uri>(new rdf::uri(filename, std::string()));
+		subject = rdf::uri(filename, std::string());
 		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
-		rql::results data     = rql::select(doc->metadata, rql::subject == *doc->subject);
+		rql::results data     = rql::select(rdf_metadata, rql::subject == subject);
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
@@ -683,11 +682,11 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 			settings("document.mimetype") = mimetype;
 		settings.save();
 
-		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("title"));
-		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("creator"));
-		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("publisher"));
-		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("description"));
-		doc_metadata.add_metadata(doc->metadata, *doc->subject, rdf::dc("language"));
+		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("title"));
+		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("creator"));
+		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("publisher"));
+		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("description"));
+		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("language"));
 
 		std::ostringstream length;
 		length << (doc->text_length() / CHARACTERS_PER_WORD) << i18n(" words (approx.)");
@@ -696,8 +695,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 
 		timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
-		std::string lang = rql::select_value<std::string>(doc->metadata,
-		                   rql::subject == *doc->subject && rql::predicate == rdf::dc("language"));
+		std::string lang = rql::select_value<std::string>(rdf_metadata,
+		                   rql::subject == subject && rql::predicate == rdf::dc("language"));
 		if (lang.empty())
 			lang = "en";
 
@@ -747,7 +746,7 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	if (tts.select_voice(tts_metadata, voice))
 	{
 		voiceSelection->show(tts.voice());
-		if (!speech || !speech->is_speaking())
+		if ((!speech || !speech->is_speaking()) && doc)
 			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 		settings("voice.name") = voice.str();
 		return true;

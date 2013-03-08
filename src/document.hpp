@@ -30,10 +30,4 @@
 
 GtkTextTag *create_text_tag_from_style(const cainteoir::css::styles &aStyles);
 
-struct document : public cainteoir::document
-{
-	std::shared_ptr<const rdf::uri> subject;
-	rdf::graph metadata;
-};
-
 #endif

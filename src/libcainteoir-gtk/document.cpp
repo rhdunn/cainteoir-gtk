@@ -19,8 +19,9 @@
  */
 
 #include "config.h"
-#include "compatibility.hpp"
-#include "document.hpp"
+
+#include <gtk/gtk.h>
+#include <cainteoir-gtk/document.hpp>
 
 #include <stack>
 

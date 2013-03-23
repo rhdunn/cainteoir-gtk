@@ -19,8 +19,7 @@
  */
 
 #include <gtk/gtk.h>
-
-#include "document.hpp"
+#include <cainteoir-gtk/document.hpp>
 #include "tester.hpp"
 
 REGISTER_TESTSUITE("content");

@@ -214,8 +214,8 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 		else if (rql::predicate(statement) == rdf::dc("language"))
 		{
 			cainteoir::language::tag lang = cainteoir::language::make_lang(rql::value(statement));
-			gtk_tree_store_set(store, &row, VLC_LANGUAGE, languages.language(lang), -1);
-			gtk_tree_store_set(store, &row, VLC_REGION, languages.region(lang), -1);
+			gtk_tree_store_set(store, &row, VLC_LANGUAGE, languages.language(lang).c_str(), -1);
+			gtk_tree_store_set(store, &row, VLC_REGION, languages.region(lang).c_str(), -1);
 		}
 		else if (rql::predicate(statement) == rdf::tts("gender"))
 		{

@@ -428,7 +428,7 @@ void Cainteoir::save_settings()
 
 void Cainteoir::read()
 {
-	out = cainteoir::open_audio_device(nullptr, "pulse", 0.3, rdf_metadata, subject, tts_metadata, tts.voice());
+	out = cainteoir::open_audio_device(nullptr, rdf_metadata, subject, tts_metadata, tts.voice());
 	on_speak(i18n("reading"));
 }
 

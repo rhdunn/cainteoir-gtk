@@ -26,6 +26,13 @@ REGISTER_TESTSUITE("content");
 
 namespace css = cainteoir::css;
 
+static void setup()
+{
+	#if !GLIB_CHECK_VERSION(2, 36, 0)
+		g_type_init();
+	#endif
+}
+
 static void test_tag_(GtkTextTag *aTag, const char *aName,
                       bool aFontFamilySet, const char *aFontFamily,
                       bool aFontSizeSet, int aFontSize,
@@ -131,7 +138,7 @@ static void test_tag_(GtkTextTag *aTag, const char *aName,
 
 TEST_CASE("css::styles -- defaults")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("defaults");
 	test_tag(create_text_tag_from_style(style), "defaults",
@@ -152,7 +159,7 @@ TEST_CASE("css::styles -- defaults")
 
 TEST_CASE("css::styles.display")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("display");
 
@@ -287,7 +294,7 @@ TEST_CASE("css::styles.display")
 
 TEST_CASE("css::styles.vertical_align")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("vertical-align");
 
@@ -342,7 +349,7 @@ TEST_CASE("css::styles.vertical_align")
 
 TEST_CASE("css::styles.text_align")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("text-align");
 
@@ -413,7 +420,7 @@ TEST_CASE("css::styles.text_align")
 
 TEST_CASE("css::styles.text_decoration")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("text-decoration");
 
@@ -468,7 +475,7 @@ TEST_CASE("css::styles.text_decoration")
 
 TEST_CASE("css::styles.font_style")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("font-style");
 
@@ -523,7 +530,7 @@ TEST_CASE("css::styles.font_style")
 
 TEST_CASE("css::styles.font_variant_caps")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("font-variant");
 
@@ -562,7 +569,7 @@ TEST_CASE("css::styles.font_variant_caps")
 
 TEST_CASE("css::styles.font_weight")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("font-weight");
 
@@ -601,7 +608,7 @@ TEST_CASE("css::styles.font_weight")
 
 TEST_CASE("css::styles.font_family")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("font-family");
 
@@ -640,7 +647,7 @@ TEST_CASE("css::styles.font_family")
 
 TEST_CASE("css::styles.font_size")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("font-size");
 
@@ -679,7 +686,7 @@ TEST_CASE("css::styles.font_size")
 
 TEST_CASE("css::styles.margin.left")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("margin-left");
 
@@ -718,7 +725,7 @@ TEST_CASE("css::styles.margin.left")
 
 TEST_CASE("css::styles.margin.top")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("margin-top");
 
@@ -757,7 +764,7 @@ TEST_CASE("css::styles.margin.top")
 
 TEST_CASE("css::styles.margin.right")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("margin-right");
 
@@ -796,7 +803,7 @@ TEST_CASE("css::styles.margin.right")
 
 TEST_CASE("css::styles.margin.bottom")
 {
-	g_type_init();
+	setup();
 
 	css::styles style("margin-bottom");
 

@@ -133,10 +133,10 @@
               <object class="GtkBox" id="document-page">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="spacing">30</property>
+                <property name="spacing">20</property>
                 <child>
                   <object class="GtkScrolledWindow" id="toc-view">
-                    <property name="width_request">200</property>
+                    <property name="width_request">265</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <child>

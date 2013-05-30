@@ -1,4 +1,4 @@
-@define-color borders  #a7aba7;
+@define-color borders  #8e8e8e;
 @define-color progress #1a73a7;
 
 #toc row,

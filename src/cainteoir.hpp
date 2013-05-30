@@ -83,6 +83,7 @@ private:
 
 	GtkRecentManager *recentManager;
 	GtkRecentFilter  *recentFilter;
+	GtkWidget *openFile;
 
 	GtkAction *readAction;
 	GtkAction *stopAction;

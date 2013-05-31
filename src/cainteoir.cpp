@@ -380,8 +380,6 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_action_set_sensitive(recordAction, FALSE);
 	gtk_action_set_visible(stopAction, FALSE);
 
-	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
-
 	rql::results formats = rql::select(tts_metadata,
 	                                   rql::predicate == rdf::rdf("type") &&
 	                                   rql::object    == rdf::tts("DocumentFormat"));
@@ -391,6 +389,8 @@ Cainteoir::Cainteoir(const char *filename)
 	            settings("document.mimetype", "text/plain").as<std::string>(),
 	            tts_metadata,
 	            formats);
+
+	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
 
 	rdf::uri voice = tts_metadata.href(settings("voice.name", std::string()).as<std::string>());
 	bool set_voice = false;
@@ -593,6 +593,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (!mimetype.empty())
 			settings("document.mimetype") = mimetype;
 		settings.save();
+
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(openFile), filename.c_str());
 
 		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("title"));
 		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("creator"));

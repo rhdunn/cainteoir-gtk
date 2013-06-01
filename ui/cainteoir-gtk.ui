@@ -246,9 +246,11 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkToolButton" id="play-button">
+                <property name="use_action_appearance">False</property>
                 <property name="related_action">play-action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="icon_widget">play-image</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -257,9 +259,11 @@
             </child>
             <child>
               <object class="GtkToolButton" id="stop-button">
+                <property name="use_action_appearance">False</property>
                 <property name="related_action">stop-action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="icon_widget">stop-image</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -268,9 +272,11 @@
             </child>
             <child>
               <object class="GtkToolButton" id="record-button">
+                <property name="use_action_appearance">False</property>
                 <property name="related_action">record-action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="icon_widget">record-image</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -331,13 +337,14 @@
             </child>
             <child>
               <object class="GtkToolButton" id="open-button">
+                <property name="use_action_appearance">False</property>
                 <property name="related_action">open-action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">_Open</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-open</property>
+                <property name="icon_widget">open-image</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -353,5 +360,25 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkImage" id="open-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-open-symbolic</property>
+  </object>
+  <object class="GtkImage" id="play-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-playback-start-symbolic</property>
+  </object>
+  <object class="GtkImage" id="record-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-record-symbolic</property>
+  </object>
+  <object class="GtkImage" id="stop-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-playback-stop-symbolic</property>
   </object>
 </interface>

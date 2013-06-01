@@ -284,6 +284,23 @@
               </packing>
             </child>
             <child>
+              <object class="GtkToolButton" id="open-button">
+                <property name="use_action_appearance">False</property>
+                <property name="related_action">open-action</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">_Open</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-open</property>
+                <property name="icon_widget">open-image</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolItem" id="timebar-container">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -333,22 +350,6 @@
               </object>
               <packing>
                 <property name="expand">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="open-button">
-                <property name="use_action_appearance">False</property>
-                <property name="related_action">open-action</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">_Open</property>
-                <property name="use_underline">True</property>
-                <property name="icon_widget">open-image</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
               </packing>
             </child>
           </object>

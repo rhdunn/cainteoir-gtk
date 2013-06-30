@@ -8,7 +8,7 @@
     <property name="label" translatable="yes">Info</property>
   </object>
   <object class="GtkToggleAction" id="library-view-action">
-    <property name="label" translatable="yes">Library</property>
+    <property name="label" translatable="yes">Recent</property>
   </object>
   <object class="GtkAction" id="open-action">
     <property name="stock_id">gtk-open</property>

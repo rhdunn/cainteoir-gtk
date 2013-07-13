@@ -15,7 +15,7 @@
 
 GtkNotebook {
 	border-color: @borders;
-	border-width: 1@GTK_PX@ 0 1@GTK_PX@ 0;
+	border-width: 1px 0 1px 0;
 }
 
 /* The toc pane is coloured white by default, with the notebook

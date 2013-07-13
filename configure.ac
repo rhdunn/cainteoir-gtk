@@ -59,16 +59,9 @@ dnl ================================================================
 dnl GTK+ checks.
 dnl ================================================================
 
-PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.0.0])
+PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.8.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
-
-AC_MSG_CHECKING([if GTK+ CSS themes need an explicit px unit specifier])
-PKG_CHECK_EXISTS([gtk+-3.0 >= 3.4.0],
-	[AC_MSG_RESULT([yes])
-	 AC_SUBST(GTK_PX, [px])],
-	[AC_MSG_RESULT([no])
-	 AC_SUBST(GTK_PX, [])])
 
 dnl ================================================================
 dnl sigc++ checks.
@@ -85,10 +78,6 @@ dnl ================================================================
 AC_CONFIG_FILES([
 	Makefile
 	po/Makefile.in
-	data/themes/gtk3-common.css
-	data/themes/Adwaita/gtk3.css
-	data/themes/Ambiance/gtk3.css
-	data/themes/Radiance/gtk3.css
 ])
 AC_OUTPUT
 

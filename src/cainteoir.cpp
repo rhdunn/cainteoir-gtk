@@ -333,7 +333,11 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_box_pack_start(GTK_BOX(metadata_view), engine_metadata, FALSE, FALSE, 0);
 
 	GtkWidget *metadata_pane = GTK_WIDGET(gtk_builder_get_object(ui, "metadata-pane"));
+#if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_container_add(GTK_CONTAINER(metadata_pane), metadata_view);
+#else
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(metadata_pane), metadata_view);
+#endif
 
 	docview = GTK_WIDGET(gtk_builder_get_object(ui, "document"));
 	toc.connect(docview);

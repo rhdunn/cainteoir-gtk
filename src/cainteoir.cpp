@@ -455,38 +455,45 @@ void Cainteoir::record()
 	if (filename.empty())
 		return;
 
-	std::string::size_type extpos = filename.rfind('.');
-	if (extpos != std::string::npos)
+	try
 	{
-		std::string ext = '*' + filename.substr(extpos);
-
-		for (auto &filetype : rql::select(tts_metadata, rql::predicate == rdf::tts("extension")))
+		std::string::size_type extpos = filename.rfind('.');
+		if (extpos != std::string::npos)
 		{
-			if (rql::value(filetype) == ext)
+			std::string ext = '*' + filename.substr(extpos);
+
+			for (auto &filetype : rql::select(tts_metadata, rql::predicate == rdf::tts("extension")))
 			{
-				const rdf::uri &uri = rql::subject(filetype);
+				if (rql::value(filetype) == ext)
+				{
+					const rdf::uri &uri = rql::subject(filetype);
 
-				auto type     = rql::select_value<std::string>(tts_metadata,
-				                rql::subject == uri && rql::predicate == rdf::tts("name"));
+					auto type     = rql::select_value<std::string>(tts_metadata,
+					                rql::subject == uri && rql::predicate == rdf::tts("name"));
 
-				auto mimetype = rql::select_value<std::string>(tts_metadata,
-				                rql::subject == uri && rql::predicate == rdf::tts("mimetype"));
+					auto mimetype = rql::select_value<std::string>(tts_metadata,
+					                rql::subject == uri && rql::predicate == rdf::tts("mimetype"));
 
-				settings("recording.filename") = filename;
-				settings("recording.mimetype") = mimetype;
-				settings.save();
+					settings("recording.filename") = filename;
+					settings("recording.mimetype") = mimetype;
+					settings.save();
 
-				out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, rdf_metadata, subject, tts_metadata, tts.voice());
-				on_speak(i18n("recording"));
-				return;
+					out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, rdf_metadata, subject, tts_metadata, tts.voice());
+					on_speak(i18n("recording"));
+					return;
+				}
 			}
 		}
-	}
 
-	display_error_message(GTK_WINDOW(window),
-		i18n("Record Document"),
-		i18n("Unable to record the document"),
-		i18n("Unsupported file type."));
+		throw std::runtime_error(i18n("Unsupported file type."));
+	}
+	catch (const std::runtime_error &e)
+	{
+		display_error_message(GTK_WINDOW(window),
+			i18n("Record Document"),
+			i18n("Unable to record the document"),
+			e.what());
+	}
 }
 
 void Cainteoir::stop()

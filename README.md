@@ -1,5 +1,10 @@
 # Cainteoir Text-to-Speech
 
+- [Bugs](#bugs)
+- [License Information](#license-information)
+
+----------
+
 The cainteoir-gtk project is a Gtk+/Gnome graphical front-end to the
 cainteoir-engine library.
 

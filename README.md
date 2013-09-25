@@ -1,5 +1,8 @@
 # Cainteoir Text-to-Speech
 
+- [Build Dependencies](#build-dependencies)
+  - [Debian](#debian)
+- [Building](#building)
 - [Bugs](#bugs)
 - [License Information](#license-information)
 
@@ -8,8 +11,34 @@
 The cainteoir-gtk project is a Gtk+/Gnome graphical front-end to the
 cainteoir-engine library.
 
-Cainteoir is a registered trademark of Reece Dunn. All trademarks are property
-of their respective owners.
+## Build Dependencies
+
+In order to build Cainteoir Text-to-Speech, you need:
+
+1.  a functional autotools system (`make`, `autoconf`, `automake`, `libtool`,
+    `intltool` and `pkg-config`);
+2.  a functional c++ compiler;
+3.  the [Cainteoir text-to-speech engine](https://github.com/rhdunn/cainteoir-engine);
+4.  Gtk+ 3.4 or later development libraries;
+5.  SigC++ development libraries.
+
+### Debian
+
+| Dependency    | Install                                                                   |
+|---------------|---------------------------------------------------------------------------|
+| autotools     | `sudo apt-get install make autoconf automake libtool intltool pkg-config` |
+| c++ compiler  | `sudo apt-get install gcc g++`                                            |
+| gtk+          | `sudo apt-get install libgtk-3-dev`                                       |
+| sigc++        | `sudo apt-get install libsigc++-2.0-dev`                                  |
+
+## Building
+
+Cainteoir Text-to-Speech uses a standard autotools build setup. Simply run:
+
+    $ ./autogen.sh
+    $ ./configure --prefix=/usr
+    $ make
+    $ sudo make install
 
 ## Bugs
 

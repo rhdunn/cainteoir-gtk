@@ -1,6 +1,6 @@
 # Cainteoir Text-to-Speech
 
-- [Build Dependencies](#build-dependencies)
+- [Dependencies](#dependencies)
   - [Debian](#debian)
 - [Building](#building)
 - [Bugs](#bugs)
@@ -11,7 +11,7 @@
 The cainteoir-gtk project is a Gtk+/Gnome graphical front-end to the
 cainteoir-engine library.
 
-## Build Dependencies
+## Dependencies
 
 In order to build Cainteoir Text-to-Speech, you need:
 
@@ -22,14 +22,19 @@ In order to build Cainteoir Text-to-Speech, you need:
 4.  Gtk+ 3.4 or later development libraries;
 5.  SigC++ development libraries.
 
+When running `cainteoir-gtk`, you will need:
+
+1.  the `gnome-icon-theme-symbolic` package (to display the icons correctly).
+
 ### Debian
 
-| Dependency    | Install                                                                   |
-|---------------|---------------------------------------------------------------------------|
-| autotools     | `sudo apt-get install make autoconf automake libtool intltool pkg-config` |
-| c++ compiler  | `sudo apt-get install gcc g++`                                            |
-| gtk+          | `sudo apt-get install libgtk-3-dev`                                       |
-| sigc++        | `sudo apt-get install libsigc++-2.0-dev`                                  |
+| Dependency                | Install                                                                   |
+|---------------------------|---------------------------------------------------------------------------|
+| autotools                 | `sudo apt-get install make autoconf automake libtool intltool pkg-config` |
+| c++ compiler              | `sudo apt-get install gcc g++`                                            |
+| gtk+                      | `sudo apt-get install libgtk-3-dev`                                       |
+| sigc++                    | `sudo apt-get install libsigc++-2.0-dev`                                  |
+| gnome-icon-theme-symbolic | `sudo apt-get install gnome-icon-theme-symbolic`                          |
 
 ## Building
 

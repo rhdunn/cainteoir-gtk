@@ -251,6 +251,11 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_widget">play-image</property>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="play-button-atkobject">
+                    <property name="AtkObject::accessible-name" translatable="yes" context="Media controls">Play</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -264,6 +269,11 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_widget">stop-image</property>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="stop-button-atkobject">
+                    <property name="AtkObject::accessible-name" translatable="yes">Stop</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -277,6 +287,11 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_widget">record-image</property>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="record-button-atkobject">
+                    <property name="AtkObject::accessible-name" translatable="yes">Record</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -294,6 +309,11 @@
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
                 <property name="icon_widget">open-image</property>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="open-button-atkobject">
+                    <property name="AtkObject::accessible-name" translatable="yes">Open</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>

@@ -74,9 +74,7 @@ struct VoiceParameter
 class VoiceSelectionView
 {
 public:
-	VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
-
-	GtkWidget *gobj() { return layout; }
+	VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &aLanguages, GtkBuilder *ui);
 
 	void show(const rdf::uri &voice);
 
@@ -86,8 +84,6 @@ public:
 
 	void apply();
 private:
-	void create_entry(tts::parameter::type, int row, const char *aID);
-
 	GtkWidget *layout;
 
 	std::list<VoiceParameter> parameters;

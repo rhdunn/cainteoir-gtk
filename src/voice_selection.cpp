@@ -26,6 +26,26 @@
 
 #include "voice_selection.hpp"
 
+struct setting_data_t
+{
+	tts::parameter::type type;
+	const char *key;
+	const char *label;
+	const char *parameter;
+	const char *units;
+};
+
+static const setting_data_t setting_entries[] = {
+	{ tts::parameter::rate, "voice.rate",
+	  "rate-label", "rate-parameter", "rate-units" },
+	{ tts::parameter::volume, "voice.volume",
+	  "volume-label", "volume-parameter", "volume-units" },
+	{ tts::parameter::pitch, "voice.pitch",
+	  "pitch-label", "pitch-parameter", "pitch-units" },
+	{ tts::parameter::pitch_range, "voice.pitch-range",
+	  "pitchrange-label", "pitchrange-parameter", "pitchrange-units" },
+};
+
 enum VoiceListColumns
 {
 	VLC_VOICE,
@@ -231,54 +251,34 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 	}
 }
 
-VoiceSelectionView::VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages)
+VoiceSelectionView::VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &aLanguages, GtkBuilder *ui)
 	: mEngines(&aEngines)
-	, voices(aSettings, aMetadata, languages)
+	, voices(aSettings, aMetadata, aLanguages)
 	, settings(aSettings)
 {
-	layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(layout), 6);
+	layout = GTK_WIDGET(gtk_builder_get_object(ui, "voice-selection-page"));
 
-	GtkWidget *voices_header = gtk_label_new("");
-	gtk_misc_set_alignment(GTK_MISC(voices_header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(voices_header), bold(i18n("Voices")));
+	for (auto &setting : setting_entries)
+	{
+		VoiceParameter item;
+		item.type = setting.type;
+		item.id = setting.key;
+		item.label = GTK_WIDGET(gtk_builder_get_object(ui, setting.label));
+		item.param = GTK_WIDGET(gtk_builder_get_object(ui, setting.parameter));
+		item.units = GTK_WIDGET(gtk_builder_get_object(ui, setting.units));
+		parameters.push_back(item);
 
-	GtkWidget *header = gtk_label_new("");
-	gtk_misc_set_alignment(GTK_MISC(header), 0, 0);
-	gtk_label_set_markup(GTK_LABEL(header), bold(i18n("Settings")));
+		int value = mEngines->parameter(item.type)->value();
+		mEngines->parameter(item.type)->set_value(settings(item.id, value).as<int>());
+	}
 
-	GtkWidget *filter_by_doc_lang_label = gtk_label_new(i18n("Filter voices by the document's language."));
-	gtk_misc_set_alignment(GTK_MISC(filter_by_doc_lang_label), 1, 0.5);
+	GtkWidget *voices_view = GTK_WIDGET(gtk_builder_get_object(ui, "voices-view"));
+	gtk_container_add(GTK_CONTAINER(voices_view), voices);
 
-	GtkWidget *filter_by_doc_lang = gtk_switch_new();
-	gtk_switch_set_active(GTK_SWITCH(filter_by_doc_lang), TRUE);
-
-	parameterView = gtk_grid_new();
-	gtk_grid_set_column_spacing(GTK_GRID(parameterView), 4);
-
-	create_entry(tts::parameter::rate, 0, "voice.rate");
-	create_entry(tts::parameter::volume, 1, "voice.volume");
-	create_entry(tts::parameter::pitch, 2, "voice.pitch");
-	create_entry(tts::parameter::pitch_range, 3, "voice.pitch-range");
-
-	GtkWidget *buttons = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons), GTK_BUTTONBOX_START);
-
-	GtkWidget *bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_box_pack_start(GTK_BOX(bottom), buttons, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(bottom), filter_by_doc_lang_label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(bottom), filter_by_doc_lang, FALSE, FALSE, 0);
-
-	GtkWidget *apply = gtk_button_new_with_mnemonic(i18n("_Apply"));
-	gtk_box_pack_start(GTK_BOX(buttons), apply, FALSE, FALSE, 0);
-
-	gtk_box_pack_start(GTK_BOX(gobj()), header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), parameterView, FALSE, FALSE, 6);
-	gtk_box_pack_start(GTK_BOX(gobj()), voices_header, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gobj()), voices, TRUE, TRUE, 6);
-	gtk_box_pack_start(GTK_BOX(gobj()), bottom, FALSE, FALSE, 6);
-
+	GtkWidget *apply = GTK_WIDGET(gtk_builder_get_object(ui, "apply-voice-settings"));
 	g_signal_connect(apply, "clicked", G_CALLBACK(on_apply_button_clicked), this);
+
+	GtkWidget *filter_by_doc_lang = GTK_WIDGET(gtk_builder_get_object(ui, "filter-by-doc-language"));
 	g_signal_connect(filter_by_doc_lang, "notify::active", G_CALLBACK(on_filter_by_doc_lang_active), &voices);
 }
 
@@ -310,32 +310,4 @@ void VoiceSelectionView::apply()
 	}
 
 	on_voice_change.emit(voices.get_voice());
-}
-
-void VoiceSelectionView::create_entry(tts::parameter::type aParameter, int row, const char *aID)
-{
-	VoiceParameter item;
-	item.type = aParameter;
-	item.id = aID;
-
-	item.param = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
-	gtk_range_set_increments(GTK_RANGE(item.param), 1.0, 5.0);
-	gtk_scale_set_value_pos(GTK_SCALE(item.param), GTK_POS_RIGHT);
-	gtk_scale_set_digits(GTK_SCALE(item.param), 0);
-	gtk_widget_set_hexpand(item.param, TRUE);
-
-	item.label = gtk_label_new("");
-	gtk_misc_set_alignment(GTK_MISC(item.label), 1, 0.5);
-
-	item.units = gtk_label_new("");
-	gtk_misc_set_alignment(GTK_MISC(item.units), 0, 0.5);
-
-	gtk_grid_attach(GTK_GRID(parameterView), item.label, 0, row, 1, 1);
-	gtk_grid_attach(GTK_GRID(parameterView), item.param, 1, row, 1, 1);
-	gtk_grid_attach(GTK_GRID(parameterView), item.units, 2, row, 1, 1);
-
-	parameters.push_back(item);
-
-	int value = mEngines->parameter(item.type)->value();
-	mEngines->parameter(item.type)->set_value(settings(item.id, value).as<int>());
 }

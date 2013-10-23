@@ -268,9 +268,6 @@ Cainteoir::Cainteoir(const char *filename)
 	, engine_metadata(languages, i18n("Engine"), 2)
 	, settings(get_user_file("settings.dat"))
 {
-	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages));
-	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
-
 	cainteoir::supportedDocumentFormats(tts_metadata, cainteoir::text_support);
 	cainteoir::supportedAudioFormats(tts_metadata);
 
@@ -288,6 +285,9 @@ Cainteoir::Cainteoir(const char *filename)
 
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
+
+	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages, ui));
+	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	recentManager = gtk_recent_manager_get_default();
 	recentFilter = create_recent_filter(tts_metadata);
@@ -350,7 +350,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	int doc_page   = 0;
 	int lib_page   = 1;
-	int voice_page = gtk_notebook_append_page(GTK_NOTEBOOK(view), GTK_WIDGET(voiceSelection->gobj()),  nullptr);
+	int voice_page = 2;
 
 	ViewCallbackData *data = g_slice_new(ViewCallbackData);
 	data->document_pane = GTK_WIDGET(gtk_builder_get_object(ui, "doc-pane"));

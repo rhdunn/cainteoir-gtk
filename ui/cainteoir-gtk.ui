@@ -36,6 +36,39 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="play-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-playback-start-symbolic</property>
+    <child internal-child="accessible">
+      <object class="AtkObject" id="play-image-atkobject">
+        <property name="AtkObject::accessible-name" translatable="yes">Play</property>
+        <property name="AtkObject::accessible-description" translatable="yes">Read the current document</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="record-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-record-symbolic</property>
+    <child internal-child="accessible">
+      <object class="AtkObject" id="record-image-atkobject">
+        <property name="AtkObject::accessible-name" translatable="yes">Record</property>
+        <property name="AtkObject::accessible-description" translatable="yes">Record the spoken text to an audio file</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="stop-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-playback-stop-symbolic</property>
+    <child internal-child="accessible">
+      <object class="AtkObject" id="stop-image-atkobject">
+        <property name="AtkObject::accessible-name" translatable="yes">Stop</property>
+        <property name="AtkObject::accessible-description" translatable="yes">Stop reading/recording the current document</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="cainteoir-gtk">
     <property name="width_request">500</property>
     <property name="height_request">300</property>
@@ -238,7 +271,293 @@
               <placeholder/>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkBox" id="voice-selection-page">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="border_width">6</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <property name="label" translatable="yes">Settings</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkGrid" id="grid1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="rate-label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="rate-parameter">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="round_digits">1</property>
+                        <property name="digits">0</property>
+                        <property name="value_pos">right</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="rate-units">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="volume-label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="volume-parameter">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="round_digits">1</property>
+                        <property name="digits">0</property>
+                        <property name="value_pos">right</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="volume-units">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="pitch-label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="pitch-parameter">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="round_digits">0</property>
+                        <property name="digits">0</property>
+                        <property name="value_pos">right</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="pitch-units">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="pitchrange-label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">3</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="pitchrange-parameter">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="round_digits">0</property>
+                        <property name="digits">0</property>
+                        <property name="value_pos">right</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">3</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="pitchrange-units">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <property name="label" translatable="yes">Voices</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="voices-view">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="box1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkButton" id="apply-voice-settings">
+                        <property name="label" translatable="yes">_Apply</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label3">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Filter voices by the document's language</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="filter-by-doc-language">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="active">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
             </child>
             <child type="tab">
               <placeholder/>
@@ -394,39 +713,6 @@
             <property name="position">2</property>
           </packing>
         </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="play-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">media-playback-start-symbolic</property>
-    <child internal-child="accessible">
-      <object class="AtkObject" id="play-image-atkobject">
-        <property name="AtkObject::accessible-name" translatable="yes">Play</property>
-        <property name="AtkObject::accessible-description" translatable="yes">Read the current document</property>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="record-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">media-record-symbolic</property>
-    <child internal-child="accessible">
-      <object class="AtkObject" id="record-image-atkobject">
-        <property name="AtkObject::accessible-name" translatable="yes">Record</property>
-        <property name="AtkObject::accessible-description" translatable="yes">Record the spoken text to an audio file</property>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="stop-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">media-playback-stop-symbolic</property>
-    <child internal-child="accessible">
-      <object class="AtkObject" id="stop-image-atkobject">
-        <property name="AtkObject::accessible-name" translatable="yes">Stop</property>
-        <property name="AtkObject::accessible-description" translatable="yes">Stop reading/recording the current document</property>
       </object>
     </child>
   </object>

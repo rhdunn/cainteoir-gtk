@@ -578,7 +578,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
 		for (auto &entry : doc->toc())
-			toc.add(entry.depth, entry.location, entry.title);
+			toc.add(entry);
 
 		if (toc.empty())
 			gtk_widget_hide(toc);

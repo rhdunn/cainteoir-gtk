@@ -22,6 +22,7 @@
 #define CAINTEOIRGTK_SRC_TOC_HPP
 
 #include <cainteoir/metadata.hpp>
+#include <cainteoir/document.hpp>
 
 namespace rdf = cainteoir::rdf;
 
@@ -40,7 +41,7 @@ public:
 
 	void clear();
 
-	void add(int depth, const rdf::uri &location, const std::string &title);
+	void add(const cainteoir::document::toc_entry &entry);
 
 	TocSelection selection() const;
 private:

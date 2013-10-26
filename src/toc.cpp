@@ -26,8 +26,8 @@
 enum TocColumns
 {
 	TOC_TITLE,
-	TOC_ANCHOR, // rdf::uri
-	TOC_COUNT // number of columns
+	TOC_ANCHOR,
+	TOC_COUNT
 };
 
 static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item, bool advance)
@@ -122,13 +122,13 @@ void TocPane::clear()
 	gtk_tree_store_clear(store);
 }
 
-void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
+void TocPane::add(const cainteoir::document::toc_entry &entry)
 {
 	GtkTreeIter row;
 	gtk_tree_store_append(store, &row, nullptr);
 	gtk_tree_store_set(store, &row,
-		TOC_TITLE,  title.c_str(),
-		TOC_ANCHOR, location.str().c_str(),
+		TOC_TITLE,  entry.title.c_str(),
+		TOC_ANCHOR, entry.location.str().c_str(),
 		-1);
 }
 

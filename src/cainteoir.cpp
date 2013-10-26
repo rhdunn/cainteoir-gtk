@@ -504,7 +504,7 @@ void Cainteoir::stop()
 
 void Cainteoir::on_speak(const char * status)
 {
-	speech = tts.speak(out, doc->children(toc.selection()));
+	speech = tts.speak(out, doc->toc(), doc->children(toc.selection()));
 
 	gtk_action_set_visible(readAction, FALSE);
 	gtk_action_set_visible(stopAction, TRUE);

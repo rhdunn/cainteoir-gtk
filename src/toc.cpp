@@ -26,6 +26,7 @@
 enum TocColumns
 {
 	TOC_ENTRY_PTR,
+	TOC_GUTTER,
 	TOC_TITLE,
 	TOC_ANCHOR,
 	TOC_COUNT
@@ -49,6 +50,21 @@ static const rdf::uri &uri_from_selected_item(GtkTreeModel *model, GList *item, 
 		return entry->location;
 	}
 	return empty_uri;
+}
+
+static bool find_toc_entry(GtkTreeModel *model, GtkTreeIter &iter, const cainteoir::document::toc_entry *value)
+{
+	if (!gtk_tree_model_get_iter_first(model, &iter))
+		return false;
+
+	do
+	{
+		const cainteoir::document::toc_entry *entry = nullptr;
+		gtk_tree_model_get(model, &iter, TOC_ENTRY_PTR, &entry, -1);
+		if (entry == value) return true;
+	} while (gtk_tree_model_iter_next(model, &iter));
+
+	return false;
 }
 
 static void on_cursor_changed(GtkTreeView *view, void *data)
@@ -84,17 +100,29 @@ static void on_cursor_changed(GtkTreeView *view, void *data)
 }
 
 TocPane::TocPane()
+	: mActive(nullptr)
 {
-	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	for (int i = 0; i < TOC_COUNT; ++i)
 	{
 		if (i == TOC_ANCHOR || i == TOC_ENTRY_PTR) continue;
 
-		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
-		gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+		if (i == TOC_GUTTER)
+		{
+			GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
+			GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
+				"", renderer, "icon-name", i, nullptr);
+			gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+		}
+		else
+		{
+			GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+			GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
+				"", renderer, "text", i, nullptr);
+			gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+		}
 	}
 
 	gtk_widget_set_name(view, "toc");
@@ -128,9 +156,24 @@ void TocPane::add(const cainteoir::document::toc_entry &entry)
 	gtk_tree_store_append(store, &row, nullptr);
 	gtk_tree_store_set(store, &row,
 		TOC_ENTRY_PTR, &entry,
+		TOC_GUTTER,    "",
 		TOC_TITLE,     entry.title.c_str(),
 		TOC_ANCHOR,    entry.location.str().c_str(),
 		-1);
+}
+
+void TocPane::set_playing(const cainteoir::document::toc_entry &entry)
+{
+	if (&entry == mActive) return;
+
+	if (mActive)
+		gtk_tree_store_set(store, &mActiveIter, TOC_GUTTER, "", -1);
+
+	if (!find_toc_entry(GTK_TREE_MODEL(store), mActiveIter, &entry))
+		return;
+
+	gtk_tree_store_set(store, &mActiveIter, TOC_GUTTER, "media-playback-start", -1);
+	mActive = &entry;
 }
 
 TocSelection TocPane::selection() const

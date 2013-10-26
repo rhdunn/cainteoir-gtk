@@ -519,6 +519,7 @@ bool Cainteoir::on_speaking()
 	if (speech->is_speaking())
 	{
 		timebar->update(speech->elapsedTime(), speech->totalTime(), speech->completed());
+		toc.set_playing(speech->toc_entry());
 		return true;
 	}
 

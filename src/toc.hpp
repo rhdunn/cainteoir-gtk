@@ -43,11 +43,16 @@ public:
 
 	void add(const cainteoir::document::toc_entry &entry);
 
+	void set_playing(const cainteoir::document::toc_entry &entry);
+
 	TocSelection selection() const;
 private:
 	GtkWidget *view;
 	GtkTreeStore *store;
 	GtkTreeSelection *toc_selection;
+
+	const cainteoir::document::toc_entry *mActive;
+	GtkTreeIter mActiveIter;
 };
 
 #endif

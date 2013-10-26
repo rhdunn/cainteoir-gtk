@@ -25,30 +25,30 @@
 
 enum TocColumns
 {
+	TOC_ENTRY_PTR,
 	TOC_TITLE,
 	TOC_ANCHOR,
 	TOC_COUNT
 };
 
-static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item, bool advance)
+static const rdf::uri &uri_from_selected_item(GtkTreeModel *model, GList *item, bool advance)
 {
+	static const rdf::uri empty_uri = {};
+
 	GtkTreeIter iter;
 	if (item && gtk_tree_model_get_iter(model, &iter, (GtkTreePath *)item->data))
 	{
 		if (advance)
 		{
 			if (!gtk_tree_model_iter_next(model, &iter))
-				return rdf::uri();
+				return empty_uri;
 		}
 
-		gchar *anchor = nullptr;
-		gtk_tree_model_get(model, &iter, TOC_ANCHOR, &anchor, -1);
-
-		rdf::uri ref(anchor);
-		g_free(anchor);
-		return ref;
+		const cainteoir::document::toc_entry *entry = nullptr;
+		gtk_tree_model_get(model, &iter, TOC_ENTRY_PTR, &entry, -1);
+		return entry->location;
 	}
-	return rdf::uri();
+	return empty_uri;
 }
 
 static void on_cursor_changed(GtkTreeView *view, void *data)
@@ -85,12 +85,12 @@ static void on_cursor_changed(GtkTreeView *view, void *data)
 
 TocPane::TocPane()
 {
-	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING);
 
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	for (int i = 0; i < TOC_COUNT; ++i)
 	{
-		if (i == TOC_ANCHOR) continue;
+		if (i == TOC_ANCHOR || i == TOC_ENTRY_PTR) continue;
 
 		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
@@ -127,8 +127,9 @@ void TocPane::add(const cainteoir::document::toc_entry &entry)
 	GtkTreeIter row;
 	gtk_tree_store_append(store, &row, nullptr);
 	gtk_tree_store_set(store, &row,
-		TOC_TITLE,  entry.title.c_str(),
-		TOC_ANCHOR, entry.location.str().c_str(),
+		TOC_ENTRY_PTR, &entry,
+		TOC_TITLE,     entry.title.c_str(),
+		TOC_ANCHOR,    entry.location.str().c_str(),
 		-1);
 }
 

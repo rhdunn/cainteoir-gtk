@@ -168,7 +168,7 @@ const rdf::uri VoiceList::get_voice() const
 	{
 		gchar *voice = nullptr;
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &row, VLC_URI, &voice, -1);
-		ref = mMetadata.href(voice);
+		ref = rdf::href(voice);
 		g_free(voice);
 	}
 	return ref;

@@ -376,7 +376,7 @@ Cainteoir::Cainteoir(const char *filename)
 
 	load_document(filename ? std::string(filename) : settings("document.filename").as<std::string>(), true);
 
-	rdf::uri voice = tts_metadata.href(settings("voice.name", std::string()).as<std::string>());
+	rdf::uri voice = rdf::href(settings("voice.name", std::string()).as<std::string>());
 	bool set_voice = false;
 	if (!voice.empty())
 		set_voice = switch_voice(voice);

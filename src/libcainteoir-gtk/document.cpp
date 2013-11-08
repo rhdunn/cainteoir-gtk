@@ -201,8 +201,8 @@ GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::docu
 				(void)gtk_text_buffer_create_mark(buffer, a.c_str(), &position, TRUE);
 			anchor.clear();
 
-			const gchar *start = entry.text->begin();
-			const gchar *end   = entry.text->end();
+			const gchar *start = entry.content->begin();
+			const gchar *end   = entry.content->end();
 			while (start < end)
 			{
 				const gchar *next  = start;

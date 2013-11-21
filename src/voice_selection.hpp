@@ -62,15 +62,6 @@ private:
 	rdf::uri selected_voice;
 };
 
-struct VoiceParameter
-{
-	tts::parameter::type type;
-	const char *id;
-	GtkWidget *label;
-	GtkWidget *param;
-	GtkWidget *units;
-};
-
 class VoiceSelectionView
 {
 public:
@@ -86,10 +77,7 @@ public:
 private:
 	GtkWidget *layout;
 
-	std::list<VoiceParameter> parameters;
-	tts::engines *mEngines;
 	application_settings &settings;
-
 	VoiceList voices;
 	GtkWidget *parameterView;
 

@@ -19,6 +19,9 @@
   <object class="GtkAction" id="record-action">
     <property name="stock_id">gtk-media-record</property>
   </object>
+  <object class="GtkToggleAction" id="settings-view-action">
+    <property name="label" translatable="yes">Settings</property>
+  </object>
   <object class="GtkAction" id="stop-action">
     <property name="stock_id">gtk-media-stop</property>
   </object>
@@ -108,17 +111,29 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton" id="voice-button">
-                        <property name="related_action">voice-view-action</property>
+                      <object class="GtkToggleButton" id="settings-button">
+                        <property name="related_action">settings-view-action</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="relief">half</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="voice-button">
+                        <property name="related_action">voice-view-action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
@@ -238,28 +253,12 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkBox" id="voice-selection-page">
+              <object class="GtkBox" id="settings-page">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">6</property>
                 <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkLabel" id="label2">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="yalign">0</property>
-                    <property name="label" translatable="yes">Settings</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
+                <property name="spacing">20</property>
                 <child>
                   <object class="GtkGrid" id="grid1">
                     <property name="visible">True</property>
@@ -285,7 +284,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
-                        <property name="round_digits">1</property>
+                        <property name="round_digits">0</property>
                         <property name="digits">0</property>
                         <property name="value_pos">right</property>
                         <accessibility>
@@ -333,7 +332,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
-                        <property name="round_digits">1</property>
+                        <property name="round_digits">0</property>
                         <property name="digits">0</property>
                         <property name="value_pos">right</property>
                         <accessibility>
@@ -458,21 +457,33 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label1">
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkButtonBox" id="buttonbox1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="yalign">0</property>
-                    <property name="label" translatable="yes">Voices</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
+                    <property name="layout_style">start</property>
+                    <child>
+                      <object class="GtkButton" id="apply-settings">
+                        <property name="label" translatable="yes">_Apply</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -480,11 +491,24 @@
                     <property name="position">2</property>
                   </packing>
                 </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkBox" id="voice-selection-page">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="voices-view">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -499,6 +523,7 @@
                   <object class="GtkBox" id="box1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="border_width">6</property>
                     <child>
                       <object class="GtkButton" id="apply-voice-settings">
                         <property name="label" translatable="yes">_Apply</property>
@@ -553,7 +578,7 @@
                 </child>
               </object>
               <packing>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child type="tab">

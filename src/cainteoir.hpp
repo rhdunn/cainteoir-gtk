@@ -25,6 +25,7 @@
 #include <cainteoir-gtk/document.hpp>
 
 #include "settings.hpp"
+#include "settings_view.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
@@ -76,6 +77,7 @@ private:
 	GtkTextTagTable *tags;
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
+	std::shared_ptr<SettingsView> settingsView;
 	std::shared_ptr<DocumentLibrary> library;
 	GtkWidget *library_button;
 	GtkWidget *document_button;

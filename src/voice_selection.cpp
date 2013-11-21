@@ -26,26 +26,6 @@
 
 #include "voice_selection.hpp"
 
-struct setting_data_t
-{
-	tts::parameter::type type;
-	const char *key;
-	const char *label;
-	const char *parameter;
-	const char *units;
-};
-
-static const setting_data_t setting_entries[] = {
-	{ tts::parameter::rate, "voice.rate",
-	  "rate-label", "rate-parameter", "rate-units" },
-	{ tts::parameter::volume, "voice.volume",
-	  "volume-label", "volume-parameter", "volume-units" },
-	{ tts::parameter::pitch, "voice.pitch",
-	  "pitch-label", "pitch-parameter", "pitch-units" },
-	{ tts::parameter::pitch_range, "voice.pitch-range",
-	  "pitchrange-label", "pitchrange-parameter", "pitchrange-units" },
-};
-
 enum VoiceListColumns
 {
 	VLC_VOICE,
@@ -68,13 +48,6 @@ const char * columns[VLC_COUNT] = {
 	i18n("Frequency (Hz)"),
 	i18n("Channels"),
 };
-
-static const char *bold(const char *text)
-{
-	static char boldtext[512];
-	snprintf(boldtext, sizeof(boldtext), "<b>%s</b>", text);
-	return boldtext;
-}
 
 static void on_voice_list_column_clicked(GtkTreeViewColumn *column, void *data)
 {
@@ -252,25 +225,10 @@ void VoiceList::add_voice(rdf::graph &aMetadata, rql::results &voice, cainteoir:
 }
 
 VoiceSelectionView::VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &aLanguages, GtkBuilder *ui)
-	: mEngines(&aEngines)
-	, voices(aSettings, aMetadata, aLanguages)
+	: voices(aSettings, aMetadata, aLanguages)
 	, settings(aSettings)
 {
 	layout = GTK_WIDGET(gtk_builder_get_object(ui, "voice-selection-page"));
-
-	for (auto &setting : setting_entries)
-	{
-		VoiceParameter item;
-		item.type = setting.type;
-		item.id = setting.key;
-		item.label = GTK_WIDGET(gtk_builder_get_object(ui, setting.label));
-		item.param = GTK_WIDGET(gtk_builder_get_object(ui, setting.parameter));
-		item.units = GTK_WIDGET(gtk_builder_get_object(ui, setting.units));
-		parameters.push_back(item);
-
-		int value = mEngines->parameter(item.type)->value();
-		mEngines->parameter(item.type)->set_value(settings(item.id, value).as<int>());
-	}
 
 	GtkWidget *voices_view = GTK_WIDGET(gtk_builder_get_object(ui, "voices-view"));
 	gtk_container_add(GTK_CONTAINER(voices_view), voices);
@@ -284,17 +242,6 @@ VoiceSelectionView::VoiceSelectionView(application_settings &aSettings, tts::eng
 
 void VoiceSelectionView::show(const rdf::uri &voice)
 {
-	for (auto &item : parameters)
-	{
-		std::shared_ptr<tts::parameter> parameter = mEngines->parameter(item.type);
-
-		gtk_range_set_range(GTK_RANGE(item.param), parameter->minimum(), parameter->maximum());
-		gtk_range_set_value(GTK_RANGE(item.param), parameter->value());
-
-		gtk_label_set_markup(GTK_LABEL(item.label), parameter->name());
-		gtk_label_set_markup(GTK_LABEL(item.units), parameter->units());
-	}
-
 	voices.set_voice(voice);
 
 	gtk_widget_show(layout);
@@ -302,12 +249,5 @@ void VoiceSelectionView::show(const rdf::uri &voice)
 
 void VoiceSelectionView::apply()
 {
-	for (auto &item : parameters)
-	{
-		int value = gtk_range_get_value(GTK_RANGE(item.param));
-		mEngines->parameter(item.type)->set_value(value);
-		settings(item.id) = value;
-	}
-
 	on_voice_change.emit(voices.get_voice());
 }

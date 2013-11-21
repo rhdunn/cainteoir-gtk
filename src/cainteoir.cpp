@@ -286,6 +286,7 @@ Cainteoir::Cainteoir(const char *filename)
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
 
+	settingsView = std::shared_ptr<SettingsView>(new SettingsView(settings, tts, ui));
 	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages, ui));
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
@@ -348,9 +349,13 @@ Cainteoir::Cainteoir(const char *filename)
 
 	view = GTK_WIDGET(gtk_builder_get_object(ui, "view"));
 
-	int doc_page   = 0;
-	int lib_page   = 1;
-	int voice_page = 2;
+	enum pages
+	{
+		doc_page,
+		lib_page,
+		settings_page,
+		voice_page,
+	};
 
 	ViewCallbackData *data = g_slice_new(ViewCallbackData);
 	data->document_pane = GTK_WIDGET(gtk_builder_get_object(ui, "doc-pane"));
@@ -359,6 +364,7 @@ Cainteoir::Cainteoir(const char *filename)
 	library_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "library-button")),  GTK_NOTEBOOK(view), lib_page);
 	info_button = data->info_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "info-button")), GTK_NOTEBOOK(view), doc_page);
 	document_button = data->document_button = navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "document-button")), GTK_NOTEBOOK(view), doc_page);
+	navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "settings-button")), GTK_NOTEBOOK(view), settings_page);
 	navbar.add_paged_button(GTK_WIDGET(gtk_builder_get_object(ui, "voice-button")), GTK_NOTEBOOK(view), voice_page);
 	navbar.set_active_button(info_button);
 
@@ -655,6 +661,7 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	if (tts.select_voice(tts_metadata, voice))
 	{
 		voiceSelection->show(tts.voice());
+		settingsView->show();
 		if ((!speech || !speech->is_speaking()) && doc)
 			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 		settings("voice.name") = voice.str();

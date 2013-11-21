@@ -286,8 +286,8 @@ Cainteoir::Cainteoir(const char *filename)
 	g_signal_connect(window, "window-state-event", G_CALLBACK(on_window_state_changed), &settings);
 	g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), this);
 
-	settingsView = std::shared_ptr<SettingsView>(new SettingsView(settings, tts, ui));
-	voiceSelection = std::shared_ptr<VoiceSelectionView>(new VoiceSelectionView(settings, tts, tts_metadata, languages, ui));
+	settingsView = std::make_shared<SettingsView>(settings, tts, ui);
+	voiceSelection = std::make_shared<VoiceSelectionView>(settings, tts, tts_metadata, languages, ui);
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	recentManager = gtk_recent_manager_get_default();

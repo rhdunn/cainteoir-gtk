@@ -49,6 +49,18 @@ static void on_apply_button_clicked(GtkButton *button, void *data)
 	((SettingsView *)data)->apply();
 }
 
+static void on_enable_narration_active(GtkSwitch *button, GParamSpec *arg, void *settings)
+{
+	bool active = gtk_switch_get_active(button);
+	(*(application_settings *)settings)("narration.enabled") = active ? "true" : "false";
+}
+
+static void on_enable_tts_fallback_active(GtkSwitch *button, GParamSpec *arg, void *settings)
+{
+	bool active = gtk_switch_get_active(button);
+	(*(application_settings *)settings)("narration.tts_fallback") = active ? "true" : "false";
+}
+
 SettingsView::SettingsView(application_settings &aSettings, tts::engines &aEngines, GtkBuilder *ui)
 	: mEngines(&aEngines)
 	, settings(aSettings)
@@ -71,6 +83,16 @@ SettingsView::SettingsView(application_settings &aSettings, tts::engines &aEngin
 
 	GtkWidget *apply = GTK_WIDGET(gtk_builder_get_object(ui, "apply-settings"));
 	g_signal_connect(apply, "clicked", G_CALLBACK(on_apply_button_clicked), this);
+
+	GtkWidget *enable_narration = GTK_WIDGET(gtk_builder_get_object(ui, "enable-narration"));
+	g_signal_connect(enable_narration, "notify::active", G_CALLBACK(on_enable_narration_active), &settings);
+	if (settings("narration.enabled", "false").as<std::string>() == "true")
+		gtk_switch_set_active(GTK_SWITCH(enable_narration), TRUE);
+
+	GtkWidget *enable_tts_fallback = GTK_WIDGET(gtk_builder_get_object(ui, "enable-tts-fallback"));
+	g_signal_connect(enable_tts_fallback, "notify::active", G_CALLBACK(on_enable_tts_fallback_active), &settings);
+	if (settings("narration.tts_fallback", "false").as<std::string>() == "true")
+		gtk_switch_set_active(GTK_SWITCH(enable_tts_fallback), TRUE);
 }
 
 void SettingsView::show()

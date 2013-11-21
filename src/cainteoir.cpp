@@ -510,7 +510,13 @@ void Cainteoir::stop()
 
 void Cainteoir::on_speak(const char * status)
 {
-	speech = tts.speak(out, doc->toc(), doc->children(toc.selection()));
+	auto mode = tts::media_overlays_mode::tts_only;
+	if (settings("narration.enabled", "false").as<std::string>() == "true")
+		mode = settings("narration.tts_fallback", "false").as<std::string>() == "true"
+		     ? tts::media_overlays_mode::tts_and_media_overlays
+		     : tts::media_overlays_mode::media_overlays_only;
+
+	speech = tts.speak(out, doc->toc(), doc->children(toc.selection()), mode);
 
 	gtk_action_set_visible(readAction, FALSE);
 	gtk_action_set_visible(stopAction, TRUE);

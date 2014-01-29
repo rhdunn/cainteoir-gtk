@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011-2013 Reece H. Dunn
+ * Copyright (C) 2011-2014 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -531,7 +531,7 @@ bool Cainteoir::on_speaking()
 	if (speech->is_speaking())
 	{
 		timebar->update(speech->elapsedTime(), speech->totalTime(), speech->completed());
-		toc.set_playing(speech->toc_entry());
+		toc.set_playing(speech->context());
 		return true;
 	}
 

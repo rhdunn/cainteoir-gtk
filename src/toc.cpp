@@ -1,6 +1,6 @@
 /* Table of Content Side Pane
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2014 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -45,21 +45,21 @@ static const rdf::uri &uri_from_selected_item(GtkTreeModel *model, GList *item, 
 				return empty_uri;
 		}
 
-		const cainteoir::document::toc_entry *entry = nullptr;
+		const cainteoir::ref_entry *entry = nullptr;
 		gtk_tree_model_get(model, &iter, TOC_ENTRY_PTR, &entry, -1);
 		return entry->location;
 	}
 	return empty_uri;
 }
 
-static bool find_toc_entry(GtkTreeModel *model, GtkTreeIter &iter, const cainteoir::document::toc_entry *value)
+static bool find_ref_entry(GtkTreeModel *model, GtkTreeIter &iter, const cainteoir::ref_entry *value)
 {
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		return false;
 
 	do
 	{
-		const cainteoir::document::toc_entry *entry = nullptr;
+		const cainteoir::ref_entry *entry = nullptr;
 		gtk_tree_model_get(model, &iter, TOC_ENTRY_PTR, &entry, -1);
 		if (entry == value) return true;
 	} while (gtk_tree_model_iter_next(model, &iter));
@@ -150,7 +150,7 @@ void TocPane::clear()
 	gtk_tree_store_clear(store);
 }
 
-void TocPane::add(const cainteoir::document::toc_entry &entry)
+void TocPane::add(const cainteoir::ref_entry &entry)
 {
 	GtkTreeIter row;
 	gtk_tree_store_append(store, &row, nullptr);
@@ -162,14 +162,14 @@ void TocPane::add(const cainteoir::document::toc_entry &entry)
 		-1);
 }
 
-void TocPane::set_playing(const cainteoir::document::toc_entry &entry)
+void TocPane::set_playing(const cainteoir::ref_entry &entry)
 {
 	if (&entry == mActive) return;
 
 	if (mActive)
 		gtk_tree_store_set(store, &mActiveIter, TOC_GUTTER, "", -1);
 
-	if (!find_toc_entry(GTK_TREE_MODEL(store), mActiveIter, &entry))
+	if (!find_ref_entry(GTK_TREE_MODEL(store), mActiveIter, &entry))
 		return;
 
 	gtk_tree_store_set(store, &mActiveIter, TOC_GUTTER, "media-playback-start", -1);

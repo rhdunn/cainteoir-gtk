@@ -1,6 +1,6 @@
 /* Table of Content Side Pane
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2014 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -41,9 +41,9 @@ public:
 
 	void clear();
 
-	void add(const cainteoir::document::toc_entry &entry);
+	void add(const cainteoir::ref_entry &entry);
 
-	void set_playing(const cainteoir::document::toc_entry &entry);
+	void set_playing(const cainteoir::ref_entry &entry);
 
 	TocSelection selection() const;
 private:
@@ -51,7 +51,7 @@ private:
 	GtkTreeStore *store;
 	GtkTreeSelection *toc_selection;
 
-	const cainteoir::document::toc_entry *mActive;
+	const cainteoir::ref_entry *mActive;
 	GtkTreeIter mActiveIter;
 };
 

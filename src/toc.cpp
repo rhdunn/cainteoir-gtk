@@ -147,6 +147,7 @@ bool TocPane::empty() const
 
 void TocPane::clear()
 {
+	mListing.clear();
 	gtk_tree_store_clear(store);
 }
 

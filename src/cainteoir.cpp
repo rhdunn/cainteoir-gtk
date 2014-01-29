@@ -590,7 +590,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
-		toc.set_listing(doc->navigation(rdf_metadata, rdf::epv("toc")));
+		toc.set_listing(cainteoir::navigation(rdf_metadata, subject, rdf::epv("toc")));
 		if (toc.empty())
 			gtk_widget_hide(toc);
 		else

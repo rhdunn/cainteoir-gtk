@@ -150,16 +150,21 @@ void TocPane::clear()
 	gtk_tree_store_clear(store);
 }
 
-void TocPane::add(const cainteoir::ref_entry &entry)
+void TocPane::set_listing(const std::vector<cainteoir::ref_entry> &listing)
 {
+	mListing = listing;
+
 	GtkTreeIter row;
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-		TOC_ENTRY_PTR, &entry,
-		TOC_GUTTER,    "",
-		TOC_TITLE,     entry.title.c_str(),
-		TOC_ANCHOR,    entry.location.str().c_str(),
-		-1);
+	for (const auto &entry : mListing)
+	{
+		gtk_tree_store_append(store, &row, nullptr);
+		gtk_tree_store_set(store, &row,
+			TOC_ENTRY_PTR, &entry,
+			TOC_GUTTER,    "",
+			TOC_TITLE,     entry.title.c_str(),
+			TOC_ANCHOR,    entry.location.str().c_str(),
+			-1);
+	}
 }
 
 void TocPane::set_playing(const cainteoir::ref_entry &entry)

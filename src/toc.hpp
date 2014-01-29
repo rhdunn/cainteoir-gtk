@@ -41,16 +41,19 @@ public:
 
 	void clear();
 
-	void add(const cainteoir::ref_entry &entry);
+	void set_listing(const std::vector<cainteoir::ref_entry> &listing);
 
 	void set_playing(const cainteoir::ref_entry &entry);
 
 	TocSelection selection() const;
+
+	const std::vector<cainteoir::ref_entry> &listing() const { return mListing; }
 private:
 	GtkWidget *view;
 	GtkTreeStore *store;
 	GtkTreeSelection *toc_selection;
 
+	std::vector<cainteoir::ref_entry> mListing;
 	const cainteoir::ref_entry *mActive;
 	GtkTreeIter mActiveIter;
 };

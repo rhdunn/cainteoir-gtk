@@ -516,7 +516,7 @@ void Cainteoir::on_speak(const char * status)
 		     ? tts::media_overlays_mode::tts_and_media_overlays
 		     : tts::media_overlays_mode::media_overlays_only;
 
-	speech = tts.speak(out, doc->toc(), doc->children(toc.selection()), mode);
+	speech = tts.speak(out, toc.listing(), doc->children(toc.selection()), mode);
 
 	gtk_action_set_visible(readAction, FALSE);
 	gtk_action_set_visible(stopAction, TRUE);
@@ -574,7 +574,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (!reader)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		auto newdoc = std::make_shared<cainteoir::document>(reader);
+		auto newdoc = std::make_shared<cainteoir::document>(reader, rdf_metadata);
 		GtkTextBuffer *buffer = create_buffer_from_document(newdoc);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
@@ -590,9 +590,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
-		for (auto &entry : doc->toc())
-			toc.add(entry);
-
+		toc.set_listing(doc->navigation(rdf_metadata, rdf::epv("toc")));
 		if (toc.empty())
 			gtk_widget_hide(toc);
 		else

@@ -29,6 +29,7 @@ enum TocColumns
 	TOC_GUTTER,
 	TOC_TITLE,
 	TOC_ANCHOR,
+	TOC_DISPLAY,
 	TOC_COUNT
 };
 
@@ -99,31 +100,28 @@ static void on_cursor_changed(GtkTreeView *view, void *data)
 	}
 }
 
+static void add_icon_column(GtkTreeView *treeview, int i)
+{
+	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "icon-name", i, nullptr);
+	gtk_tree_view_append_column(treeview, column);
+}
+
+static void add_text_column(GtkTreeView *treeview, int i)
+{
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
+	gtk_tree_view_append_column(treeview, column);
+}
+
 TocPane::TocPane()
 	: mActive(nullptr)
 {
-	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	for (int i = 0; i < TOC_COUNT; ++i)
-	{
-		if (i == TOC_ANCHOR || i == TOC_ENTRY_PTR) continue;
-
-		if (i == TOC_GUTTER)
-		{
-			GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
-			GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
-				"", renderer, "icon-name", i, nullptr);
-			gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-		}
-		else
-		{
-			GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-			GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
-				"", renderer, "text", i, nullptr);
-			gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-		}
-	}
+	add_icon_column(GTK_TREE_VIEW(view), TOC_GUTTER);
+	add_text_column(GTK_TREE_VIEW(view), TOC_DISPLAY);
 
 	gtk_widget_set_name(view, "toc");
 	gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(view), TRUE);
@@ -156,14 +154,21 @@ void TocPane::set_listing(const std::vector<cainteoir::ref_entry> &listing)
 	mListing = listing;
 
 	GtkTreeIter row;
+	int initial_depth = mListing.front().depth;
 	for (const auto &entry : mListing)
 	{
+		std::ostringstream title;
+		for (const auto &i : cainteoir::range<int>(initial_depth, entry.depth))
+			title << "... ";
+		title << entry.title;
+
 		gtk_tree_store_append(store, &row, nullptr);
 		gtk_tree_store_set(store, &row,
 			TOC_ENTRY_PTR, &entry,
 			TOC_GUTTER,    "",
 			TOC_TITLE,     entry.title.c_str(),
 			TOC_ANCHOR,    entry.location.str().c_str(),
+			TOC_DISPLAY,   title.str().c_str(),
 			-1);
 	}
 }

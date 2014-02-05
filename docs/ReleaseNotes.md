@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.9: Wednesday February 5th 2014 \[Feb 2014\]
+-----------------------------------------------------
+
+  *  provide better rendering of nested table of contents entries
+  *  moved the pitch, rate and volume options to a new settings tab
+  *  add narration (ePub3 Media Overlays) configuration options to the settings tab
+  *  track the currently playing chapter/section (only works if started at the first item)
+  *  improve the accessibility of the UI
+  *  update the UI to better align with the Music application UI
+  *  use symbolic icons for the main icons
+
+### translation updates:
+
+  *  Vietnamese
+  *  Catalan
+
 Version 0.8: Saturday December 1st 2012 \[Nov 2012\]
 ----------------------------------------------------
 

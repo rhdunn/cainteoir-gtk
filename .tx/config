@@ -1,0 +1,10 @@
+[main]
+host = https://www.transifex.com
+type = PO
+
+[cainteoir-text-to-speech.master]
+file_filter = po/<lang>.po
+source_file = po/cainteoir-gtk.pot
+source_lang = en
+type = PO
+

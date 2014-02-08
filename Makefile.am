@@ -12,6 +12,7 @@ AM_LDFLAGS  = \
 	${LTLIBINTL}
 
 AM_CXXFLAGS = \
+	-Isrc/include \
 	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
 	${SIGCXX_CFLAGS}  \
@@ -109,6 +110,17 @@ AmbianceTheme_DATA = data/themes/Ambiance/gtk3.css
 RadianceThemedir = ${themedir}/Radiance
 RadianceTheme_DATA = data/themes/Radiance/gtk3.css
 
+############################# libcainteoir-gtk ################################
+
+libcainteoir_gtk_includedir = $(includedir)/cainteoir-gtk
+libcainteoir_gtk_include_HEADERS = \
+	src/include/cainteoir-gtk/document.hpp
+
+lib_LTLIBRARIES += src/libcainteoir-gtk/libcainteoir-gtk.la
+
+src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
+	src/libcainteoir-gtk/document.cpp
+
 ############################# applications ####################################
 
 desktopdir = $(datadir)/applications
@@ -119,6 +131,7 @@ ui_DATA = ui/cainteoir-gtk.ui
 
 bin_PROGRAMS += src/cainteoir-gtk
 
+src_cainteoir_gtk_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
 src_cainteoir_gtk_SOURCES = \
 	src/i18n.h \
 	src/compatibility.hpp \
@@ -127,8 +140,8 @@ src_cainteoir_gtk_SOURCES = \
 	src/settings.cpp \
 	src/toc.hpp \
 	src/toc.cpp \
-	src/document.hpp \
-	src/document.cpp \
+	src/settings_view.hpp \
+	src/settings_view.cpp \
 	src/voice_selection.hpp \
 	src/voice_selection.cpp \
 	src/metadata.hpp \
@@ -151,7 +164,8 @@ EXTRA_DIST += ${man1_MANS}
 
 noinst_bin_PROGRAMS += tests/content
 tests_content_CXXFLAGS = ${AM_CXXFLAGS} -I src
-tests_content_SOURCES  = tests/content.cpp tests/tester.hpp src/document.cpp
+tests_content_LDADD    = src/libcainteoir-gtk/libcainteoir-gtk.la
+tests_content_SOURCES  = tests/content.cpp tests/tester.hpp
 
 check: tests/content
 	tests/content

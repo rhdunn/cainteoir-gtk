@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2013 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -22,14 +22,16 @@
 #define CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 
 #include <cainteoir/languages.hpp>
+#include <cainteoir-gtk/document.hpp>
 
 #include "settings.hpp"
-#include "document.hpp"
+#include "settings_view.hpp"
 #include "voice_selection.hpp"
 #include "metadata.hpp"
 #include "timebar.hpp"
 #include "library.hpp"
 #include "navbar.hpp"
+#include "toc.hpp"
 
 class Cainteoir
 {
@@ -75,6 +77,7 @@ private:
 	GtkTextTagTable *tags;
 
 	std::shared_ptr<VoiceSelectionView> voiceSelection;
+	std::shared_ptr<SettingsView> settingsView;
 	std::shared_ptr<DocumentLibrary> library;
 	GtkWidget *library_button;
 	GtkWidget *document_button;
@@ -91,7 +94,10 @@ private:
 	rdf::graph tts_metadata;
 	cainteoir::tts::engines tts;
 
-	std::shared_ptr<document> doc;
+	std::shared_ptr<cainteoir::document> doc;
+	rdf::graph rdf_metadata;
+	rdf::uri subject;
+
 	cainteoir::languages languages;
 	std::shared_ptr<cainteoir::tts::speech> speech;
 	std::shared_ptr<cainteoir::audio> out;

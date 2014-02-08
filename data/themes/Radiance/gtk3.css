@@ -14,8 +14,8 @@
 }
 
 GtkToolbar {
-	padding-left: 5@GTK_PX@;
-	padding-right: 5@GTK_PX@;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 
 .menubar .button {
@@ -60,27 +60,27 @@ GtkNotebook, #toc, GtkScrolledWindow * {
 .linked .button {
 	-unico-inner-stroke-width: 0;
 	-unico-outer-stroke-width: 0;
-	border-right-width: 1@GTK_PX@;
+	border-right-width: 1px;
 	border-left-width: 0;
 	border-radius: 0;
 }
 
 .linked .button:first-child {
-	border-left-width: 1@GTK_PX@;
-	border-bottom-left-radius: 3@GTK_PX@;
-	border-top-left-radius: 3@GTK_PX@;
+	border-left-width: 1px;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
 }
 
 .linked .button:last-child {
-	border-right-width: 1@GTK_PX@;
-	border-bottom-right-radius: 3@GTK_PX@;
-	border-top-right-radius: 3@GTK_PX@;
+	border-right-width: 1px;
+	border-bottom-right-radius: 3px;
+	border-top-right-radius: 3px;
 }
 
 .linked .button:only-child {
-	border-right-width: 1@GTK_PX@;
-	border-left-width: 1@GTK_PX@;
-	border-radius: 3@GTK_PX@;
+	border-right-width: 1px;
+	border-left-width: 1px;
+	border-radius: 3px;
 }
 
 /* Workaround for Ubuntu bug 888901 ...

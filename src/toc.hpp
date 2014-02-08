@@ -1,6 +1,6 @@
 /* Table of Content Side Pane
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2014 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -22,6 +22,7 @@
 #define CAINTEOIRGTK_SRC_TOC_HPP
 
 #include <cainteoir/metadata.hpp>
+#include <cainteoir/document.hpp>
 
 namespace rdf = cainteoir::rdf;
 
@@ -40,13 +41,21 @@ public:
 
 	void clear();
 
-	void add(int depth, const rdf::uri &location, const std::string &title);
+	void set_listing(const std::vector<cainteoir::ref_entry> &listing);
+
+	void set_playing(const cainteoir::ref_entry &entry);
 
 	TocSelection selection() const;
+
+	const std::vector<cainteoir::ref_entry> &listing() const { return mListing; }
 private:
 	GtkWidget *view;
 	GtkTreeStore *store;
 	GtkTreeSelection *toc_selection;
+
+	std::vector<cainteoir::ref_entry> mListing;
+	const cainteoir::ref_entry *mActive;
+	GtkTreeIter mActiveIter;
 };
 
 #endif

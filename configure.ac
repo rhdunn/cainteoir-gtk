@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([Cainteoir Text-to-Speech], [0.8], [https://github.com/rhdunn/cainteoir-gtk/issues], [cainteoir-gtk], [https://github.com/rhdunn/cainteoir-gtk])
+AC_INIT([Cainteoir Text-to-Speech], [0.9], [https://github.com/rhdunn/cainteoir-gtk/issues], [cainteoir-gtk], [https://github.com/rhdunn/cainteoir-gtk])
 AM_INIT_AUTOMAKE()
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES])
@@ -45,8 +45,8 @@ CXX11_CONSTEXPR
 CXX11_REQUIRE_STD_INITIALIZER_LIST
 CXX11_REQUIRE_STD_SHARED_PTR
 
-CXX11_HAVE_STD_BEGIN
-CXX11_HAVE_STD_END
+CXX11_REQUIRE_STD_BEGIN
+CXX11_REQUIRE_STD_END
 
 dnl ================================================================
 dnl getopt checks.
@@ -59,16 +59,9 @@ dnl ================================================================
 dnl GTK+ checks.
 dnl ================================================================
 
-PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.0.0])
+PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.4.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
-
-AC_MSG_CHECKING([if GTK+ CSS themes need an explicit px unit specifier])
-PKG_CHECK_EXISTS([gtk+-3.0 >= 3.4.0],
-	[AC_MSG_RESULT([yes])
-	 AC_SUBST(GTK_PX, [px])],
-	[AC_MSG_RESULT([no])
-	 AC_SUBST(GTK_PX, [])])
 
 dnl ================================================================
 dnl sigc++ checks.
@@ -85,10 +78,6 @@ dnl ================================================================
 AC_CONFIG_FILES([
 	Makefile
 	po/Makefile.in
-	data/themes/gtk3-common.css
-	data/themes/Adwaita/gtk3.css
-	data/themes/Ambiance/gtk3.css
-	data/themes/Radiance/gtk3.css
 ])
 AC_OUTPUT
 

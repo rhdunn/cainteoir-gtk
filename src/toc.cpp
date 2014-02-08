@@ -1,6 +1,6 @@
 /* Table of Content Side Pane
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2014 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -25,30 +25,47 @@
 
 enum TocColumns
 {
+	TOC_ENTRY_PTR,
+	TOC_GUTTER,
 	TOC_TITLE,
-	TOC_ANCHOR, // rdf::uri
-	TOC_COUNT // number of columns
+	TOC_ANCHOR,
+	TOC_DISPLAY,
+	TOC_COUNT
 };
 
-static rdf::uri uri_from_selected_item(GtkTreeModel *model, GList *item, bool advance)
+static const rdf::uri &uri_from_selected_item(GtkTreeModel *model, GList *item, bool advance)
 {
+	static const rdf::uri empty_uri = {};
+
 	GtkTreeIter iter;
 	if (item && gtk_tree_model_get_iter(model, &iter, (GtkTreePath *)item->data))
 	{
 		if (advance)
 		{
 			if (!gtk_tree_model_iter_next(model, &iter))
-				return rdf::uri();
+				return empty_uri;
 		}
 
-		gchar *anchor = nullptr;
-		gtk_tree_model_get(model, &iter, TOC_ANCHOR, &anchor, -1);
-
-		rdf::uri ref(anchor);
-		g_free(anchor);
-		return ref;
+		const cainteoir::ref_entry *entry = nullptr;
+		gtk_tree_model_get(model, &iter, TOC_ENTRY_PTR, &entry, -1);
+		return entry->location;
 	}
-	return rdf::uri();
+	return empty_uri;
+}
+
+static bool find_ref_entry(GtkTreeModel *model, GtkTreeIter &iter, const cainteoir::ref_entry *value)
+{
+	if (!gtk_tree_model_get_iter_first(model, &iter))
+		return false;
+
+	do
+	{
+		const cainteoir::ref_entry *entry = nullptr;
+		gtk_tree_model_get(model, &iter, TOC_ENTRY_PTR, &entry, -1);
+		if (entry == value) return true;
+	} while (gtk_tree_model_iter_next(model, &iter));
+
+	return false;
 }
 
 static void on_cursor_changed(GtkTreeView *view, void *data)
@@ -83,19 +100,28 @@ static void on_cursor_changed(GtkTreeView *view, void *data)
 	}
 }
 
-TocPane::TocPane()
+static void add_icon_column(GtkTreeView *treeview, int i)
 {
-	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_STRING, G_TYPE_STRING);
+	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "icon-name", i, nullptr);
+	gtk_tree_view_append_column(treeview, column);
+}
+
+static void add_text_column(GtkTreeView *treeview, int i)
+{
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
+	gtk_tree_view_append_column(treeview, column);
+}
+
+TocPane::TocPane()
+	: mActive(nullptr)
+{
+	store = gtk_tree_store_new(TOC_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	for (int i = 0; i < TOC_COUNT; ++i)
-	{
-		if (i == TOC_ANCHOR) continue;
-
-		GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
-		gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	}
+	add_icon_column(GTK_TREE_VIEW(view), TOC_GUTTER);
+	add_text_column(GTK_TREE_VIEW(view), TOC_DISPLAY);
 
 	gtk_widget_set_name(view, "toc");
 	gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(view), TRUE);
@@ -119,17 +145,46 @@ bool TocPane::empty() const
 
 void TocPane::clear()
 {
+	mListing.clear();
 	gtk_tree_store_clear(store);
 }
 
-void TocPane::add(int depth, const rdf::uri &location, const std::string &title)
+void TocPane::set_listing(const std::vector<cainteoir::ref_entry> &listing)
 {
+	mListing = listing;
+
 	GtkTreeIter row;
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-		TOC_TITLE,  title.c_str(),
-		TOC_ANCHOR, location.str().c_str(),
-		-1);
+	int initial_depth = mListing.front().depth;
+	for (const auto &entry : mListing)
+	{
+		std::ostringstream title;
+		for (const auto &i : cainteoir::range<int>(initial_depth, entry.depth))
+			title << "... ";
+		title << entry.title;
+
+		gtk_tree_store_append(store, &row, nullptr);
+		gtk_tree_store_set(store, &row,
+			TOC_ENTRY_PTR, &entry,
+			TOC_GUTTER,    "",
+			TOC_TITLE,     entry.title.c_str(),
+			TOC_ANCHOR,    entry.location.str().c_str(),
+			TOC_DISPLAY,   title.str().c_str(),
+			-1);
+	}
+}
+
+void TocPane::set_playing(const cainteoir::ref_entry &entry)
+{
+	if (&entry == mActive) return;
+
+	if (mActive)
+		gtk_tree_store_set(store, &mActiveIter, TOC_GUTTER, "", -1);
+
+	if (!find_ref_entry(GTK_TREE_MODEL(store), mActiveIter, &entry))
+		return;
+
+	gtk_tree_store_set(store, &mActiveIter, TOC_GUTTER, "media-playback-start", -1);
+	mActive = &entry;
 }
 
 TocSelection TocPane::selection() const

@@ -1,5 +1,6 @@
 src/cainteoir.cpp
 src/compatibility.cpp
+src/libcainteoir-gtk/document.cpp
 src/library.cpp
 src/libraryentrycellrenderer.cpp
 src/main.cpp

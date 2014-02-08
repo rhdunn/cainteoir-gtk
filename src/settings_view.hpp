@@ -1,6 +1,6 @@
-/* Document Processing
+/* Settings View
  *
- * Copyright (C) 2011-2012 Reece H. Dunn
+ * Copyright (C) 2011-2013 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -18,37 +18,43 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAINTEOIRGTK_SRC_DOCUMENT_HPP
-#define CAINTEOIRGTK_SRC_DOCUMENT_HPP
+#ifndef CAINTEOIRGTK_SRC_SETTINGSVIEW_HPP
+#define CAINTEOIRGTK_SRC_SETTINGSVIEW_HPP
 
-#include <cainteoir/document.hpp>
 #include <cainteoir/engines.hpp>
-#include <cainteoir/content.hpp>
+#include <cainteoir/languages.hpp>
 
-#include "toc.hpp"
-#include <vector>
+#include "settings.hpp"
 
-GtkTextTag *create_text_tag_from_style(const cainteoir::styles &aStyles);
+namespace rdf = cainteoir::rdf;
+namespace rql = cainteoir::rdf::query;
+namespace tts = cainteoir::tts;
 
-struct toc_entry_data
+struct VoiceParameter
 {
-	int depth;
-	rdf::uri location;
-	std::string title;
-
-	toc_entry_data(int aDepth, const rdf::uri &aLocation, const std::string &aTitle)
-		: depth(aDepth)
-		, location(aLocation)
-		, title(aTitle)
-	{
-	}
+	tts::parameter::type type;
+	const char *id;
+	GtkWidget *label;
+	GtkWidget *param;
+	GtkWidget *units;
 };
 
-struct document : public cainteoir::document
+class SettingsView
 {
-	std::vector<toc_entry_data> toc;
-	std::shared_ptr<const rdf::uri> subject;
-	rdf::graph metadata;
+public:
+	SettingsView(application_settings &aSettings, tts::engines &aEngines, GtkBuilder *ui);
+
+	void show();
+
+	void apply();
+private:
+	GtkWidget *layout;
+
+	std::list<VoiceParameter> parameters;
+	tts::engines *mEngines;
+	application_settings &settings;
+
+	GtkWidget *parameterView;
 };
 
 #endif

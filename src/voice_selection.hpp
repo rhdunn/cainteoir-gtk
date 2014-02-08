@@ -62,21 +62,10 @@ private:
 	rdf::uri selected_voice;
 };
 
-struct VoiceParameter
-{
-	tts::parameter::type type;
-	const char *id;
-	GtkWidget *label;
-	GtkWidget *param;
-	GtkWidget *units;
-};
-
 class VoiceSelectionView
 {
 public:
-	VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &languages);
-
-	GtkWidget *gobj() { return layout; }
+	VoiceSelectionView(application_settings &aSettings, tts::engines &aEngines, rdf::graph &aMetadata, cainteoir::languages &aLanguages, GtkBuilder *ui);
 
 	void show(const rdf::uri &voice);
 
@@ -86,14 +75,9 @@ public:
 
 	void apply();
 private:
-	void create_entry(tts::parameter::type, int row, const char *aID);
-
 	GtkWidget *layout;
 
-	std::list<VoiceParameter> parameters;
-	tts::engines *mEngines;
 	application_settings &settings;
-
 	VoiceList voices;
 	GtkWidget *parameterView;
 

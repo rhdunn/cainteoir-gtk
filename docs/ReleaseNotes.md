@@ -1,8 +1,24 @@
 Release Notes
 =============
 
-Version 0.8: Saturday December 1st 2012 [Nov 2012]
---------------------------------------------------
+Version 0.9: Wednesday February 5th 2014 \[Feb 2014\]
+-----------------------------------------------------
+
+  *  provide better rendering of nested table of contents entries
+  *  moved the pitch, rate and volume options to a new settings tab
+  *  add narration (ePub3 Media Overlays) configuration options to the settings tab
+  *  track the currently playing chapter/section (only works if started at the first item)
+  *  improve the accessibility of the UI
+  *  update the UI to better align with the Music application UI
+  *  use symbolic icons for the main icons
+
+### translation updates:
+
+  *  Vietnamese
+  *  Catalan
+
+Version 0.8: Saturday December 1st 2012 \[Nov 2012\]
+----------------------------------------------------
 
   *  persist the voice settings (name, pitch, rate, ...)
   *  update the timebar after changing voice settings to reflect the new estimated read time
@@ -10,8 +26,8 @@ Version 0.8: Saturday December 1st 2012 [Nov 2012]
      before the text
   *  map the new Cainteoir Engine styles structure to text view formatting (GtkTextTag objects)
 
-Version 0.7: Monday October 1st 2012 [Sep 2012]
------------------------------------------------
+Version 0.7: Monday October 1st 2012 \[Sep 2012\]
+-------------------------------------------------
 
   *  switch to glib-gettextize/intltool for localization
   *  update the translations and support more languages
@@ -19,8 +35,8 @@ Version 0.7: Monday October 1st 2012 [Sep 2012]
   *  make the top-bar styling work for the Ambiance theme in Ubuntu 12.10
   *  use C++11 range-based for loops
 
-Version 0.6: Tuesday July 31st 2012 [Jul 2012]
-----------------------------------------------
+Version 0.6: Tuesday July 31st 2012 \[Jul 2012\]
+------------------------------------------------
 
   *  display the document text in the Document tab
   *  support drag and drop to change the open document
@@ -30,8 +46,8 @@ Version 0.6: Tuesday July 31st 2012 [Jul 2012]
 
   *  fix a crash when opening a document with mismatched html tags
 
-Version 0.5: Friday June 1st 2012 [Jun 2012]
---------------------------------------------
+Version 0.5: Friday June 1st 2012 \[Jun 2012\]
+----------------------------------------------
 
   *  moved the recent documents into a document library pane.
   *  improve the styling of the top and bottom bars.
@@ -41,8 +57,8 @@ Version 0.5: Friday June 1st 2012 [Jun 2012]
 
   *  the metadata pane is now scrollable to handle large description text.
 
-Version 0.4: Saturday March 31st 2012 [Mar 2012]
-------------------------------------------------
+Version 0.4: Saturday March 31st 2012 \[Mar 2012\]
+--------------------------------------------------
 
   *  initial translations from OSTD [http://littlesvr.ca/ostd].
   *  hide the titlebar when maximized on GNOME 3.4 and later.
@@ -54,16 +70,16 @@ Version 0.4: Saturday March 31st 2012 [Mar 2012]
 
   *  fix reading/recording section ranges (it would miss the last section).
 
-Version 0.3: Sunday January 29th 2012 [Nov 2012]
-------------------------------------------------
+Version 0.3: Sunday January 29th 2012 \[Nov 2012\]
+--------------------------------------------------
 
   *  redesigned the UI -- make it consistent with the GNOME 3 application designs.
   *  don't show the "unable to open document" dialog when launching the program.
   *  keep the previous document if opening a document fails.
   *  require gtk+ >= 3.0.
 
-Version 0.2: Tuesday November 22nd 2011 [Nov 2011]
---------------------------------------------------
+Version 0.2: Tuesday November 22nd 2011 \[Nov 2011\]
+----------------------------------------------------
 
 ### new functionality:
 
@@ -80,8 +96,8 @@ Version 0.2: Tuesday November 22nd 2011 [Nov 2011]
   *  fix selecting the recorded file format based on file extension (was always Ogg/Vorbis).
   *  fix opening documents containing spaces.
 
-Version 0.1 -- Sunday August 7th 2011 [Aug 2011]
-------------------------------------------------
+Version 0.1 -- Sunday August 7th 2011 \[Aug 2011\]
+--------------------------------------------------
 
 ### cainteoir-gtk:
 

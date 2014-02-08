@@ -12,6 +12,7 @@ release.log
 
 # build output:
 
+*.la
 src/cainteoir-gtk
 po/*.gmo
 po/stamp-it
@@ -33,6 +34,7 @@ INSTALL
 aclocal.m4
 autom4te.cache/
 ChangeLog
+compile
 config.h
 config.h.in
 config.h.in~
@@ -45,11 +47,6 @@ missing
 stamp-h1
 libtool
 ltmain.sh
-
-data/themes/gtk3-common.css
-data/themes/Adwaita/gtk3.css
-data/themes/Ambiance/gtk3.css
-data/themes/Radiance/gtk3.css
 
 # gettext/libintl/autopoint output:
 

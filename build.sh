@@ -41,7 +41,7 @@ dopostdebbuild() {
 	fi
 }
 
-doscanpacakges() {
+doscanpackages() {
 	pushd $1
 	dpkg-scanpackages . /dev/null | gzip -9 > Packages.gz
 	popd

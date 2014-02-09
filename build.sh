@@ -3,6 +3,9 @@
 PACKAGE=cainteoir-gtk
 DPUT_PPA=cainteoir-ppa
 
+PBUILD_IMGDIR=/opt/data/pbuilder
+PBUILD_OUTDIR=../pbuilder-output/${PACKAGE}
+
 doclean() {
 	rm -vf ../${PACKAGE}_*.{tar.gz,dsc,build,changes,deb}
 	git clean -fxd
@@ -14,6 +17,29 @@ dodist() {
 	pushd ${PACKAGE}-* || exit 1
 	( ./configure --prefix=/usr && make && make check && popd ) || \
 		( popd && exit 1 )
+}
+
+dopredebbuild() {
+	DIST=$1
+	doclean
+	cp debian/changelog{,.downstream}
+	sed -i -e "s/~unstable\([0-9]*\)) unstable;/~${DIST}\1) ${DIST};/" debian/changelog
+	sed -i -e "s/(\([0-9\.\-]*\)) unstable;/(\1~${DIST}1) ${DIST};/" debian/changelog
+	if [[ -e debian/$DIST.patch ]] ; then
+		patch -f -p1 -i debian/$DIST.patch || touch builddeb.failed
+	fi
+}
+
+dopostdebbuild() {
+	DIST=$1
+	if [[ -e debian/$DIST.patch ]] ; then
+		patch -Rf -p1 -i debian/$DIST.patch || touch builddeb.failed
+	fi
+	mv debian/changelog{.downstream,}
+	if [[ -e builddeb.failed ]] ; then
+		rm builddeb.failed
+		exit 1
+	fi
 }
 
 builddeb() {
@@ -28,13 +54,7 @@ builddeb() {
 
 	DIST=$1
 	shift
-	doclean
-	cp debian/changelog{,.downstream}
-	sed -i -e "s/~unstable\([0-9]*\)) unstable;/~${DIST}\1) ${DIST};/" debian/changelog
-	sed -i -e "s/(\([0-9\.\-]*\)) unstable;/(\1~${DIST}1) ${DIST};/" debian/changelog
-	if [[ -e debian/$DIST.patch ]] ; then
-		patch -f -p1 -i debian/$DIST.patch || touch builddeb.failed
-	fi
+	dopredebbuild ${DIST}
 	if [[ ! -e builddeb.failed ]] ; then
 		echo "... building debian packages ($@) ..."
 		${DEBUILD} $@ || touch builddeb.failed
@@ -43,14 +63,65 @@ builddeb() {
 		echo "... validating debian packages ..."
 		lintian -Ivi ../${PACKAGE}_*.dsc || touch builddeb.failed
 	fi
-	if [[ -e debian/$DIST.patch ]] ; then
-		patch -Rf -p1 -i debian/$DIST.patch || touch builddeb.failed
-	fi
-	mv debian/changelog{.downstream,}
-	if [[ -e builddeb.failed ]] ; then
-		rm builddeb.failed
-		exit 1
-	fi
+	dopostdebbuild ${DIST}
+}
+
+dopbuild() {
+	COMMAND=$1
+	ARCH=$3
+
+	case "$2" in
+		stable|wheezy)
+			DIST=debian
+			RELEASE=wheezy
+			;;
+		testing|jessie)
+			DIST=debian
+			RELEASE=jessie
+			;;
+		unstable|sid)
+			DIST=debian
+			RELEASE=sid
+			;;
+		precise|quantal|raring|saucy|trusty)
+			DIST=debian
+			RELEASE=$2
+			;;
+		*)
+			echo "Unknown distribution release : $1"
+			exit 1
+			;;
+	esac
+
+	case "${DIST}" in
+		debian)
+			MIRROR=ftp://mirror.ox.ac.uk/debian/
+			KEYRING=/usr/share/keyrings/debian-archive-keyring.gpg
+			;;
+		ubuntu)
+			MIRROR=ftp://archive.ubuntu.com/ubuntu/
+			KEYRING=/usr/share/keyrings/ubuntu-archive-keyring.gpg
+			;;
+	esac
+
+	REF=${DIST}-${RELEASE}-${ARCH}
+	BASETGZ=${PBUILD_IMGDIR}/${REF}.tgz
+	OUTPUT=${PBUILD_OUTDIR}/${REF}
+
+	case "${COMMAND}" in
+		create)
+			mkdir -pv ${PBUILD_IMGDIR}
+			sudo pbuilder ${COMMAND} --distribution ${RELEASE} --mirror ${MIRROR} --basetgz ${BASETGZ} --debootstrapopts "--keyring=${KEYRING}"
+			;;
+		build)
+			mkdir -pv ${OUTPUT}
+			dopredebbuild ${RELEASE}
+			if [[ ! -e builddeb.failed ]] ; then
+				(pdebuild --buildresult ${OUTPUT} -- --distribution ${RELEASE} --mirror ${MIRROR} --basetgz ${BASETGZ} --debootstrapopts "--keyring=${KEYRING}" || touch builddeb.failed) 2>&1 | tee ${OUTPUT}/build.log
+			fi
+			dopostdebbuild ${RELEASE}
+			;;
+	esac
 }
 
 dorelease() {
@@ -96,6 +167,8 @@ case "$1" in
 	deb)       builddeb $2 -us -uc ;;
 	debsrc)    builddeb $2 -S -sa ;;
 	dist)      dodist ;;
+	mkimage)   dopbuild create $2 $3 ;;
+	pbuild)    dopbuild build  $2 $3 ;;
 	ppa)       doppa $2 ;;
 	release)   dorelease $2 ;;
 	install)   doinstall ;;
@@ -110,6 +183,10 @@ where <command> is one of:
     deb <dist>     Create a (development build) debian binary package.
     debsrc <dist>  Create a debian source package.
     dist           Create (and test) a distribution source tarball.
+    mkimage <dist> <arch>
+                   Create a pbuilder image.
+    pbuild <dist> <arch>
+                   Build the debian package under a pbuilder environment.
     help           Show this help screen.
     install        Installs the built debian packages.
     ppa <dist>     Publish to the Cainteoir Text-to-Speech Ubuntu PPA for <dist>.

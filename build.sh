@@ -84,7 +84,7 @@ dopbuild() {
 			RELEASE=sid
 			;;
 		precise|quantal|raring|saucy|trusty)
-			DIST=debian
+			DIST=ubuntu
 			RELEASE=$2
 			;;
 		*)

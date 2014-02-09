@@ -3,8 +3,7 @@
 PACKAGE=cainteoir-gtk
 DPUT_PPA=cainteoir-ppa
 
-PBUILD_IMGDIR=/opt/data/pbuilder
-PBUILD_OUTDIR=../pbuilder-output/${PACKAGE}
+PBUILD_DIR=/opt/data/pbuilder
 
 doclean() {
 	rm -vf ../${PACKAGE}_*.{tar.gz,dsc,build,changes,deb}
@@ -105,8 +104,8 @@ dopbuild() {
 	esac
 
 	REF=${DIST}-${RELEASE}-${ARCH}
-	BASETGZ=${PBUILD_IMGDIR}/${REF}.tgz
-	OUTPUT=${PBUILD_OUTDIR}/${REF}
+	BASETGZ=${PBUILD_DIR}/${REF}.tgz
+	OUTPUT=${PBUILD_DIR}/${REF}
 
 	case "${COMMAND}" in
 		create)

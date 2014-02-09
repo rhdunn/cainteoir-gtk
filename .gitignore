@@ -3,7 +3,7 @@
 *.o
 *.lo
 *.pyc
-release.log
+build.log
 
 # vi/vim editor files:
 

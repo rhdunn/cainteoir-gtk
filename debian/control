@@ -11,9 +11,26 @@ Vcs-Git: git://github.com/rhdunn/cainteoir-gtk.git
 Vcs-browser: https://github.com/rhdunn/cainteoir-gtk
 Homepage: http://rhdunn.github.com/cainteoir
 
+Package: libcainteoir-gtk0
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcainteoir0
+Description: Shared library for Cainteoir Text-to-Speech Gtk+ API.
+ This package provides the runtime libraries for the Cainteoir Text-to-Speech
+ engines Gtk+ helper functions and bindings.
+
+Package: libcainteoir-gtk-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: libc-dev, ${misc:Depends}, libcainteoir-gtk0 (= ${binary:Version})
+Description: Development headers for the Cainteoir Text-to-Speech Gtk+ bindings.
+ This package provides the development libraries and headers for interfacing
+ with the Cainteoir Text-to-Speech engine using Gtk+.
+
 Package: cainteoir-gtk
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcainteoir-gtk0 (= ${binary:Version})
 Description: Graphical text-to-speech document reader and recorder.
  Read and record different document formats (such as ePub and HTML) to various
  audio output formats (such as PulseAudio, WAV and OGG/Vorbis).

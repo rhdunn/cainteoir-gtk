@@ -78,6 +78,9 @@ po/stamp-po
 
 # debian output:
 
+debian/tmp/
+debian/libcainteoir-gtk0/
+debian/libcainteoir-gtk-dev/
 debian/cainteoir-gtk/
 
 debian/*.debhelper.log

@@ -1,0 +1,5 @@
+usr/bin/cainteoir-gtk
+usr/share/cainteoir-gtk/themes/*
+usr/share/cainteoir-gtk/ui/*
+usr/share/applications/*
+usr/share/locale/*

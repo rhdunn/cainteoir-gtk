@@ -41,6 +41,12 @@ dopostdebbuild() {
 	fi
 }
 
+doscanpacakges() {
+	pushd $1
+	dpkg-scanpackages . /dev/null | gzip -9 > Packages.gz
+	popd
+}
+
 builddeb() {
 	if [[ `which debuild` ]] ; then
 		DEBUILD=debuild
@@ -117,6 +123,9 @@ dopbuild() {
 			dopredebbuild ${RELEASE}
 			if [[ ! -e builddeb.failed ]] ; then
 				(pdebuild --buildresult ${OUTPUT} -- --distribution ${RELEASE} --mirror ${MIRROR} --basetgz ${BASETGZ} --debootstrapopts "--keyring=${KEYRING}" || touch builddeb.failed) 2>&1 | tee build.log
+			fi
+			if [[ ! -e builddeb.failed ]] ; then
+				doscanpackages ${OUTPUT}
 			fi
 			dopostdebbuild ${RELEASE}
 			;;

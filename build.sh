@@ -33,6 +33,13 @@ list_rm() {
 	done
 }
 
+list_mv() {
+	DEST=$1
+	while read FILE ; do
+		mv -v ${FILE} ${DEST}/ 2>/dev/null
+	done
+}
+
 doclean() {
 	rm -vf ../${PACKAGE}_*.{tar.{g,x}z,dsc,build,changes,deb}
 	git clean -fxd
@@ -166,7 +173,10 @@ dopbuild() {
 		build)
 			doclean ${RELEASE} ${ARCH}
 			dopredebbuild ${RELEASE}
+			VERSION=$(dpkg-parsechangelog|sed -n 's/^Version: \(.*:\|\)//p')
 			sbuild --build=${ARCH} --chroot=${REF}-sbuild
+			pkg_list_debs ../${PACKAGE}_${VERSION}_${ARCH}.changes | list_mv ${BUILD_DIR}/debs/${RELEASE}
+			pkg_list ../${PACKAGE}_${VERSION}_${ARCH}.changes | list_mv ${BUILD_DIR}/build/${RELEASE}
 			dopostdebbuild ${RELEASE}
 			;;
 	esac

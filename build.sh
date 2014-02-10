@@ -69,11 +69,6 @@ repo() {
 	esac
 }
 
-doclean() {
-	rm -vf ../${PACKAGE}_*.{tar.{g,x}z,dsc,build,changes,deb}
-	git clean -fxd
-}
-
 dodist() {
 	( ./autogen.sh && ./configure --prefix=/usr && make dist ) || exit 1
 	tar -xf ${PACKAGE}-*.tar.gz || exit 1

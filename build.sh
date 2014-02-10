@@ -6,7 +6,7 @@ DPUT_PPA=cainteoir-ppa
 PBUILD_DIR=/opt/data/pbuilder
 
 doclean() {
-	rm -vf ../${PACKAGE}_*.{tar.gz,dsc,build,changes,deb}
+	rm -vf ../${PACKAGE}_*.{tar.{g,x}z,dsc,build,changes,deb}
 	git clean -fxd
 }
 

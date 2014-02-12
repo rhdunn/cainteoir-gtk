@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 7.0.50~),
                autoconf, automake, libtool, autopoint, gettext, intltool, pkg-config,
                libcainteoir0, libcainteoir-dev,
                libgtk-3-dev, libsigc++-2.0-dev
-Standards-Version: 3.9.3
+Standards-Version: 3.9.5
 Vcs-Git: git://github.com/rhdunn/cainteoir-gtk.git
 Vcs-browser: https://github.com/rhdunn/cainteoir-gtk
 Homepage: http://rhdunn.github.com/cainteoir

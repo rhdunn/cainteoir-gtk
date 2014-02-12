@@ -270,7 +270,7 @@ doppa() {
 }
 
 doallppa() {
-	for DISTRO in precise quantal raring saucy trusty ; do
+	for DISTRO in precise quantal saucy trusty ; do
 		doppa ${DISTRO}
 	done
 }

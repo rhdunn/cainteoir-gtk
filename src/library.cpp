@@ -23,7 +23,6 @@
 #include "i18n.h"
 
 #include "library.hpp"
-#include "libraryentrycellrenderer.h"
 
 enum LibColumns
 {
@@ -64,9 +63,9 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	lib_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
-	GtkCellRenderer *renderer = cainteoir_library_entry_cell_renderer_new();
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer,
-		"title", LIB_TITLE,
+		"text", LIB_TITLE,
 		nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 

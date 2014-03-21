@@ -26,12 +26,19 @@
 
 #include "cainteoir.hpp"
 
+#include <cainteoir/path.hpp>
 #include <stdexcept>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#define UIDIR DATADIR "/" PACKAGE "/ui"
+static cainteoir::path get_data_dir()
+{
+	const char *path = getenv("CAINTEOIR_GTK_DATA_DIR");
+	if (path)
+		return cainteoir::path(path);
+	return cainteoir::path(DATADIR "/" PACKAGE);
+}
 
 namespace rql = cainteoir::rdf::query;
 
@@ -272,7 +279,7 @@ Cainteoir::Cainteoir(const char *filename)
 	cainteoir::supportedAudioFormats(tts_metadata);
 
 	GtkBuilder *ui = gtk_builder_new();
-	if (!gtk_builder_add_from_file(ui, UIDIR "/cainteoir-gtk.ui", NULL))
+	if (!gtk_builder_add_from_file(ui, get_data_dir() / "ui" / "cainteoir-gtk.ui", NULL))
 		throw std::runtime_error("unable to load the cainteoir-gtk UI file.");
 
 	window = GTK_WIDGET(gtk_builder_get_object(ui, "cainteoir-gtk"));

@@ -2,12 +2,12 @@ src/cainteoir.cpp
 src/compatibility.cpp
 src/libcainteoir-gtk/document.cpp
 src/library.cpp
-src/libraryentrycellrenderer.cpp
 src/main.cpp
 src/metadata.cpp
 src/navbar.cpp
 src/settings.cpp
+src/settings_view.cpp
 src/timebar.cpp
 src/toc.cpp
 src/voice_selection.cpp
-[type: gettext/glade]ui/cainteoir-gtk.ui
+[type: gettext/glade]data/ui/cainteoir-gtk.ui

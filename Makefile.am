@@ -62,7 +62,7 @@ check-gettext:
 
 update-po: check-gettext
 	@find $(srcdir)/src/ -name "*.cpp" -print | sed -e 's,\./,,g' | sort > $(srcdir)/po/POTFILES.in.2 ;
-	@find $(srcdir)/ui/ -name "*.ui" -print | sed -e 's,\./,,g' -e 's,^,\[type: gettext/glade\],g' | sort >> $(srcdir)/po/POTFILES.in.2 ; \
+	@find $(srcdir)/data/ui/ -name "*.ui" -print | sed -e 's,\./,,g' -e 's,^,\[type: gettext/glade\],g' | sort >> $(srcdir)/po/POTFILES.in.2 ; \
 	if diff $(srcdir)/po/POTFILES.in $(srcdir)/po/POTFILES.in.2 >/dev/null 2>&1 ; then \
 		rm -f $(srcdir)/po/POTFILES.in.2 ; \
 	else \
@@ -127,7 +127,7 @@ desktopdir = $(datadir)/applications
 desktop_DATA = src/cainteoir-gtk.desktop
 
 uidir = ${datadir}/cainteoir-gtk/ui
-ui_DATA = ui/cainteoir-gtk.ui
+ui_DATA = data/ui/cainteoir-gtk.ui
 
 bin_PROGRAMS += src/cainteoir-gtk
 

@@ -23,16 +23,23 @@
 #include "i18n.h"
 
 #include <sigc++/signal.h>
-
 #include "cainteoir.hpp"
 
-static void load_gtk3_theme(const std::string &theme)
-{
-	std::string theme_path = std::string(DATADIR "/" PACKAGE "/themes/") + theme;
+#include <cainteoir/path.hpp>
 
+static cainteoir::path get_data_dir()
+{
+	const char *path = getenv("CAINTEOIR_GTK_DATA_DIR");
+	if (path)
+		return cainteoir::path(path);
+	return cainteoir::path(DATADIR "/" PACKAGE);
+}
+
+static void load_gtk3_theme(const std::string &theme_name)
+{
 	try
 	{
-		auto theme = cainteoir::make_file_buffer(theme_path.c_str());
+		auto theme = cainteoir::make_file_buffer(get_data_dir() / "themes" / theme_name);
 
 		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
 

@@ -1,5 +1,7 @@
 # Cainteoir Text-to-Speech
 
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=rhdunn&url=https://github.com/rhdunn/cainteoir-gtk&title=cainteoir-gtk&language=&tags=github&category=software)
+
 - [Dependencies](#dependencies)
   - [Debian](#debian)
 - [Building](#building)

@@ -276,7 +276,7 @@ Cainteoir::Cainteoir(const char *filename)
 	, settings(get_user_file("settings.dat"))
 {
 	cainteoir::supportedDocumentFormats(tts_metadata, cainteoir::text_support);
-	cainteoir::supportedAudioFormats(tts_metadata);
+	cainteoir::supported_audio_formats(tts_metadata);
 
 	GtkBuilder *ui = gtk_builder_new();
 	if (!gtk_builder_add_from_file(ui, get_data_dir() / "ui" / "cainteoir-gtk.ui", NULL))

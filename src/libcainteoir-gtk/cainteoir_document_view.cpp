@@ -157,7 +157,7 @@ cainteoir_document_view_set_document(CainteoirDocumentView *view, CainteoirDocum
 }
 
 CainteoirDocument *
-cainteoir_document_view_get_data(CainteoirDocumentView *view)
+cainteoir_document_view_get_document(CainteoirDocumentView *view)
 {
 	g_return_val_if_fail(CAINTEOIR_DOCUMENT_VIEW(view), nullptr);
 

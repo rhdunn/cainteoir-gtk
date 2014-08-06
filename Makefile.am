@@ -119,8 +119,8 @@ libcainteoir_gtk_include_HEADERS = \
 lib_LTLIBRARIES += src/libcainteoir-gtk/libcainteoir-gtk.la
 
 src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
-	src/libcainteoir-gtk/cainteoir_supported_formats.cpp \
-	src/libcainteoir-gtk/document.cpp
+	src/libcainteoir-gtk/cainteoir_document.cpp \
+	src/libcainteoir-gtk/cainteoir_supported_formats.cpp
 
 ############################# applications ####################################
 

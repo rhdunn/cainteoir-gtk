@@ -216,7 +216,7 @@ create_text_tag_from_style(const css::styles &aStyles)
 }
 
 GtkTextBuffer *
-create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
+create_buffer_from_document(const cainteoir::document *doc)
 {
 	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
@@ -301,4 +301,18 @@ create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
 	}
 
 	return buffer;
+}
+
+cainteoir::document *
+cainteoir_document_get_document(CainteoirDocument *doc)
+{
+	if (!doc) return nullptr;
+	return doc->priv->doc.get();
+}
+
+cainteoir::rdf::graph *
+cainteoir_document_get_metadata(CainteoirDocument *doc)
+{
+	if (!doc) return nullptr;
+	return &doc->priv->metadata;
 }

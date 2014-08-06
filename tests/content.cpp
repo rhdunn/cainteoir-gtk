@@ -19,6 +19,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <cainteoir-gtk/cainteoir_document.h>
 #include "libcainteoir-gtk/cainteoir_document_private.h"
 #include "tester.hpp"
 

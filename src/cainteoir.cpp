@@ -210,6 +210,7 @@ Cainteoir::Cainteoir(const char *filename)
 	, settings(get_user_file("settings.dat"))
 	, mDocumentFormats(nullptr)
 	, mAudioFormats(nullptr)
+	, mDocument(nullptr)
 {
 	mDocumentFormats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
 	mAudioFormats    = cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS);
@@ -336,6 +337,7 @@ Cainteoir::~Cainteoir()
 {
 	if (mDocumentFormats) g_object_unref(mDocumentFormats);
 	if (mAudioFormats)    g_object_unref(mAudioFormats);
+	if (mDocument)        g_object_unref(mDocument);
 }
 
 void Cainteoir::on_open_document()
@@ -382,7 +384,8 @@ void Cainteoir::save_settings()
 
 void Cainteoir::read()
 {
-	out = cainteoir::open_audio_device(nullptr, rdf_metadata, subject, tts_metadata, tts.voice());
+	auto doc_metadata = cainteoir_document_get_metadata(mDocument);
+	out = cainteoir::open_audio_device(nullptr, *doc_metadata, subject, tts_metadata, tts.voice());
 	on_speak(i18n("reading"));
 }
 
@@ -424,7 +427,8 @@ void Cainteoir::record()
 					settings("recording.mimetype") = mimetype;
 					settings.save();
 
-					out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, rdf_metadata, subject, tts_metadata, tts.voice());
+					auto doc_metadata = cainteoir_document_get_metadata(mDocument);
+					out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, *doc_metadata, subject, tts_metadata, tts.voice());
 					on_speak(i18n("recording"));
 					return;
 				}
@@ -456,6 +460,7 @@ void Cainteoir::on_speak(const char * status)
 		     ? tts::media_overlays_mode::tts_and_media_overlays
 		     : tts::media_overlays_mode::media_overlays_only;
 
+	auto doc = cainteoir_document_get_document(mDocument);
 	speech = tts.speak(out, toc.listing(), doc->children(toc.selection()), mode);
 
 	gtk_action_set_visible(readAction, FALSE);
@@ -487,6 +492,7 @@ bool Cainteoir::on_speaking()
 	speech.reset();
 	out.reset();
 
+	auto doc = cainteoir_document_get_document(mDocument);
 	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 
 	gtk_action_set_visible(readAction, TRUE);
@@ -510,15 +516,16 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (filename.find("file://") == 0)
 			filename.erase(0, 7);
 
-		auto reader = cainteoir::createDocumentReader(filename.c_str(), rdf_metadata, std::string());
-		if (!reader)
+		CainteoirDocument *document = cainteoir_document_new(filename.c_str());
+		if (!document)
 			throw std::runtime_error(i18n("Document type is not supported"));
 
-		auto newdoc = std::make_shared<cainteoir::document>(reader, rdf_metadata);
-		GtkTextBuffer *buffer = create_buffer_from_document(newdoc);
-		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
+		if (mDocument) g_object_unref(mDocument);
+		mDocument = document;
 
-		doc = newdoc;
+		auto doc = cainteoir_document_get_document(mDocument);
+		GtkTextBuffer *buffer = create_buffer_from_document(doc);
+		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		toc.clear();
 		doc_metadata.clear();
@@ -526,6 +533,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		subject = rdf::uri(filename, std::string());
 		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
+		rdf::graph &rdf_metadata = *cainteoir_document_get_metadata(mDocument);
 		rql::results data     = rql::select(rdf_metadata, rql::subject == subject);
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
@@ -577,6 +585,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		ret = false;
 	}
 
+	auto doc = cainteoir_document_get_document(mDocument);
 	if (doc && doc->text_length() != 0)
 	{
 		gtk_action_set_sensitive(readAction, TRUE);
@@ -606,6 +615,7 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	{
 		voiceSelection->show(tts.voice());
 		settingsView->show();
+		auto doc = cainteoir_document_get_document(mDocument);
 		if ((!speech || !speech->is_speaking()) && doc)
 			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
 		settings("voice.name") = voice.str();

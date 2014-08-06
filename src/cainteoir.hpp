@@ -22,6 +22,7 @@
 #define CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 
 #include <cainteoir/languages.hpp>
+#include <cainteoir-gtk/cainteoir_document.h>
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 
 #include "settings.hpp"
@@ -95,8 +96,7 @@ private:
 	rdf::graph tts_metadata;
 	cainteoir::tts::engines tts;
 
-	std::shared_ptr<cainteoir::document> doc;
-	rdf::graph rdf_metadata;
+	CainteoirDocument *mDocument;
 	rdf::uri subject;
 
 	cainteoir::languages languages;

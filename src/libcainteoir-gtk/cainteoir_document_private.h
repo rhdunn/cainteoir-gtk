@@ -1,4 +1,4 @@
-/* Document Processing
+/* A GTK+ wrapper around the cainteoir::document class.
  *
  * Copyright (C) 2011-2013 Reece H. Dunn
  *
@@ -18,8 +18,8 @@
  * along with cainteoir-gtk.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAINTEOIRGTK_SRC_DOCUMENT_HPP
-#define CAINTEOIRGTK_SRC_DOCUMENT_HPP
+#ifndef CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_PRIVATE_H
+#define CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_PRIVATE_H
 
 #include <cainteoir/document.hpp>
 #include <cainteoir/content.hpp>

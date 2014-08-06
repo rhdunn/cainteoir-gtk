@@ -1,4 +1,4 @@
-/* Document Processing
+/* A GTK+ wrapper around the cainteoir::document class.
  *
  * Copyright (C) 2012-2014 Reece H. Dunn
  *
@@ -21,12 +21,73 @@
 #include "config.h"
 
 #include <gtk/gtk.h>
+
+#include <cainteoir-gtk/cainteoir_document.h>
+#include <cainteoir/document.hpp>
+
 #include "cainteoir_document_private.h"
 
 #include <stack>
 
+namespace rdf    = cainteoir::rdf;
 namespace css    = cainteoir::css;
 namespace events = cainteoir::events;
+
+struct _CainteoirDocumentPrivate
+{
+	std::shared_ptr<cainteoir::document> doc;
+	rdf::graph metadata;
+};
+
+G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocument, cainteoir_document, G_TYPE_OBJECT)
+
+static void
+cainteoir_document_finalize(GObject *object)
+{
+	CainteoirDocument *doc = CAINTEOIR_DOCUMENT(object);
+	doc->priv->~CainteoirDocumentPrivate();
+
+	G_OBJECT_CLASS(cainteoir_document_parent_class)->finalize(object);
+}
+
+static void
+cainteoir_document_class_init(CainteoirDocumentClass *klass)
+{
+	GObjectClass *object = G_OBJECT_CLASS(klass);
+	object->finalize = cainteoir_document_finalize;
+}
+
+static void
+cainteoir_document_init(CainteoirDocument *doc)
+{
+	void * data = cainteoir_document_get_instance_private(doc);
+	doc->priv = new (data)CainteoirDocumentPrivate();
+}
+
+CainteoirDocument *
+cainteoir_document_new(const char *filename)
+{
+	CainteoirDocument *self = CAINTEOIR_DOCUMENT(g_object_new(CAINTEOIR_TYPE_DOCUMENT, nullptr));
+
+	try
+	{
+		auto reader = cainteoir::createDocumentReader(filename, self->priv->metadata, std::string());
+		if (!reader)
+			throw std::runtime_error("the document type is not supported");
+
+		self->priv->doc = std::make_shared<cainteoir::document>(reader, self->priv->metadata);
+	}
+	catch (const std::exception &e)
+	{
+		fprintf(stderr, "error: %s\n", e.what());
+		g_object_unref(self);
+		return nullptr;
+	}
+
+	return self;
+}
+
+// private api ////////////////////////////////////////////////////////////////
 
 struct tag_block
 {

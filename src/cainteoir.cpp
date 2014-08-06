@@ -26,6 +26,7 @@
 
 #include "cainteoir.hpp"
 
+#include <cainteoir-gtk/cainteoir_document_view.h>
 #include "libcainteoir-gtk/cainteoir_document_private.h"
 
 #include <cainteoir/path.hpp>
@@ -283,7 +284,9 @@ Cainteoir::Cainteoir(const char *filename)
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(metadata_pane), metadata_view);
 #endif
 
-	docview = GTK_WIDGET(gtk_builder_get_object(ui, "document"));
+	GtkWidget *doc_pane = GTK_WIDGET(gtk_builder_get_object(ui, "doc-pane"));
+	docview = cainteoir_document_view_new();
+	gtk_container_add(GTK_CONTAINER(doc_pane), docview);
 	toc.connect(docview);
 
 	GtkWidget *pane = GTK_WIDGET(gtk_builder_get_object(ui, "document-page"));
@@ -521,9 +524,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 
 		if (mDocument) g_object_unref(mDocument);
 		mDocument = document;
-
-		GtkTextBuffer *buffer = cainteoir_document_create_buffer(mDocument);
-		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
+		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(docview), mDocument);
 
 		toc.clear();
 		doc_metadata.clear();

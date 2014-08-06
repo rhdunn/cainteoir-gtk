@@ -35,7 +35,7 @@ public:
 
 	operator GtkWidget *() { return view; }
 
-	void connect(GtkWidget *aTextView);
+	void connect(GtkWidget *aDocumentView);
 
 	bool empty() const;
 

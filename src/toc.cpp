@@ -22,6 +22,7 @@
 #include "compatibility.hpp"
 
 #include "toc.hpp"
+#include <cainteoir-gtk/cainteoir_document_view.h>
 
 enum TocColumns
 {
@@ -81,20 +82,7 @@ static void on_cursor_changed(GtkTreeView *view, void *data)
 		gchar *anchor = nullptr;
 		gtk_tree_model_get(model, &iter, TOC_ANCHOR, &anchor, -1);
 
-		GtkTextView *text = GTK_TEXT_VIEW((GtkWidget *)data);
-		GtkTextBuffer *buffer = gtk_text_view_get_buffer(text);
-		GtkTextMark *mark = gtk_text_buffer_get_mark(buffer, anchor);
-
-		GtkTextIter position;
-		if (mark)
-		{
-			gtk_text_buffer_get_iter_at_mark(buffer, &position, mark);
-			gtk_text_iter_forward_char(&position);
-		}
-		else
-			gtk_text_buffer_get_start_iter(buffer, &position);
-
-		gtk_text_view_scroll_to_iter(text, &position, 0, TRUE, 0.0, 0.0);
+		cainteoir_document_view_scroll_to_anchor(CAINTEOIR_DOCUMENT_VIEW(data), anchor);
 
 		g_free(anchor);
 	}
@@ -132,9 +120,9 @@ TocPane::TocPane()
 	gtk_tree_selection_set_mode(toc_selection, GTK_SELECTION_MULTIPLE);
 }
 
-void TocPane::connect(GtkWidget *aTextView)
+void TocPane::connect(GtkWidget *aDocumentView)
 {
-	g_signal_connect(view, "cursor-changed", G_CALLBACK(on_cursor_changed), aTextView);
+	g_signal_connect(view, "cursor-changed", G_CALLBACK(on_cursor_changed), aDocumentView);
 }
 
 bool TocPane::empty() const

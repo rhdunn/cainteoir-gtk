@@ -26,6 +26,8 @@
 
 #include "cainteoir.hpp"
 
+#include "libcainteoir-gtk/cainteoir_document_private.h"
+
 #include <cainteoir/path.hpp>
 #include <stdexcept>
 

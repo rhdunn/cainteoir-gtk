@@ -1,6 +1,6 @@
 /* Cainteoir Main Window
  *
- * Copyright (C) 2011-2013 Reece H. Dunn
+ * Copyright (C) 2011-2014 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -22,7 +22,6 @@
 #define CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 
 #include <cainteoir/languages.hpp>
-#include <cainteoir-gtk/document.hpp>
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 
 #include "settings.hpp"

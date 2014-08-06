@@ -23,17 +23,18 @@
 
 #include <cainteoir/languages.hpp>
 #include <cainteoir/document.hpp>
+#include <cainteoir-gtk/cainteoir_supported_formats.h>
 
 #include "settings.hpp"
 
 class DocumentLibrary
 {
 public:
-	DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, rdf::graph &aMetadata);
+	DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, CainteoirSupportedFormats *aFormats);
 
 	operator GtkWidget *() { return view; }
 
-	void update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show);
+	void update_recent(GtkRecentManager *aRecent, CainteoirSupportedFormats *aFormats, int max_items_to_show);
 
 	std::string get_filename() const;
 private:

@@ -104,35 +104,14 @@ static std::string select_file(
 	const char *open_id,
 	const char *filename,
 	std::string default_mimetype,
-	rdf::graph &metadata,
-	rql::results &formats)
+	CainteoirSupportedFormats *formats)
 {
 	GtkWidget *dialog = gtk_file_chooser_dialog_new(title, window, action,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		open_id,          GTK_RESPONSE_OK,
 		nullptr);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
-
-	for (auto &format : formats)
-	{
-		rql::results data = rql::select(metadata, rql::subject == rql::subject(format));
-
-		GtkFileFilter *filter = gtk_file_filter_new();
-		gtk_file_filter_set_name(filter, rql::select_value<std::string>(data, rql::predicate == rdf::dc("title")).c_str());
-
-		bool active_filter = false;
-		for (auto &item : rql::select(data, rql::predicate == rdf::tts("mimetype")))
-		{
-			const std::string &mimetype = rql::value(item);
-			gtk_file_filter_add_mime_type(filter, mimetype.c_str());
-			if (default_mimetype == mimetype)
-				active_filter = true;
-		}
-
-		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-		if (active_filter)
-			gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter);
-	}
+	cainteoir_supported_formats_add_file_filters(formats, GTK_FILE_CHOOSER(dialog), default_mimetype.c_str());
 
 	std::string ret;
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK)
@@ -147,23 +126,6 @@ static std::string select_file(
 
 	gtk_widget_destroy(dialog);
 	return ret;
-}
-
-static GtkRecentFilter *create_recent_filter(const rdf::graph & aMetadata)
-{
-	GtkRecentFilter *filter = gtk_recent_filter_new();
-
-	for (auto &format : rql::select(aMetadata,
-	                                rql::predicate == rdf::rdf("type") &&
-	                                rql::object    == rdf::tts("DocumentFormat")))
-	{
-		for (auto &mimetype : rql::select(aMetadata,
-		                                  rql::predicate == rdf::tts("mimetype") &&
-		                                  rql::subject   == rql::subject(format)))
-			gtk_recent_filter_add_mime_type(filter, rql::value(mimetype).c_str());
-	}
-
-	return filter;
 }
 
 struct ViewCallbackData
@@ -244,9 +206,11 @@ Cainteoir::Cainteoir(const char *filename)
 	, voice_metadata(languages, i18n("Voice"), 2)
 	, engine_metadata(languages, i18n("Engine"), 2)
 	, settings(get_user_file("settings.dat"))
+	, mDocumentFormats(nullptr)
+	, mAudioFormats(nullptr)
 {
-	cainteoir::supportedDocumentFormats(tts_metadata, cainteoir::text_support);
-	cainteoir::supported_audio_formats(tts_metadata);
+	mDocumentFormats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
+	mAudioFormats    = cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS);
 
 	GtkBuilder *ui = gtk_builder_new();
 	if (!gtk_builder_add_from_file(ui, get_data_dir() / "ui" / "cainteoir-gtk.ui", NULL))
@@ -268,10 +232,10 @@ Cainteoir::Cainteoir(const char *filename)
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	recentManager = gtk_recent_manager_get_default();
-	recentFilter = create_recent_filter(tts_metadata);
+	recentFilter = cainteoir_supported_formats_create_recent_filter(mDocumentFormats);
 
 	GtkWidget *library_view = GTK_WIDGET(gtk_builder_get_object(ui, "library-view"));
-	library = std::make_shared<DocumentLibrary>(languages, recentManager, tts_metadata);
+	library = std::make_shared<DocumentLibrary>(languages, recentManager, mDocumentFormats);
 	gtk_container_add(GTK_CONTAINER(library_view), *library);
 
 	readAction   = GTK_ACTION(gtk_builder_get_object(ui, "play-action"));
@@ -367,6 +331,12 @@ Cainteoir::Cainteoir(const char *filename)
 		switch_voice(tts.voice());
 }
 
+Cainteoir::~Cainteoir()
+{
+	if (mDocumentFormats) g_object_unref(mDocumentFormats);
+	if (mAudioFormats)    g_object_unref(mAudioFormats);
+}
+
 void Cainteoir::on_open_document()
 {
 	std::string filename;
@@ -376,17 +346,13 @@ void Cainteoir::on_open_document()
 	}
 	else
 	{
-		rql::results formats = rql::select(tts_metadata,
-		                                   rql::predicate == rdf::rdf("type") &&
-		                                   rql::object    == rdf::tts("DocumentFormat"));
-
 		filename = select_file(GTK_WINDOW(window),
 			i18n("Open Document"),
 			GTK_FILE_CHOOSER_ACTION_OPEN,
 			GTK_STOCK_OPEN,
 			settings("document.filename").as<std::string>().c_str(),
 			settings("document.mimetype", "text/plain").as<std::string>(),
-			tts_metadata, formats);
+			mDocumentFormats);
 	}
 
 	if (!filename.empty())
@@ -423,17 +389,13 @@ void Cainteoir::record()
 {
 	// TODO: Generate a default name from the file metadata ($(recording.basepath)/author - title.ogg)
 
-	rql::results formats = rql::select(tts_metadata,
-	                                   rql::predicate == rdf::rdf("type") &&
-	                                   rql::object    == rdf::tts("AudioFormat"));
-
 	std::string filename = select_file(GTK_WINDOW(window),
 		i18n("Record Document"),
 		GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_MEDIA_RECORD,
 		settings("recording.filename").as<std::string>().c_str(),
 		settings("recording.mimetype", "audio/x-vorbis+ogg").as<std::string>(),
-		tts_metadata, formats);
+		mAudioFormats);
 
 	if (filename.empty())
 		return;

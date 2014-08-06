@@ -23,6 +23,7 @@
 
 #include <cainteoir/languages.hpp>
 #include <cainteoir-gtk/document.hpp>
+#include <cainteoir-gtk/cainteoir_supported_formats.h>
 
 #include "settings.hpp"
 #include "settings_view.hpp"
@@ -37,6 +38,7 @@ class Cainteoir
 {
 public:
 	Cainteoir(const char *filename);
+	~Cainteoir();
 
 	bool load_document(std::string filename, bool suppress_error_message=false);
 
@@ -60,6 +62,9 @@ protected:
 	bool switch_voice_by_language(const std::string &language);
 private:
 	void updateProgress(double elapsed, double total, double completed);
+
+	CainteoirSupportedFormats *mDocumentFormats;
+	CainteoirSupportedFormats *mAudioFormats;
 
 	std::shared_ptr<TimeBar> timebar;
 	TocPane toc;

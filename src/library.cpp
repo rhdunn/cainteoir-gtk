@@ -57,7 +57,7 @@ static void add_document(GtkTreeStore *store, rdf::graph &metadata, rdf::uri sub
 		-1);
 }
 
-DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, rdf::graph &aMetadata)
+DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentManager *aRecent, CainteoirSupportedFormats *aFormats)
 {
 	store = gtk_tree_store_new(LIB_COUNT, G_TYPE_STRING, G_TYPE_STRING);
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -72,14 +72,12 @@ DocumentLibrary::DocumentLibrary(cainteoir::languages &aLanguages, GtkRecentMana
 	gtk_widget_set_name(view, "library");
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
 
-	update_recent(aRecent, aMetadata, 45);
+	update_recent(aRecent, aFormats, 45);
 }
 
-void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMetadata, int max_items_to_show)
+void DocumentLibrary::update_recent(GtkRecentManager *aRecent, CainteoirSupportedFormats *aFormats, int max_items_to_show)
 {
 	GList *items = g_list_sort(gtk_recent_manager_get_items(aRecent), (GCompareFunc)sort_recent_items_mru);
-
-	rql::results mimetypes = rql::select(aMetadata, rql::predicate == rdf::tts("mimetype"));
 
 	int index = 0;
 	for (GList *item = g_list_first(items); item && index != max_items_to_show; item = g_list_next(item))
@@ -92,23 +90,19 @@ void DocumentLibrary::update_recent(GtkRecentManager *aRecent, rdf::graph &aMeta
 
 		const char *mime = gtk_recent_info_get_mime_type(info);
 
-		for (auto &mimetype : mimetypes)
+		if (cainteoir_supported_formats_is_mimetype_supported(aFormats, mime))
 		{
-			if (rql::value(mimetype) == mime)
+			char *uri = gtk_recent_info_get_uri_display(info);
+			try
 			{
-				char *uri  = gtk_recent_info_get_uri_display(info);
-				try
-				{
-					auto reader = cainteoir::createDocumentReader(uri, metadata, std::string());
-					if (reader)
-						add_document(store, metadata, rdf::uri(uri, std::string()), index++);
-				}
-				catch (const std::exception &)
-				{
-				}
-				g_free(uri);
-				break;
+				auto reader = cainteoir::createDocumentReader(uri, metadata, std::string());
+				if (reader)
+					add_document(store, metadata, rdf::uri(uri, std::string()), index++);
 			}
+			catch (const std::exception &)
+			{
+			}
+			g_free(uri);
 		}
 	}
 

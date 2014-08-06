@@ -26,6 +26,7 @@
 
 struct _CainteoirDocumentViewPrivate
 {
+	CainteoirDocument *doc;
 };
 
 enum
@@ -63,6 +64,7 @@ static void
 cainteoir_document_view_finalize(GObject *object)
 {
 	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(object);
+	if (view->priv->doc) g_object_unref(view->priv->doc);
 
 	G_OBJECT_CLASS(cainteoir_document_view_parent_class)->finalize(object);
 }
@@ -80,10 +82,28 @@ static void
 cainteoir_document_view_init(CainteoirDocumentView *view)
 {
 	view->priv = (CainteoirDocumentViewPrivate *)cainteoir_document_view_get_instance_private(view);
+	view->priv->doc = nullptr;
 }
 
 GtkWidget *
 cainteoir_document_view_new()
 {
 	return (GtkWidget *)g_object_new(CAINTEOIR_TYPE_DOCUMENT_VIEW, nullptr);
+}
+
+void
+cainteoir_document_view_set_document(CainteoirDocumentView *view, CainteoirDocument *doc)
+{
+	g_return_if_fail(CAINTEOIR_DOCUMENT_VIEW(view));
+
+	if (view->priv->doc) g_object_unref(view->priv->doc);
+	view->priv->doc = CAINTEOIR_DOCUMENT(g_object_ref(doc));
+}
+
+CainteoirDocument *
+cainteoir_document_view_get_data(CainteoirDocumentView *view)
+{
+	g_return_val_if_fail(CAINTEOIR_DOCUMENT_VIEW(view), nullptr);
+
+	return CAINTEOIR_DOCUMENT(g_object_ref(view->priv->doc));
 }

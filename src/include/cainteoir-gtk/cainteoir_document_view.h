@@ -65,6 +65,11 @@ GType                                  cainteoir_document_view_get_type(void) G_
 
 GtkWidget *                            cainteoir_document_view_new(void);
 
+void                                   cainteoir_document_view_set_document(CainteoirDocumentView *view,
+                                                                            CainteoirDocument *doc);
+
+CainteoirDocument *                    cainteoir_document_view_get_document(CainteoirDocumentView *view);
+
 G_END_DECLS
 
 #endif

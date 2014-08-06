@@ -114,11 +114,13 @@ RadianceTheme_DATA = data/themes/Radiance/gtk3.css
 
 libcainteoir_gtk_includedir = $(includedir)/cainteoir-gtk
 libcainteoir_gtk_include_HEADERS = \
+	src/include/cainteoir-gtk/cainteoir_supported_formats.h \
 	src/include/cainteoir-gtk/document.hpp
 
 lib_LTLIBRARIES += src/libcainteoir-gtk/libcainteoir-gtk.la
 
 src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
+	src/libcainteoir-gtk/cainteoir_supported_formats.cpp \
 	src/libcainteoir-gtk/document.cpp
 
 ############################# applications ####################################

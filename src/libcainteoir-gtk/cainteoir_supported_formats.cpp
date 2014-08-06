@@ -32,6 +32,7 @@ namespace rql = cainteoir::rdf::query;
 struct _CainteoirSupportedFormatsPrivate
 {
 	rdf::graph metadata;
+	rql::results mimetypes;
 	rdf::uri format;
 };
 
@@ -79,6 +80,7 @@ cainteoir_supported_formats_new(CainteoirFormatType type)
 		g_object_unref(formats);
 		return nullptr;
 	}
+	formats->priv->mimetypes = rql::select(formats->priv->metadata, rql::predicate == rdf::tts("mimetype"));
 	return formats;
 }
 
@@ -127,4 +129,14 @@ cainteoir_supported_formats_add_file_filters(CainteoirSupportedFormats *formats,
 		if (active_filter)
 			gtk_file_chooser_set_filter(chooser, filter);
 	}
+}
+
+gboolean cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFormats *formats, const gchar *mimetype)
+{
+	for (auto &mime : formats->priv->mimetypes)
+	{
+		if (rql::value(mime) == mimetype)
+			return TRUE;
+	}
+	return FALSE;
 }

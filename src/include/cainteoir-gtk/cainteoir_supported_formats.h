@@ -75,6 +75,9 @@ void                                   cainteoir_supported_formats_add_file_filt
                                                                                     GtkFileChooser *chooser,
                                                                                     const gchar *active_mimetype);
 
+gboolean                               cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFormats *formats,
+                                                                                         const gchar *mimetype);
+
 G_END_DECLS
 
 #endif

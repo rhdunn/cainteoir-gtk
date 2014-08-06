@@ -26,6 +26,7 @@
 
 struct _CainteoirDocumentViewPrivate
 {
+	GtkWidget *text_view;
 	CainteoirDocument *doc;
 };
 
@@ -82,13 +83,17 @@ static void
 cainteoir_document_view_init(CainteoirDocumentView *view)
 {
 	view->priv = (CainteoirDocumentViewPrivate *)cainteoir_document_view_get_instance_private(view);
+	view->priv->text_view = gtk_text_view_new();
 	view->priv->doc = nullptr;
 }
 
 GtkWidget *
 cainteoir_document_view_new()
 {
-	return (GtkWidget *)g_object_new(CAINTEOIR_TYPE_DOCUMENT_VIEW, nullptr);
+	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(g_object_new(CAINTEOIR_TYPE_DOCUMENT_VIEW, nullptr));
+	gtk_container_add(GTK_CONTAINER(view), view->priv->text_view);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(view->priv->text_view), FALSE);
+	return GTK_WIDGET(view);
 }
 
 void

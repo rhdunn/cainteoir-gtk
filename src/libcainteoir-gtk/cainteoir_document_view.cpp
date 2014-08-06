@@ -24,6 +24,8 @@
 
 #include <cainteoir-gtk/cainteoir_document_view.h>
 
+#include "cainteoir_document_private.h"
+
 struct _CainteoirDocumentViewPrivate
 {
 	GtkWidget *text_view;
@@ -103,6 +105,9 @@ cainteoir_document_view_set_document(CainteoirDocumentView *view, CainteoirDocum
 
 	if (view->priv->doc) g_object_unref(view->priv->doc);
 	view->priv->doc = CAINTEOIR_DOCUMENT(g_object_ref(doc));
+
+	GtkTextBuffer *buffer = cainteoir_document_create_buffer(doc);
+	gtk_text_view_set_buffer(GTK_TEXT_VIEW(view->priv->text_view), buffer);
 }
 
 CainteoirDocument *

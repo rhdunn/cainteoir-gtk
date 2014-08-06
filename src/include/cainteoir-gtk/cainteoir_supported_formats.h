@@ -69,6 +69,8 @@ GType                                  cainteoir_supported_formats_get_type(void
 
 CainteoirSupportedFormats *            cainteoir_supported_formats_new(CainteoirFormatType type);
 
+GtkRecentFilter *                      cainteoir_supported_formats_create_recent_filter(CainteoirSupportedFormats *formats);
+
 G_END_DECLS
 
 #endif

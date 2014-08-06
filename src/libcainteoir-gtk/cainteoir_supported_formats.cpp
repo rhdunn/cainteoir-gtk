@@ -32,6 +32,7 @@ namespace rql = cainteoir::rdf::query;
 struct _CainteoirSupportedFormatsPrivate
 {
 	rdf::graph metadata;
+	rdf::uri format;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSupportedFormats, cainteoir_supported_formats, G_TYPE_OBJECT)
@@ -67,9 +68,11 @@ cainteoir_supported_formats_new(CainteoirFormatType type)
 	{
 	case CAINTEOIR_FORMAT_DOCUMENT:
 		cainteoir::supportedDocumentFormats(formats->priv->metadata, cainteoir::text_support);
+		formats->priv->format = rdf::tts("DocumentFormat");
 		break;
 	case CAINTEOIR_FORMAT_AUDIO:
 		cainteoir::supported_audio_formats(formats->priv->metadata);
+		formats->priv->format = rdf::tts("AudioFormat");
 		break;
 	default:
 		fprintf(stderr, "error: unknown cainteoir format type\n");
@@ -77,4 +80,23 @@ cainteoir_supported_formats_new(CainteoirFormatType type)
 		return nullptr;
 	}
 	return formats;
+}
+
+GtkRecentFilter *
+cainteoir_supported_formats_create_recent_filter(CainteoirSupportedFormats *formats)
+{
+	GtkRecentFilter *filter = gtk_recent_filter_new();
+
+	rdf::graph &metadata = formats->priv->metadata;
+	for (auto &format : rql::select(metadata,
+	                                rql::predicate == rdf::rdf("type") &&
+	                                rql::object    == formats->priv->format))
+	{
+		for (auto &mimetype : rql::select(metadata,
+		                                  rql::predicate == rdf::tts("mimetype") &&
+		                                  rql::subject   == rql::subject(format)))
+			gtk_recent_filter_add_mime_type(filter, rql::value(mimetype).c_str());
+	}
+
+	return filter;
 }

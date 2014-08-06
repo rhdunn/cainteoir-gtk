@@ -101,7 +101,8 @@ struct tag_block
 	}
 };
 
-GtkTextTag *create_text_tag_from_style(const css::styles &aStyles)
+GtkTextTag *
+create_text_tag_from_style(const css::styles &aStyles)
 {
 	GtkTextTag *tag = gtk_text_tag_new(aStyles.name.c_str());
 
@@ -214,7 +215,8 @@ GtkTextTag *create_text_tag_from_style(const css::styles &aStyles)
 	return tag;
 }
 
-GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
+GtkTextBuffer *
+create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc)
 {
 	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);

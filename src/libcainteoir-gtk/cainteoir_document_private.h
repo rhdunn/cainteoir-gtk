@@ -24,8 +24,8 @@
 #include <cainteoir/document.hpp>
 #include <cainteoir/content.hpp>
 
-GtkTextTag *create_text_tag_from_style(const cainteoir::css::styles &aStyles);
+GtkTextTag *                           create_text_tag_from_style(const cainteoir::css::styles &aStyles);
 
-GtkTextBuffer *create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc);
+GtkTextBuffer *                        create_buffer_from_document(const std::shared_ptr<cainteoir::document> &doc);
 
 #endif

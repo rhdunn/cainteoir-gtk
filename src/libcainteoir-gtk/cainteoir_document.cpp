@@ -239,7 +239,7 @@ create_text_tag_from_style(const css::styles &aStyles)
 }
 
 GtkTextBuffer *
-create_buffer_from_document(const cainteoir::document *doc)
+cainteoir_document_create_buffer(CainteoirDocument *doc)
 {
 	GtkTextTagTable *tags = gtk_text_tag_table_new();
 	GtkTextBuffer *buffer = gtk_text_buffer_new(tags);
@@ -250,7 +250,7 @@ create_buffer_from_document(const cainteoir::document *doc)
 	std::list<std::string> anchor;
 	std::stack<tag_block> contexts;
 	bool need_linebreak = false;
-	for (auto &entry : doc->children())
+	for (auto &entry : doc->priv->doc->children())
 	{
 		if (entry.type & events::begin_context)
 		{

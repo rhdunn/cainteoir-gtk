@@ -522,8 +522,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		if (mDocument) g_object_unref(mDocument);
 		mDocument = document;
 
-		auto doc = cainteoir_document_get_document(mDocument);
-		GtkTextBuffer *buffer = create_buffer_from_document(doc);
+		GtkTextBuffer *buffer = cainteoir_document_create_buffer(mDocument);
 		gtk_text_view_set_buffer(GTK_TEXT_VIEW(docview), buffer);
 
 		toc.clear();

@@ -26,7 +26,7 @@
 
 GtkTextTag *                           create_text_tag_from_style(const cainteoir::css::styles &aStyles);
 
-GtkTextBuffer *                        create_buffer_from_document(const cainteoir::document *doc);
+GtkTextBuffer *                        cainteoir_document_create_buffer(CainteoirDocument *doc);
 
 cainteoir::document *                  cainteoir_document_get_document(CainteoirDocument *doc);
 

@@ -67,6 +67,9 @@ size_t                                 cainteoir_document_get_text_length(Cainte
 
 size_t                                 cainteoir_document_estimate_word_count(CainteoirDocument *doc);
 
+double                                 cainteoir_document_estimate_duration(CainteoirDocument *doc,
+                                                                            double words_per_minute);
+
 G_END_DECLS
 
 #endif

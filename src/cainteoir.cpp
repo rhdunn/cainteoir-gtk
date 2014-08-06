@@ -81,9 +81,9 @@ static std::string get_user_file(const char * filename)
 	return root + "/" + std::string(filename);
 }
 
-static double estimate_time(size_t text_length, std::shared_ptr<tts::parameter> aRate)
+static double estimate_time(CainteoirDocument *aDocument, std::shared_ptr<tts::parameter> aRate)
 {
-	return (double)text_length / CHARACTERS_PER_WORD / (aRate ? aRate->value() : 170) * 60.0;
+	return cainteoir_document_estimate_duration(aDocument, (aRate ? aRate->value() : 170));
 }
 
 static void display_error_message(GtkWindow *window, const char *title, const char *text, const char *secondary_text)
@@ -492,8 +492,7 @@ bool Cainteoir::on_speaking()
 	speech.reset();
 	out.reset();
 
-	auto doc = cainteoir_document_get_document(mDocument);
-	timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+	timebar->update(0.0, estimate_time(mDocument, tts.parameter(tts::parameter::rate)), 0.0);
 
 	gtk_action_set_visible(readAction, TRUE);
 	gtk_action_set_visible(stopAction, FALSE);
@@ -560,7 +559,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 
 		doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 
-		timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+		timebar->update(0.0, estimate_time(mDocument, tts.parameter(tts::parameter::rate)), 0.0);
 
 		std::string lang = rql::select_value<std::string>(rdf_metadata,
 		                   rql::subject == subject && rql::predicate == rdf::dc("language"));
@@ -614,9 +613,8 @@ bool Cainteoir::switch_voice(const rdf::uri &voice)
 	{
 		voiceSelection->show(tts.voice());
 		settingsView->show();
-		auto doc = cainteoir_document_get_document(mDocument);
-		if ((!speech || !speech->is_speaking()) && doc)
-			timebar->update(0.0, estimate_time(doc->text_length(), tts.parameter(tts::parameter::rate)), 0.0);
+		if ((!speech || !speech->is_speaking()) && mDocument)
+			timebar->update(0.0, estimate_time(mDocument, tts.parameter(tts::parameter::rate)), 0.0);
 		settings("voice.name") = voice.str();
 		return true;
 	}

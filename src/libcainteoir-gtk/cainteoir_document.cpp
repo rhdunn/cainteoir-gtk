@@ -103,6 +103,13 @@ cainteoir_document_estimate_word_count(CainteoirDocument *doc)
 	return doc->priv->doc->text_length() / CHARACTERS_PER_WORD;
 }
 
+double
+cainteoir_document_estimate_duration(CainteoirDocument *doc, double words_per_minute)
+{
+	if (!doc) return 0.0;
+	return ((double)doc->priv->doc->text_length() / CHARACTERS_PER_WORD / words_per_minute) * 60.0;
+}
+
 // private api ////////////////////////////////////////////////////////////////
 
 struct tag_block

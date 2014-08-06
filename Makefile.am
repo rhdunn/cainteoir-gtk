@@ -116,6 +116,7 @@ libcainteoir_gtk_includedir = $(includedir)/cainteoir-gtk
 libcainteoir_gtk_include_HEADERS = \
 	src/include/cainteoir-gtk/cainteoir_document.h \
 	src/include/cainteoir-gtk/cainteoir_document_view.h \
+	src/include/cainteoir-gtk/cainteoir_speech_synthesizers.h \
 	src/include/cainteoir-gtk/cainteoir_supported_formats.h
 
 lib_LTLIBRARIES += src/libcainteoir-gtk/libcainteoir-gtk.la
@@ -123,6 +124,7 @@ lib_LTLIBRARIES += src/libcainteoir-gtk/libcainteoir-gtk.la
 src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
 	src/libcainteoir-gtk/cainteoir_document.cpp \
 	src/libcainteoir-gtk/cainteoir_document_view.cpp \
+	src/libcainteoir-gtk/cainteoir_speech_synthesizers.cpp \
 	src/libcainteoir-gtk/cainteoir_supported_formats.cpp
 
 ############################# applications ####################################

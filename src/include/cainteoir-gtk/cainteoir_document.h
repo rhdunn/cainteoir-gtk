@@ -65,6 +65,8 @@ CainteoirDocument *                    cainteoir_document_new(const gchar *filen
 
 size_t                                 cainteoir_document_get_text_length(CainteoirDocument *doc);
 
+size_t                                 cainteoir_document_estimate_word_count(CainteoirDocument *doc);
+
 G_END_DECLS
 
 #endif

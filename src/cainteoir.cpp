@@ -556,7 +556,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		doc_metadata.add_metadata(rdf_metadata, subject, rdf::dc("language"));
 
 		std::ostringstream length;
-		length << (doc->text_length() / CHARACTERS_PER_WORD) << i18n(" words (approx.)");
+		length << cainteoir_document_estimate_word_count(mDocument) << i18n(" words (approx.)");
 
 		doc_metadata.add_metadata(rdf::tts("length"), length.str().c_str());
 

@@ -33,6 +33,8 @@ namespace rdf    = cainteoir::rdf;
 namespace css    = cainteoir::css;
 namespace events = cainteoir::events;
 
+static constexpr int CHARACTERS_PER_WORD = 6;
+
 struct _CainteoirDocumentPrivate
 {
 	std::shared_ptr<cainteoir::document> doc;
@@ -92,6 +94,13 @@ cainteoir_document_get_text_length(CainteoirDocument *doc)
 {
 	if (!doc) return 0;
 	return doc->priv->doc->text_length();
+}
+
+size_t
+cainteoir_document_estimate_word_count(CainteoirDocument *doc)
+{
+	if (!doc) return 0;
+	return doc->priv->doc->text_length() / CHARACTERS_PER_WORD;
 }
 
 // private api ////////////////////////////////////////////////////////////////

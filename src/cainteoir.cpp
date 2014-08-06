@@ -226,24 +226,6 @@ static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
 	gtk_recent_info_unref(info);
 }
 
-static void on_recent_files_dialog(GtkMenuItem *item, void *data)
-{
-	Cainteoir &window = *(Cainteoir *)data;
-
-	GtkWidget *dialog = gtk_recent_chooser_dialog_new(i18n("Recent Documents"), window,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
-		nullptr);
-	gtk_window_resize(GTK_WINDOW(dialog), 500, 200);
-	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), window.recent_filter());
-	gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(dialog), GTK_RECENT_SORT_MRU);
-
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
-		on_recent_item_activated(GTK_RECENT_CHOOSER(dialog), data);
-
-	gtk_widget_destroy(dialog);
-}
-
 static gboolean on_window_state_changed(GtkWidget *widget, GdkEvent *event, void *data)
 {
 	application_settings &settings = *(application_settings *)data;

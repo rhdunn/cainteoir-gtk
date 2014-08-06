@@ -214,18 +214,6 @@ static void bind_action_activate(GtkAction *action, Cainteoir *window, callback_
 	g_signal_connect(action, "activate", G_CALLBACK(on_action_activate), data);
 }
 
-static void on_recent_item_activated(GtkRecentChooser *chooser, void *data)
-{
-	GtkRecentInfo *info = gtk_recent_chooser_get_current_item(chooser);
-	gchar *filename = gtk_recent_info_get_uri_display(info);
-	if (filename)
-	{
-		((Cainteoir *)data)->load_document(filename);
-		g_free(filename);
-	}
-	gtk_recent_info_unref(info);
-}
-
 static gboolean on_window_state_changed(GtkWidget *widget, GdkEvent *event, void *data)
 {
 	application_settings &settings = *(application_settings *)data;

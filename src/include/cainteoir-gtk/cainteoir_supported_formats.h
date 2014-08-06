@@ -71,6 +71,10 @@ CainteoirSupportedFormats *            cainteoir_supported_formats_new(Cainteoir
 
 GtkRecentFilter *                      cainteoir_supported_formats_create_recent_filter(CainteoirSupportedFormats *formats);
 
+void                                   cainteoir_supported_formats_add_file_filters(CainteoirSupportedFormats *formats,
+                                                                                    GtkFileChooser *chooser,
+                                                                                    const gchar *active_mimetype);
+
 G_END_DECLS
 
 #endif

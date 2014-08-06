@@ -100,3 +100,31 @@ cainteoir_supported_formats_create_recent_filter(CainteoirSupportedFormats *form
 
 	return filter;
 }
+
+void
+cainteoir_supported_formats_add_file_filters(CainteoirSupportedFormats *formats, GtkFileChooser *chooser, const gchar *active_mimetype)
+{
+	rdf::graph &metadata = formats->priv->metadata;
+	for (auto &format : rql::select(metadata,
+	                                rql::predicate == rdf::rdf("type") &&
+	                                rql::object    == formats->priv->format))
+	{
+		rql::results data = rql::select(metadata, rql::subject == rql::subject(format));
+
+		GtkFileFilter *filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(filter, rql::select_value<std::string>(data, rql::predicate == rdf::dc("title")).c_str());
+
+		bool active_filter = false;
+		for (auto &item : rql::select(data, rql::predicate == rdf::tts("mimetype")))
+		{
+			const std::string &mimetype = rql::value(item);
+			gtk_file_filter_add_mime_type(filter, mimetype.c_str());
+			if (mimetype == active_mimetype)
+				active_filter = true;
+		}
+
+		gtk_file_chooser_add_filter(chooser, filter);
+		if (active_filter)
+			gtk_file_chooser_set_filter(chooser, filter);
+	}
+}

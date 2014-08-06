@@ -163,3 +163,22 @@ cainteoir_document_view_get_data(CainteoirDocumentView *view)
 
 	return CAINTEOIR_DOCUMENT(g_object_ref(view->priv->doc));
 }
+
+void
+cainteoir_document_view_scroll_to_anchor(CainteoirDocumentView *view, const gchar *anchor)
+{
+	GtkTextView *text_view = GTK_TEXT_VIEW(view->priv->text_view);
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
+	GtkTextMark *mark = gtk_text_buffer_get_mark(buffer, anchor);
+
+	GtkTextIter position;
+	if (mark)
+	{
+		gtk_text_buffer_get_iter_at_mark(buffer, &position, mark);
+		gtk_text_iter_forward_char(&position);
+	}
+	else
+		gtk_text_buffer_get_start_iter(buffer, &position);
+
+	gtk_text_view_scroll_to_iter(text_view, &position, 0, TRUE, 0.0, 0.0);
+}

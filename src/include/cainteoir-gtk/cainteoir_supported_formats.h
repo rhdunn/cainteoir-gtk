@@ -61,8 +61,8 @@ struct _CainteoirSupportedFormatsClass
 
 typedef enum _CainteoirFormatType
 {
-	CAINTEOIR_FORMAT_DOCUMENT,
-	CAINTEOIR_FORMAT_AUDIO,
+	CAINTEOIR_DOCUMENT_FORMATS,
+	CAINTEOIR_AUDIO_FORMATS,
 } CainteoirFormatType;
 
 GType                                  cainteoir_supported_formats_get_type(void) G_GNUC_CONST;

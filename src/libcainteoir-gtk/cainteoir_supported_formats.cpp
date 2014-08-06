@@ -66,11 +66,11 @@ cainteoir_supported_formats_new(CainteoirFormatType type)
 	CainteoirSupportedFormats *formats = CAINTEOIR_SUPPORTED_FORMATS(g_object_new(CAINTEOIR_TYPE_SUPPORTED_FORMATS, nullptr));
 	switch (type)
 	{
-	case CAINTEOIR_FORMAT_DOCUMENT:
+	case CAINTEOIR_DOCUMENT_FORMATS:
 		cainteoir::supportedDocumentFormats(formats->priv->metadata, cainteoir::text_support);
 		formats->priv->format = rdf::tts("DocumentFormat");
 		break;
-	case CAINTEOIR_FORMAT_AUDIO:
+	case CAINTEOIR_AUDIO_FORMATS:
 		cainteoir::supported_audio_formats(formats->priv->metadata);
 		formats->priv->format = rdf::tts("AudioFormat");
 		break;

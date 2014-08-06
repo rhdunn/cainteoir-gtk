@@ -50,8 +50,6 @@ public:
 	bool on_speaking();
 
 	operator GtkWindow *() const { return GTK_WINDOW(window); }
-
-	inline GtkRecentFilter *recent_filter() const { return recentFilter; }
 protected:
 	void on_open_document();
 
@@ -89,7 +87,6 @@ private:
 	GtkWidget *info_button;
 
 	GtkRecentManager *recentManager;
-	GtkRecentFilter  *recentFilter;
 
 	GtkAction *readAction;
 	GtkAction *stopAction;

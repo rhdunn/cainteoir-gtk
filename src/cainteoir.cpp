@@ -232,7 +232,6 @@ Cainteoir::Cainteoir(const char *filename)
 	voiceSelection->signal_on_voice_change().connect(sigc::mem_fun(*this, &Cainteoir::switch_voice));
 
 	recentManager = gtk_recent_manager_get_default();
-	recentFilter = cainteoir_supported_formats_create_recent_filter(mDocumentFormats);
 
 	GtkWidget *library_view = GTK_WIDGET(gtk_builder_get_object(ui, "library-view"));
 	library = std::make_shared<DocumentLibrary>(languages, recentManager, mDocumentFormats);

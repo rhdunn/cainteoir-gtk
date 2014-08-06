@@ -87,6 +87,13 @@ cainteoir_document_new(const char *filename)
 	return self;
 }
 
+size_t
+cainteoir_document_get_text_length(CainteoirDocument *doc)
+{
+	if (!doc) return 0;
+	return doc->priv->doc->text_length();
+}
+
 // private api ////////////////////////////////////////////////////////////////
 
 struct tag_block

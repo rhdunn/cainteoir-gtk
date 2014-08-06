@@ -63,6 +63,8 @@ GType                                  cainteoir_document_get_type(void) G_GNUC_
 
 CainteoirDocument *                    cainteoir_document_new(const gchar *filename);
 
+size_t                                 cainteoir_document_get_text_length(CainteoirDocument *doc);
+
 G_END_DECLS
 
 #endif

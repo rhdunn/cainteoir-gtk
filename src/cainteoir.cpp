@@ -585,8 +585,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		ret = false;
 	}
 
-	auto doc = cainteoir_document_get_document(mDocument);
-	if (doc && doc->text_length() != 0)
+	if (cainteoir_document_get_text_length(mDocument) != 0)
 	{
 		gtk_action_set_sensitive(readAction, TRUE);
 		gtk_action_set_sensitive(recordAction, TRUE);

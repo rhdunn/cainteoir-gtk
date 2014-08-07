@@ -80,6 +80,11 @@ void                                   cainteoir_waveform_view_set_maximum_heigh
 
 uint16_t                               cainteoir_waveform_view_get_maximum_height(CainteoirWaveformView *view);
 
+void                                   cainteoir_waveform_view_set_view_duration(CainteoirWaveformView *view,
+                                                                                 float view_duration);
+
+float                                  cainteoir_waveform_view_get_view_duration(CainteoirWaveformView *view);
+
 G_END_DECLS
 
 #endif

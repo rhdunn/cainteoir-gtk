@@ -33,6 +33,7 @@ struct _CainteoirWaveformViewPrivate
 	CainteoirAudioData *data;
 	uint16_t window_size;
 	uint16_t maximum_height;
+	float view_duration;
 };
 
 enum
@@ -82,20 +83,23 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	const short * samples = cainteoir_audio_data_get_s16_samples(view->priv->data);
 	uint32_t sample_count = cainteoir_audio_data_get_sample_count(view->priv->data);
 
+	uint32_t sample_window = view->priv->view_duration * frequency;
+	if (sample_window == 0) sample_window = sample_count;
+
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);
 
 	cairo_set_source_rgb(cr, 0, 0, 1);
 	cairo_set_line_width(cr, 1);
 
-	cairo_scale(cr, (float)allocation.width / (sample_count / view->priv->window_size), 0.5);
+	cairo_scale(cr, (float)allocation.width / (sample_window / view->priv->window_size), 0.5);
 
 	int midpoint = allocation.height;
 	int waveform_height = std::min(allocation.height, (int)view->priv->maximum_height);
 	short current = std::numeric_limits<short>::min();
-	for (uint32_t sample = 0, x = 0; sample != sample_count; ++sample)
+	for (uint32_t sample = 0, x = 0; sample != sample_window; ++sample)
 	{
-		current = std::max(current, *samples++);
+		current = std::max(current, (sample < sample_count) ? *samples++ : (short)0);
 		if (sample % view->priv->window_size != 0)
 			continue;
 
@@ -139,6 +143,7 @@ cainteoir_waveform_view_init(CainteoirWaveformView *view)
 	view->priv->data = nullptr;
 	view->priv->window_size = 16;
 	view->priv->maximum_height = std::numeric_limits<uint16_t>::max();
+	view->priv->view_duration = 0;
 
 	g_signal_connect(G_OBJECT(view), "draw", G_CALLBACK(cainteoir_waveform_view_draw), nullptr);
 }
@@ -198,4 +203,21 @@ cainteoir_waveform_view_get_maximum_height(CainteoirWaveformView *view)
 	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(view), 0);
 
 	return view->priv->maximum_height;
+}
+
+void
+cainteoir_waveform_view_set_view_duration(CainteoirWaveformView *view, float view_duration)
+{
+	g_return_if_fail(CAINTEOIR_WAVEFORM_VIEW(view));
+	g_return_if_fail(view_duration > 0);
+
+	view->priv->view_duration = view_duration;
+}
+
+float
+cainteoir_waveform_view_get_view_duration(CainteoirWaveformView *view)
+{
+	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(view), 0);
+
+	return view->priv->view_duration;
 }

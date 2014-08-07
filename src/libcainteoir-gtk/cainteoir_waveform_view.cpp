@@ -26,6 +26,7 @@
 
 struct _CainteoirWaveformViewPrivate
 {
+	CainteoirAudioData *data;
 };
 
 enum
@@ -73,6 +74,7 @@ static void
 cainteoir_waveform_view_finalize(GObject *object)
 {
 	CainteoirWaveformView *view = CAINTEOIR_WAVEFORM_VIEW(object);
+	if (view->priv->data) g_object_unref(view->priv->data);
 
 	G_OBJECT_CLASS(cainteoir_waveform_view_parent_class)->finalize(object);
 }
@@ -92,6 +94,7 @@ static void
 cainteoir_waveform_view_init(CainteoirWaveformView *view)
 {
 	view->priv = CAINTEOIR_WAVEFORM_VIEW_GET_PRIVATE(view);
+	view->priv->data = nullptr;
 
 	g_signal_connect(G_OBJECT(view), "draw", G_CALLBACK(cainteoir_waveform_view_draw), nullptr);
 }
@@ -100,4 +103,21 @@ GtkWidget *
 cainteoir_waveform_view_new()
 {
 	return (GtkWidget *)g_object_new(CAINTEOIR_TYPE_WAVEFORM_VIEW, nullptr);
+}
+
+void
+cainteoir_waveform_view_set_data(CainteoirWaveformView *view, CainteoirAudioData *data)
+{
+	g_return_if_fail(CAINTEOIR_WAVEFORM_VIEW(view));
+
+	if (view->priv->data) g_object_unref(view->priv->data);
+	view->priv->data = CAINTEOIR_AUDIO_DATA(g_object_ref(data));
+}
+
+CainteoirAudioData *
+cainteoir_waveform_view_get_data(CainteoirWaveformView *view)
+{
+	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(view), nullptr);
+
+	return CAINTEOIR_AUDIO_DATA(g_object_ref(view->priv->data));
 }

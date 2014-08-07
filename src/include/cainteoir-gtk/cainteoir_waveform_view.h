@@ -21,6 +21,8 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_WAVEFORM_VIEW_H
 #define CAINTEOIR_GTK_CAINTEOIR_WAVEFORM_VIEW_H
 
+#include "cainteoir_audio_data.h"
+
 G_BEGIN_DECLS
 
 #define CAINTEOIR_TYPE_WAVEFORM_VIEW \
@@ -62,6 +64,11 @@ struct _CainteoirWaveformViewClass
 GType                                  cainteoir_waveform_view_get_type(void) G_GNUC_CONST;
 
 GtkWidget *                            cainteoir_waveform_view_new(void);
+
+void                                   cainteoir_waveform_view_set_data(CainteoirWaveformView *view,
+                                                                        CainteoirAudioData *data);
+
+CainteoirAudioData *                   cainteoir_waveform_view_get_data(CainteoirWaveformView *view);
 
 G_END_DECLS
 

@@ -47,8 +47,12 @@ main(int argc, char ** argv)
 	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech Editor"));
 #endif
 
+	GtkWidget *scroll = gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_container_add(GTK_CONTAINER(window), scroll);
+
 	GtkWidget *view = cainteoir_waveform_view_new();
-	gtk_container_add(GTK_CONTAINER(window), view);
+	cainteoir_waveform_view_set_view_duration(CAINTEOIR_WAVEFORM_VIEW(view), 5.0);
+	gtk_container_add(GTK_CONTAINER(scroll), view);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
 

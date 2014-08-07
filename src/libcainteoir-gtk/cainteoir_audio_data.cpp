@@ -29,6 +29,7 @@ namespace rdf = cainteoir::rdf;
 
 struct _CainteoirAudioDataPrivate
 {
+	uint16_t frequency;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirAudioData, cainteoir_audio_data, G_TYPE_OBJECT)
@@ -52,6 +53,7 @@ static void
 cainteoir_audio_data_init(CainteoirAudioData *audio)
 {
 	audio->priv = (CainteoirAudioDataPrivate *)cainteoir_audio_data_get_instance_private(audio);
+	audio->priv->frequency = 0;
 }
 
 CainteoirAudioData *
@@ -66,6 +68,8 @@ cainteoir_audio_data_new(const char *filename)
 			throw std::runtime_error("unable to read the audio file");
 
 		audio->set_target(audio);
+
+		self->priv->frequency = audio->frequency();
 	}
 	catch (const std::exception &e)
 	{
@@ -75,4 +79,11 @@ cainteoir_audio_data_new(const char *filename)
 	}
 
 	return self;
+}
+
+uint16_t
+cainteoir_audio_data_get_frequency(CainteoirAudioData *audio)
+{
+	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), 0);
+	return audio->priv->frequency;
 }

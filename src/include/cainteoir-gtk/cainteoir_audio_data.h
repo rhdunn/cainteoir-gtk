@@ -65,6 +65,8 @@ GType                                  cainteoir_audio_data_get_type(void) G_GNU
 
 CainteoirAudioData *                   cainteoir_audio_data_new(const gchar *filename);
 
+uint16_t                               cainteoir_audio_data_get_frequency(CainteoirAudioData *audio);
+
 G_END_DECLS
 
 #endif

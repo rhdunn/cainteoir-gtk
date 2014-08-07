@@ -192,6 +192,9 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	cairo_set_source_rgb(cr, 1, 1, 1);
 	cairo_paint(cr);
 
+	if (!view->priv->data)
+		return FALSE;
+
 	uint16_t frequency = cainteoir_audio_data_get_frequency(view->priv->data);
 	const short * samples = cainteoir_audio_data_get_s16_samples(view->priv->data);
 	uint32_t sample_count = cainteoir_audio_data_get_sample_count(view->priv->data);

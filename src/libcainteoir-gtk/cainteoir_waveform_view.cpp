@@ -32,6 +32,7 @@ struct _CainteoirWaveformViewPrivate
 {
 	CainteoirAudioData *data;
 	uint16_t window_size;
+	uint16_t maximum_height;
 };
 
 enum
@@ -90,6 +91,7 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	cairo_scale(cr, (float)allocation.width / (sample_count / view->priv->window_size), 0.5);
 
 	int midpoint = allocation.height;
+	int waveform_height = std::min(allocation.height, (int)view->priv->maximum_height);
 	short current = std::numeric_limits<short>::min();
 	for (uint32_t sample = 0, x = 0; sample != sample_count; ++sample)
 	{
@@ -99,8 +101,8 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 
 		float value = (float)current / 32768;
 
-		cairo_move_to(cr, x, midpoint - (value * midpoint));
-		cairo_line_to(cr, x, midpoint + (value * midpoint));
+		cairo_move_to(cr, x, midpoint - (value * waveform_height));
+		cairo_line_to(cr, x, midpoint + (value * waveform_height));
 		cairo_stroke(cr);
 
 		current = std::numeric_limits<short>::min();
@@ -136,6 +138,7 @@ cainteoir_waveform_view_init(CainteoirWaveformView *view)
 	view->priv = CAINTEOIR_WAVEFORM_VIEW_GET_PRIVATE(view);
 	view->priv->data = nullptr;
 	view->priv->window_size = 16;
+	view->priv->maximum_height = std::numeric_limits<uint16_t>::max();
 
 	g_signal_connect(G_OBJECT(view), "draw", G_CALLBACK(cainteoir_waveform_view_draw), nullptr);
 }
@@ -178,4 +181,21 @@ cainteoir_waveform_view_get_window_size(CainteoirWaveformView *view)
 	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(view), 0);
 
 	return view->priv->window_size;
+}
+
+void
+cainteoir_waveform_view_set_maximum_height(CainteoirWaveformView *view, uint16_t maximum_height)
+{
+	g_return_if_fail(CAINTEOIR_WAVEFORM_VIEW(view));
+	g_return_if_fail(maximum_height != 0);
+
+	view->priv->maximum_height = maximum_height;
+}
+
+uint16_t
+cainteoir_waveform_view_get_maximum_height(CainteoirWaveformView *view)
+{
+	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(view), 0);
+
+	return view->priv->maximum_height;
 }

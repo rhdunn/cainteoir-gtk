@@ -75,6 +75,11 @@ void                                   cainteoir_waveform_view_set_window_size(C
 
 uint16_t                               cainteoir_waveform_view_get_window_size(CainteoirWaveformView *view);
 
+void                                   cainteoir_waveform_view_set_maximum_height(CainteoirWaveformView *view,
+                                                                                  uint16_t maximum_height);
+
+uint16_t                               cainteoir_waveform_view_get_maximum_height(CainteoirWaveformView *view);
+
 G_END_DECLS
 
 #endif

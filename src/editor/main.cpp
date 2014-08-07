@@ -22,6 +22,7 @@
 #include "i18n.h"
 
 #include <gtk/gtk.h>
+#include <cainteoir-gtk/cainteoir_audio_data.h>
 
 static void
 on_window_destroy(GtkWidget *object, gpointer data)
@@ -47,6 +48,15 @@ main(int argc, char ** argv)
 #endif
 
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
+
+	if (argc == 2)
+	{
+		CainteoirAudioData *audio = cainteoir_audio_data_new(argv[1]);
+		if (audio)
+		{
+			g_object_unref(audio);
+		}
+	}
 
 	gtk_widget_show_all(window);
 	gtk_main();

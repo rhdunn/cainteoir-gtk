@@ -70,6 +70,11 @@ void                                   cainteoir_waveform_view_set_data(Cainteoi
 
 CainteoirAudioData *                   cainteoir_waveform_view_get_data(CainteoirWaveformView *view);
 
+void                                   cainteoir_waveform_view_set_window_size(CainteoirWaveformView *view,
+                                                                               uint16_t window_size);
+
+uint16_t                               cainteoir_waveform_view_get_window_size(CainteoirWaveformView *view);
+
 G_END_DECLS
 
 #endif

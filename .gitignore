@@ -60,6 +60,7 @@ intltool-update.in
 mkinstalldirs
 m4/*
 !m4/cxx11.m4
+!m4/gtk3capabilities.m4
 po/*~
 
 po/Makefile.in.in

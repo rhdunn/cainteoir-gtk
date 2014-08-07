@@ -60,8 +60,11 @@ dnl GTK+ checks.
 dnl ================================================================
 
 PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.4.0])
+
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
+
+GTK3_HAVE_HEADER_BAR
 
 dnl ================================================================
 dnl sigc++ checks.

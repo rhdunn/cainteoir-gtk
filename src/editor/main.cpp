@@ -37,7 +37,14 @@ main(int argc, char ** argv)
 	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 
+#ifdef HAVE_GTK3_HEADER_BAR
+	GtkWidget *header = gtk_header_bar_new();
+	gtk_header_bar_set_title(GTK_HEADER_BAR(header), i18n("Cainteoir Text-to-Speech Editor"));
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
+	gtk_window_set_titlebar(GTK_WINDOW(window), header);
+#else
 	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech Editor"));
+#endif
 
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
 

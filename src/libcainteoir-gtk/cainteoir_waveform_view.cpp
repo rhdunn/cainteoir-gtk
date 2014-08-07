@@ -66,8 +66,35 @@ cainteoir_waveform_view_get_property(GObject *object, guint prop_id, GValue *val
 static gboolean
 cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 {
+	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(widget), FALSE);
+	CainteoirWaveformView *view = CAINTEOIR_WAVEFORM_VIEW(widget);
+
 	cairo_set_source_rgb(cr, 1, 1, 1);
 	cairo_paint(cr);
+
+	uint16_t frequency = cainteoir_audio_data_get_frequency(view->priv->data);
+	const short * samples = cainteoir_audio_data_get_s16_samples(view->priv->data);
+	uint32_t sample_count = cainteoir_audio_data_get_sample_count(view->priv->data);
+
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(widget, &allocation);
+
+	cairo_set_source_rgb(cr, 0, 0, 1);
+	cairo_set_line_width(cr, 1);
+
+	cairo_scale(cr, (float)allocation.width / sample_count, 0.5);
+
+	int midpoint = allocation.height;
+	for (uint32_t sample = 0; sample != sample_count; ++sample)
+	{
+		float value = (float)*samples++ / 32768;
+
+		cairo_move_to(cr, sample, midpoint);
+		cairo_line_to(cr, sample, midpoint + (value * midpoint));
+		cairo_stroke(cr);
+	}
+
+	return TRUE;
 }
 
 static void

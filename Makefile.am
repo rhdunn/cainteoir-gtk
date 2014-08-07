@@ -12,7 +12,7 @@ AM_LDFLAGS  = \
 	${LTLIBINTL}
 
 AM_CXXFLAGS = \
-	-Isrc/include \
+	-Isrc -Isrc/include \
 	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
 	${SIGCXX_CFLAGS}  \
@@ -161,6 +161,13 @@ src_cainteoir_gtk_SOURCES = \
 	src/cainteoir.hpp \
 	src/cainteoir.cpp \
 	src/main.cpp
+
+bin_PROGRAMS += src/cainteoir-editor
+
+src_cainteoir_editor_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
+src_cainteoir_editor_SOURCES = \
+	src/i18n.h \
+	src/editor/main.cpp
 
 EXTRA_DIST += ${man1_MANS}
 

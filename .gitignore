@@ -12,6 +12,7 @@
 # build output:
 
 *.la
+src/cainteoir-editor
 src/cainteoir-gtk
 po/*.gmo
 po/stamp-it

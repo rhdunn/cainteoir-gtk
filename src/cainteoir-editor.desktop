@@ -1,0 +1,14 @@
+[Desktop Entry]
+
+Name=Cainteoir Editor
+X-GNOME-FullName=Cainteoir Text-to-Speech Editor
+Comment=Create files for use with Cainteoir Text-to-Speech
+
+Exec=cainteoir-editor %f
+Terminal=false
+StartupNotify=true
+
+Type=Application
+
+Categories=AudioVideo;Audio;
+MimeType=

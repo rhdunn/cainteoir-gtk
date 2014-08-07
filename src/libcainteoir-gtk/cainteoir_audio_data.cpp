@@ -105,3 +105,10 @@ cainteoir_audio_data_get_sample_count(CainteoirAudioData *audio)
 	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), 0);
 	return audio->priv->data->len / sizeof(short);
 }
+
+float
+cainteoir_audio_data_get_duration(CainteoirAudioData *audio)
+{
+	return (float)cainteoir_audio_data_get_sample_count(audio) /
+	       cainteoir_audio_data_get_frequency(audio);
+}

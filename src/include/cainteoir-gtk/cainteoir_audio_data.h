@@ -69,6 +69,8 @@ uint16_t                               cainteoir_audio_data_get_frequency(Cainte
 
 uint32_t                               cainteoir_audio_data_get_sample_count(CainteoirAudioData *audio);
 
+float                                  cainteoir_audio_data_get_duration(CainteoirAudioData *audio);
+
 G_END_DECLS
 
 #endif

@@ -215,20 +215,22 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 
 	int midpoint = allocation.height;
 	int waveform_height = std::min(allocation.height, (int)view->priv->maximum_height);
-	short current = std::numeric_limits<short>::min();
+	short upper = std::numeric_limits<short>::min();
+	short lower = std::numeric_limits<short>::max();
 	for (uint32_t sample = view->priv->view_offset, x = 0; sample != sample_window; ++sample)
 	{
-		current = std::max(current, (sample < sample_count) ? *samples++ : std::numeric_limits<short>::max());
+		upper = std::max(upper, (sample < sample_count) ? *samples : std::numeric_limits<short>::min());
+		lower = std::min(lower, (sample < sample_count) ? *samples : std::numeric_limits<short>::max());
+		++samples;
 		if (sample % view->priv->window_size != 0)
 			continue;
 
-		float value = (float)current / 32768;
-
-		cairo_move_to(cr, x, midpoint - (value * waveform_height));
-		cairo_line_to(cr, x, midpoint + (value * waveform_height));
+		cairo_move_to(cr, x, midpoint - ((float)std::abs(upper) / 32768 * waveform_height));
+		cairo_line_to(cr, x, midpoint + ((float)std::abs(lower) / 32768 * waveform_height));
 		cairo_stroke(cr);
 
-		current = std::numeric_limits<short>::min();
+		upper = std::numeric_limits<short>::min();
+		lower = std::numeric_limits<short>::max();
 		++x;
 	}
 

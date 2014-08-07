@@ -67,6 +67,8 @@ CainteoirAudioData *                   cainteoir_audio_data_new(const gchar *fil
 
 uint16_t                               cainteoir_audio_data_get_frequency(CainteoirAudioData *audio);
 
+uint32_t                               cainteoir_audio_data_get_sample_count(CainteoirAudioData *audio);
+
 G_END_DECLS
 
 #endif

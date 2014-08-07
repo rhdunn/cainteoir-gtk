@@ -29,6 +29,7 @@ namespace rdf = cainteoir::rdf;
 
 struct _CainteoirAudioDataPrivate
 {
+	GArray *data;
 	uint16_t frequency;
 };
 
@@ -38,6 +39,7 @@ static void
 cainteoir_audio_data_finalize(GObject *object)
 {
 	CainteoirAudioData *audio = CAINTEOIR_AUDIO_DATA(object);
+	g_array_free(audio->priv->data, TRUE);
 
 	G_OBJECT_CLASS(cainteoir_audio_data_parent_class)->finalize(object);
 }
@@ -53,6 +55,7 @@ static void
 cainteoir_audio_data_init(CainteoirAudioData *audio)
 {
 	audio->priv = (CainteoirAudioDataPrivate *)cainteoir_audio_data_get_instance_private(audio);
+	audio->priv->data = g_array_new(FALSE, TRUE, sizeof(int8_t));
 	audio->priv->frequency = 0;
 }
 
@@ -67,9 +70,17 @@ cainteoir_audio_data_new(const char *filename)
 		if (!audio)
 			throw std::runtime_error("unable to read the audio file");
 
+		if (audio->channels() != 1)
+			throw std::runtime_error("only 1 channel data is supported");
+
+		if (audio->format() != rdf::tts("s16le"))
+			throw std::runtime_error("only S16_LE data is supported");
+
 		audio->set_target(audio);
 
 		self->priv->frequency = audio->frequency();
+		while (audio->read())
+			g_array_append_vals(self->priv->data, audio->data.begin(), audio->data.size());
 	}
 	catch (const std::exception &e)
 	{
@@ -86,4 +97,11 @@ cainteoir_audio_data_get_frequency(CainteoirAudioData *audio)
 {
 	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), 0);
 	return audio->priv->frequency;
+}
+
+uint32_t
+cainteoir_audio_data_get_sample_count(CainteoirAudioData *audio)
+{
+	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), 0);
+	return audio->priv->data->len / sizeof(short);
 }

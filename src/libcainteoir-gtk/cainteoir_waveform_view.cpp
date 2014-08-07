@@ -218,7 +218,7 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	short current = std::numeric_limits<short>::min();
 	for (uint32_t sample = view->priv->view_offset, x = 0; sample != sample_window; ++sample)
 	{
-		current = std::max(current, (sample < sample_count) ? *samples++ : (short)0);
+		current = std::max(current, (sample < sample_count) ? *samples++ : std::numeric_limits<short>::max());
 		if (sample % view->priv->window_size != 0)
 			continue;
 

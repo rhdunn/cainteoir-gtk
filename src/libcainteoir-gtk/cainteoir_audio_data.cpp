@@ -112,3 +112,10 @@ cainteoir_audio_data_get_duration(CainteoirAudioData *audio)
 	return (float)cainteoir_audio_data_get_sample_count(audio) /
 	       cainteoir_audio_data_get_frequency(audio);
 }
+
+const short *
+cainteoir_audio_data_get_s16_samples(CainteoirAudioData *audio)
+{
+	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), nullptr);
+	return (const short *)audio->priv->data->data;
+}

@@ -71,6 +71,8 @@ uint32_t                               cainteoir_audio_data_get_sample_count(Cai
 
 float                                  cainteoir_audio_data_get_duration(CainteoirAudioData *audio);
 
+const short *                          cainteoir_audio_data_get_s16_samples(CainteoirAudioData *audio);
+
 G_END_DECLS
 
 #endif

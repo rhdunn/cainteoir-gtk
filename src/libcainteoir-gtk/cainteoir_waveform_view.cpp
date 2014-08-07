@@ -24,6 +24,8 @@
 
 #include <cainteoir-gtk/cainteoir_waveform_view.h>
 
+#include <cstdlib>
+
 struct _CainteoirWaveformViewPrivate
 {
 	CainteoirAudioData *data;
@@ -87,9 +89,9 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	int midpoint = allocation.height;
 	for (uint32_t sample = 0; sample != sample_count; ++sample)
 	{
-		float value = (float)*samples++ / 32768;
+		float value = (float)std::abs(*samples++) / 32768;
 
-		cairo_move_to(cr, sample, midpoint);
+		cairo_move_to(cr, sample, midpoint - (value * midpoint));
 		cairo_line_to(cr, sample, midpoint + (value * midpoint));
 		cairo_stroke(cr);
 	}

@@ -23,6 +23,7 @@
 
 #include <gtk/gtk.h>
 #include <cainteoir-gtk/cainteoir_audio_data.h>
+#include <cainteoir-gtk/cainteoir_waveform_view.h>
 
 static void
 on_window_destroy(GtkWidget *object, gpointer data)
@@ -46,6 +47,9 @@ main(int argc, char ** argv)
 #else
 	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech Editor"));
 #endif
+
+	GtkWidget *view = cainteoir_waveform_view_new();
+	gtk_container_add(GTK_CONTAINER(window), view);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
 

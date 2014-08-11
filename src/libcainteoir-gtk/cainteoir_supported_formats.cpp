@@ -140,3 +140,40 @@ gboolean cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFor
 	}
 	return FALSE;
 }
+
+gboolean
+cainteoir_supported_formats_file_info(CainteoirSupportedFormats *formats,
+                                      const gchar *filename,
+                                      gchar **type,
+                                      gchar **mimetype)
+{
+	const char *extpos = strrchr(filename, '.');
+	if (!extpos)
+		return FALSE;
+
+	std::string ext = '*' + std::string(extpos);
+	for (auto &filetype : rql::select(formats->priv->metadata, rql::predicate == rdf::tts("extension")))
+	{
+		if (rql::value(filetype) == ext)
+		{
+			const rdf::uri &uri = rql::subject(filetype);
+
+			if (type)
+			{
+				auto match = rql::select_value<std::string>(formats->priv->metadata,
+				             rql::subject == uri && rql::predicate == rdf::tts("name"));
+				*type = g_strdup(match.c_str());
+			}
+
+			if (mimetype)
+			{
+				auto match = rql::select_value<std::string>(formats->priv->metadata,
+				             rql::subject == uri && rql::predicate == rdf::tts("mimetype"));
+				*mimetype = g_strdup(match.c_str());
+			}
+
+			return TRUE;
+		}
+	}
+	return FALSE;
+}

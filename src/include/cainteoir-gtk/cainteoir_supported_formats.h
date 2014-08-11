@@ -78,6 +78,11 @@ void                                   cainteoir_supported_formats_add_file_filt
 gboolean                               cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFormats *formats,
                                                                                          const gchar *mimetype);
 
+gboolean                               cainteoir_supported_formats_file_info(CainteoirSupportedFormats *formats,
+                                                                             const gchar *filename,
+                                                                             gchar **type,
+                                                                             gchar **mimetype);
+
 G_END_DECLS
 
 #endif

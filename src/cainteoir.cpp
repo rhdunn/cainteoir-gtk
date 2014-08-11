@@ -407,45 +407,27 @@ void Cainteoir::record()
 	if (filename.empty())
 		return;
 
-	try
+	gchar *type = nullptr;
+	gchar *mimetype = nullptr;
+	if (cainteoir_supported_formats_file_info(mAudioFormats, filename.c_str(), &type, &mimetype))
 	{
-		std::string::size_type extpos = filename.rfind('.');
-		if (extpos != std::string::npos)
-		{
-			std::string ext = '*' + filename.substr(extpos);
+		settings("recording.filename") = filename;
+		settings("recording.mimetype") = mimetype;
+		settings.save();
 
-			for (auto &filetype : rql::select(tts_metadata, rql::predicate == rdf::tts("extension")))
-			{
-				if (rql::value(filetype) == ext)
-				{
-					const rdf::uri &uri = rql::subject(filetype);
+		auto doc_metadata = cainteoir_document_get_metadata(mDocument);
+		out = cainteoir::create_audio_file(filename.c_str(), type, 0.3, *doc_metadata, subject, tts_metadata, tts.voice());
+		on_speak(i18n("recording"));
 
-					auto type     = rql::select_value<std::string>(tts_metadata,
-					                rql::subject == uri && rql::predicate == rdf::tts("name"));
-
-					auto mimetype = rql::select_value<std::string>(tts_metadata,
-					                rql::subject == uri && rql::predicate == rdf::tts("mimetype"));
-
-					settings("recording.filename") = filename;
-					settings("recording.mimetype") = mimetype;
-					settings.save();
-
-					auto doc_metadata = cainteoir_document_get_metadata(mDocument);
-					out = cainteoir::create_audio_file(filename.c_str(), type.c_str(), 0.3, *doc_metadata, subject, tts_metadata, tts.voice());
-					on_speak(i18n("recording"));
-					return;
-				}
-			}
-		}
-
-		throw std::runtime_error(i18n("Unsupported file type."));
+		g_free(type);
+		g_free(mimetype);
 	}
-	catch (const std::runtime_error &e)
+	else
 	{
 		display_error_message(GTK_WINDOW(window),
 			i18n("Record Document"),
 			i18n("Unable to record the document"),
-			e.what());
+			i18n("Unsupported file format."));
 	}
 }
 

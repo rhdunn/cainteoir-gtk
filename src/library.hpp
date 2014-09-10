@@ -21,7 +21,7 @@
 #ifndef CAINTEOIRGTK_SRC_DOCUMENTLIBRARY_HPP
 #define CAINTEOIRGTK_SRC_DOCUMENTLIBRARY_HPP
 
-#include <cainteoir/languages.hpp>
+#include <cainteoir/locale.hpp>
 #include <cainteoir/document.hpp>
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 

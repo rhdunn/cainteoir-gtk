@@ -22,7 +22,7 @@
 #define CAINTEOIRGTK_SRC_SETTINGSVIEW_HPP
 
 #include <cainteoir/engines.hpp>
-#include <cainteoir/languages.hpp>
+#include <cainteoir/locale.hpp>
 
 #include "settings.hpp"
 

@@ -22,7 +22,7 @@
 #define CAINTEOIRGTK_SRC_VOICESELECTION_HPP
 
 #include <cainteoir/engines.hpp>
-#include <cainteoir/languages.hpp>
+#include <cainteoir/locale.hpp>
 
 #include "settings.hpp"
 

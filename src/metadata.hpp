@@ -22,7 +22,7 @@
 #define CAINTEOIRGTK_SRC_METADATA_HPP
 
 #include <map>
-#include <cainteoir/languages.hpp>
+#include <cainteoir/locale.hpp>
 #include <cainteoir/metadata.hpp>
 
 namespace rdf = cainteoir::rdf;

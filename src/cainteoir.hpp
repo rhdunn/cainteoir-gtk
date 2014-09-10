@@ -21,7 +21,7 @@
 #ifndef CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 #define CAINTEOIRGTK_SRC_CAINTEOIR_HPP
 
-#include <cainteoir/languages.hpp>
+#include <cainteoir/locale.hpp>
 #include <cainteoir-gtk/cainteoir_document.h>
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 

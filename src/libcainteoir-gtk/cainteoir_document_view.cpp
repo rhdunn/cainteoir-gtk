@@ -140,7 +140,7 @@ cainteoir_document_view_new()
 	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(g_object_new(CAINTEOIR_TYPE_DOCUMENT_VIEW, nullptr));
 	gtk_container_add(GTK_CONTAINER(view), view->priv->text_view);
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(view->priv->text_view), FALSE);
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view->priv->text_view), GTK_WRAP_WORD);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view->priv->text_view), GTK_WRAP_WORD_CHAR);
 	return GTK_WIDGET(view);
 }
 

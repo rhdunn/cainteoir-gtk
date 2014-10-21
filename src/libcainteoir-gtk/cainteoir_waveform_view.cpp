@@ -30,7 +30,7 @@
 
 struct _CainteoirWaveformViewPrivate
 {
-	CainteoirAudioData *data;
+	CainteoirAudioDataS16 *data;
 	uint16_t window_size;
 	uint16_t maximum_height;
 	float view_duration;
@@ -64,8 +64,8 @@ cainteoir_waveform_view_value_changed(GtkAdjustment *adjustment, CainteoirWavefo
 {
 	if (adjustment == view->priv->hadjustment)
 	{
-		uint16_t frequency = cainteoir_audio_data_get_frequency(view->priv->data);
-		uint32_t sample_count = cainteoir_audio_data_get_sample_count(view->priv->data);
+		uint16_t frequency = cainteoir_audio_data_s16_get_frequency(view->priv->data);
+		uint32_t sample_count = cainteoir_audio_data_s16_get_sample_count(view->priv->data);
 		float offset = gtk_adjustment_get_value(adjustment);
 		view->priv->view_offset = std::min((uint32_t)(offset * frequency), sample_count);
 
@@ -78,7 +78,7 @@ cainteoir_waveform_view_set_hadjustment_values(CainteoirWaveformView *view)
 {
 	if (!view->priv->data) return;
 
-	float duration = cainteoir_audio_data_get_duration(view->priv->data);
+	float duration = cainteoir_audio_data_s16_get_duration(view->priv->data);
 	g_object_set(view->priv->hadjustment,
 	             "lower", 0.0,
 	             "upper", std::max(view->priv->view_duration, duration),
@@ -195,9 +195,9 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	if (!view->priv->data)
 		return FALSE;
 
-	uint16_t frequency = cainteoir_audio_data_get_frequency(view->priv->data);
-	const short * samples = cainteoir_audio_data_get_s16_samples(view->priv->data);
-	uint32_t sample_count = cainteoir_audio_data_get_sample_count(view->priv->data);
+	uint16_t frequency = cainteoir_audio_data_s16_get_frequency(view->priv->data);
+	const short * samples = cainteoir_audio_data_s16_get_samples(view->priv->data);
+	uint32_t sample_count = cainteoir_audio_data_s16_get_sample_count(view->priv->data);
 
 	uint32_t sample_window = view->priv->view_duration * frequency;
 	if (sample_window == 0) sample_window = sample_count;
@@ -287,22 +287,22 @@ cainteoir_waveform_view_new()
 }
 
 void
-cainteoir_waveform_view_set_data(CainteoirWaveformView *view, CainteoirAudioData *data)
+cainteoir_waveform_view_set_s16_data(CainteoirWaveformView *view, CainteoirAudioDataS16 *data)
 {
 	g_return_if_fail(CAINTEOIR_WAVEFORM_VIEW(view));
 
 	if (view->priv->data) g_object_unref(view->priv->data);
-	view->priv->data = CAINTEOIR_AUDIO_DATA(g_object_ref(data));
+	view->priv->data = CAINTEOIR_AUDIO_DATA_S16(g_object_ref(data));
 
 	cainteoir_waveform_view_set_hadjustment_values(view);
 }
 
-CainteoirAudioData *
-cainteoir_waveform_view_get_data(CainteoirWaveformView *view)
+CainteoirAudioDataS16 *
+cainteoir_waveform_view_get_s16_data(CainteoirWaveformView *view)
 {
 	g_return_val_if_fail(CAINTEOIR_WAVEFORM_VIEW(view), nullptr);
 
-	return CAINTEOIR_AUDIO_DATA(g_object_ref(view->priv->data));
+	return CAINTEOIR_AUDIO_DATA_S16(g_object_ref(view->priv->data));
 }
 
 void

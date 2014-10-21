@@ -58,10 +58,10 @@ main(int argc, char ** argv)
 
 	if (argc == 2)
 	{
-		CainteoirAudioData *audio = cainteoir_audio_data_new(argv[1]);
+		CainteoirAudioDataS16 *audio = cainteoir_audio_data_s16_new(argv[1]);
 		if (audio)
 		{
-			cainteoir_waveform_view_set_data(CAINTEOIR_WAVEFORM_VIEW(view), audio);
+			cainteoir_waveform_view_set_s16_data(CAINTEOIR_WAVEFORM_VIEW(view), audio);
 			g_object_unref(audio);
 		}
 	}

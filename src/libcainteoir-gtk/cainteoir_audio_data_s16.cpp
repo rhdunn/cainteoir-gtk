@@ -22,47 +22,47 @@
 
 #include <glib-object.h>
 
-#include <cainteoir-gtk/cainteoir_audio_data.h>
+#include <cainteoir-gtk/cainteoir_audio_data_s16.h>
 #include <cainteoir/audio.hpp>
 
 namespace rdf = cainteoir::rdf;
 
-struct _CainteoirAudioDataPrivate
+struct _CainteoirAudioDataS16Private
 {
 	GArray *data;
 	uint16_t frequency;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(CainteoirAudioData, cainteoir_audio_data, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CainteoirAudioDataS16, cainteoir_audio_data_s16, G_TYPE_OBJECT)
 
 static void
-cainteoir_audio_data_finalize(GObject *object)
+cainteoir_audio_data_s16_finalize(GObject *object)
 {
-	CainteoirAudioData *audio = CAINTEOIR_AUDIO_DATA(object);
+	CainteoirAudioDataS16 *audio = CAINTEOIR_AUDIO_DATA_S16(object);
 	g_array_free(audio->priv->data, TRUE);
 
-	G_OBJECT_CLASS(cainteoir_audio_data_parent_class)->finalize(object);
+	G_OBJECT_CLASS(cainteoir_audio_data_s16_parent_class)->finalize(object);
 }
 
 static void
-cainteoir_audio_data_class_init(CainteoirAudioDataClass *klass)
+cainteoir_audio_data_s16_class_init(CainteoirAudioDataS16Class *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
-	object->finalize = cainteoir_audio_data_finalize;
+	object->finalize = cainteoir_audio_data_s16_finalize;
 }
 
 static void
-cainteoir_audio_data_init(CainteoirAudioData *audio)
+cainteoir_audio_data_s16_init(CainteoirAudioDataS16 *audio)
 {
-	audio->priv = (CainteoirAudioDataPrivate *)cainteoir_audio_data_get_instance_private(audio);
+	audio->priv = (CainteoirAudioDataS16Private *)cainteoir_audio_data_s16_get_instance_private(audio);
 	audio->priv->data = g_array_new(FALSE, TRUE, sizeof(int8_t));
 	audio->priv->frequency = 0;
 }
 
-CainteoirAudioData *
-cainteoir_audio_data_new(const char *filename)
+CainteoirAudioDataS16 *
+cainteoir_audio_data_s16_new(const char *filename)
 {
-	CainteoirAudioData *self = CAINTEOIR_AUDIO_DATA(g_object_new(CAINTEOIR_TYPE_AUDIO_DATA, nullptr));
+	CainteoirAudioDataS16 *self = CAINTEOIR_AUDIO_DATA_S16(g_object_new(CAINTEOIR_TYPE_AUDIO_DATA_S16, nullptr));
 
 	try
 	{
@@ -93,29 +93,29 @@ cainteoir_audio_data_new(const char *filename)
 }
 
 uint16_t
-cainteoir_audio_data_get_frequency(CainteoirAudioData *audio)
+cainteoir_audio_data_s16_get_frequency(CainteoirAudioDataS16 *audio)
 {
-	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), 0);
+	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), 0);
 	return audio->priv->frequency;
 }
 
 uint32_t
-cainteoir_audio_data_get_sample_count(CainteoirAudioData *audio)
+cainteoir_audio_data_s16_get_sample_count(CainteoirAudioDataS16 *audio)
 {
-	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), 0);
+	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), 0);
 	return audio->priv->data->len / sizeof(short);
 }
 
 float
-cainteoir_audio_data_get_duration(CainteoirAudioData *audio)
+cainteoir_audio_data_s16_get_duration(CainteoirAudioDataS16 *audio)
 {
-	return (float)cainteoir_audio_data_get_sample_count(audio) /
-	       cainteoir_audio_data_get_frequency(audio);
+	return (float)cainteoir_audio_data_s16_get_sample_count(audio) /
+	       cainteoir_audio_data_s16_get_frequency(audio);
 }
 
 const short *
-cainteoir_audio_data_get_s16_samples(CainteoirAudioData *audio)
+cainteoir_audio_data_s16_get_samples(CainteoirAudioDataS16 *audio)
 {
-	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA(audio), nullptr);
+	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), nullptr);
 	return (const short *)audio->priv->data->data;
 }

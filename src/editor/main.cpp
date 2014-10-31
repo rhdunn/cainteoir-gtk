@@ -58,7 +58,7 @@ main(int argc, char ** argv)
 
 	if (argc == 2)
 	{
-		CainteoirAudioDataS16 *audio = cainteoir_audio_data_s16_new(argv[1]);
+		CainteoirAudioDataS16 *audio = cainteoir_audio_data_s16_new(argv[1], nullptr, nullptr, 0, 16000);
 		if (audio)
 		{
 			cainteoir_waveform_view_set_s16_data(CAINTEOIR_WAVEFORM_VIEW(view), audio);

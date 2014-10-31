@@ -63,7 +63,11 @@ struct _CainteoirAudioDataS16Class
 
 GType                                  cainteoir_audio_data_s16_get_type(void) G_GNUC_CONST;
 
-CainteoirAudioDataS16 *                cainteoir_audio_data_s16_new(const gchar *filename);
+CainteoirAudioDataS16 *                cainteoir_audio_data_s16_new(const gchar *filename,
+                                                                    const char *start_time,
+                                                                    const char *end_time,
+                                                                    uint16_t channel,
+                                                                    uint16_t frequency);
 
 uint16_t                               cainteoir_audio_data_s16_get_frequency(CainteoirAudioDataS16 *audio);
 

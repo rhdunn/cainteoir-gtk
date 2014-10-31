@@ -26,6 +26,7 @@
 #include <cainteoir/sigproc.hpp>
 
 namespace rdf = cainteoir::rdf;
+namespace css = cainteoir::css;
 
 typedef cainteoir::audio_data<short> audio_data_t;
 
@@ -61,7 +62,11 @@ cainteoir_audio_data_s16_init(CainteoirAudioDataS16 *audio)
 }
 
 CainteoirAudioDataS16 *
-cainteoir_audio_data_s16_new(const char *filename)
+cainteoir_audio_data_s16_new(const char *filename,
+                             const char *start_time,
+                             const char *end_time,
+                             uint16_t channel,
+                             uint16_t frequency)
 {
 	CainteoirAudioDataS16 *self = CAINTEOIR_AUDIO_DATA_S16(g_object_new(CAINTEOIR_TYPE_AUDIO_DATA_S16, nullptr));
 
@@ -71,7 +76,10 @@ cainteoir_audio_data_s16_new(const char *filename)
 		if (!audio)
 			throw std::runtime_error("unable to read the audio file");
 
-		self->priv->data = cainteoir::read_s16_samples(audio, {}, {}, 0, 16000);
+		css::time start = css::parse_smil_time(start_time);
+		css::time end   = css::parse_smil_time(end_time);
+
+		self->priv->data = cainteoir::read_s16_samples(audio, start, end, channel, frequency);
 	}
 	catch (const std::exception &e)
 	{

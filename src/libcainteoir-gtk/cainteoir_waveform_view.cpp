@@ -210,8 +210,8 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 
 	cairo_scale(cr, (float)allocation.width / (sample_window / view->priv->window_size), 0.5);
 
-	samples       += view->priv->view_offset;
-	sample_window += view->priv->view_offset;
+	samples      += view->priv->view_offset;
+	sample_window = std::min(sample_window + view->priv->view_offset, sample_count);
 
 	int midpoint = allocation.height;
 	int waveform_height = std::min(allocation.height, (int)view->priv->maximum_height);
@@ -219,8 +219,8 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 	short lower = std::numeric_limits<short>::max();
 	for (uint32_t sample = view->priv->view_offset, x = 0; sample != sample_window; ++sample)
 	{
-		upper = std::max(upper, (sample < sample_count) ? *samples : std::numeric_limits<short>::min());
-		lower = std::min(lower, (sample < sample_count) ? *samples : std::numeric_limits<short>::max());
+		upper = std::max(upper, *samples);
+		lower = std::min(lower, *samples);
 		++samples;
 		if (sample % view->priv->window_size != 0)
 			continue;

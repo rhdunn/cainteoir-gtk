@@ -23,13 +23,15 @@
 #include <glib-object.h>
 
 #include <cainteoir-gtk/cainteoir_audio_data_s16.h>
-#include <cainteoir/audio.hpp>
+#include <cainteoir/sigproc.hpp>
 
 namespace rdf = cainteoir::rdf;
 
+typedef cainteoir::audio_data<short> audio_data_t;
+
 struct _CainteoirAudioDataS16Private
 {
-	GArray *data;
+	audio_data_t data;
 	uint16_t frequency;
 };
 
@@ -39,7 +41,7 @@ static void
 cainteoir_audio_data_s16_finalize(GObject *object)
 {
 	CainteoirAudioDataS16 *audio = CAINTEOIR_AUDIO_DATA_S16(object);
-	g_array_free(audio->priv->data, TRUE);
+	(&audio->priv->data)->~audio_data_t();
 
 	G_OBJECT_CLASS(cainteoir_audio_data_s16_parent_class)->finalize(object);
 }
@@ -55,8 +57,7 @@ static void
 cainteoir_audio_data_s16_init(CainteoirAudioDataS16 *audio)
 {
 	audio->priv = (CainteoirAudioDataS16Private *)cainteoir_audio_data_s16_get_instance_private(audio);
-	audio->priv->data = g_array_new(FALSE, TRUE, sizeof(int8_t));
-	audio->priv->frequency = 0;
+	new (&audio->priv->data) audio_data_t();
 }
 
 CainteoirAudioDataS16 *
@@ -66,21 +67,11 @@ cainteoir_audio_data_s16_new(const char *filename)
 
 	try
 	{
-		auto audio = cainteoir::create_media_reader(cainteoir::make_file_buffer(filename));
+		auto audio = cainteoir::make_file_buffer(filename);
 		if (!audio)
 			throw std::runtime_error("unable to read the audio file");
 
-		if (audio->channels() != 1)
-			throw std::runtime_error("only 1 channel data is supported");
-
-		if (audio->format() != rdf::tts("s16le"))
-			throw std::runtime_error("only S16_LE data is supported");
-
-		audio->set_target(audio);
-
-		self->priv->frequency = audio->frequency();
-		while (audio->read())
-			g_array_append_vals(self->priv->data, audio->data.begin(), audio->data.size());
+		self->priv->data = cainteoir::read_s16_samples(audio, {}, {}, 0, 16000);
 	}
 	catch (const std::exception &e)
 	{
@@ -96,14 +87,14 @@ uint16_t
 cainteoir_audio_data_s16_get_frequency(CainteoirAudioDataS16 *audio)
 {
 	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), 0);
-	return audio->priv->frequency;
+	return audio->priv->data.info->frequency();
 }
 
 uint32_t
 cainteoir_audio_data_s16_get_sample_count(CainteoirAudioDataS16 *audio)
 {
 	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), 0);
-	return audio->priv->data->len / sizeof(short);
+	return audio->priv->data.samples.size();
 }
 
 float
@@ -117,5 +108,5 @@ const short *
 cainteoir_audio_data_s16_get_samples(CainteoirAudioDataS16 *audio)
 {
 	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), nullptr);
-	return (const short *)audio->priv->data->data;
+	return &audio->priv->data.samples[0];
 }

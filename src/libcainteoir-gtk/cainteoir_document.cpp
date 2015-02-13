@@ -268,6 +268,7 @@ cainteoir_document_create_buffer(CainteoirDocument *doc)
 			if (need_linebreak && entry.styles) switch (entry.styles->display)
 			{
 			case cainteoir::css::display::block:
+			case cainteoir::css::display::line_break:
 			case cainteoir::css::display::list_item:
 			case cainteoir::css::display::table:
 			case cainteoir::css::display::table_row:

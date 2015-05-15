@@ -65,6 +65,36 @@ CainteoirSettings *                    cainteoir_settings_new(const gchar *filen
 
 void                                   cainteoir_settings_save(CainteoirSettings *settings);
 
+gchar *                                cainteoir_settings_get_string(CainteoirSettings *settings,
+                                                                     const gchar *group,
+                                                                     const gchar *key,
+                                                                     const gchar *default_value);
+
+void                                   cainteoir_settings_set_string(CainteoirSettings *settings,
+                                                                      const gchar *group,
+                                                                      const gchar *key,
+                                                                      const gchar *value);
+
+gboolean                               cainteoir_settings_get_boolean(CainteoirSettings *settings,
+                                                                      const gchar *group,
+                                                                      const gchar *key,
+                                                                      gboolean default_value);
+
+void                                   cainteoir_settings_set_boolean(CainteoirSettings *settings,
+                                                                      const gchar *group,
+                                                                      const gchar *key,
+                                                                      gboolean value);
+
+gint                                   cainteoir_settings_get_integer(CainteoirSettings *settings,
+                                                                      const gchar *group,
+                                                                      const gchar *key,
+                                                                      gint default_value);
+
+void                                   cainteoir_settings_set_integer(CainteoirSettings *settings,
+                                                                      const gchar *group,
+                                                                      const gchar *key,
+                                                                      gint value);
+
 G_END_DECLS
 
 #endif

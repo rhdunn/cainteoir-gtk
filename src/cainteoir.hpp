@@ -24,6 +24,7 @@
 #include <cainteoir/locale.hpp>
 #include <cainteoir-gtk/cainteoir_document.h>
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
+#include <cainteoir-gtk/cainteoir_settings.h>
 
 #include "settings.hpp"
 #include "settings_view.hpp"
@@ -103,6 +104,8 @@ private:
 	std::shared_ptr<cainteoir::tts::speech> speech;
 	std::shared_ptr<cainteoir::audio> out;
 	application_settings settings;
+
+	CainteoirSettings *mSettings;
 };
 
 #endif

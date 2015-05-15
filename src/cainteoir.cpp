@@ -215,6 +215,7 @@ Cainteoir::Cainteoir(const char *filename)
 {
 	mDocumentFormats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
 	mAudioFormats    = cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS);
+	mSettings        = cainteoir_settings_new("settings.dat");
 
 	GtkBuilder *ui = gtk_builder_new();
 	if (!gtk_builder_add_from_file(ui, get_data_dir() / "ui" / "cainteoir-gtk.ui", NULL))
@@ -341,6 +342,7 @@ Cainteoir::~Cainteoir()
 	if (mDocumentFormats) g_object_unref(mDocumentFormats);
 	if (mAudioFormats)    g_object_unref(mAudioFormats);
 	if (mDocument)        g_object_unref(mDocument);
+	if (mSettings)        g_object_unref(mSettings);
 }
 
 void Cainteoir::on_open_document()

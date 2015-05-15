@@ -1,6 +1,6 @@
 /* A GTK+ wrapper around the DocumentFormat/AudioFormat metadata.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -63,6 +63,7 @@ typedef enum _CainteoirFormatType
 {
 	CAINTEOIR_DOCUMENT_FORMATS,
 	CAINTEOIR_AUDIO_FORMATS,
+	CAINTEOIR_METADATA_FORMATS,
 } CainteoirFormatType;
 
 GType                                  cainteoir_supported_formats_get_type(void) G_GNUC_CONST;

@@ -1,6 +1,6 @@
 /* A GTK+ wrapper around the DocumentFormat/AudioFormat metadata.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -74,6 +74,10 @@ cainteoir_supported_formats_new(CainteoirFormatType type)
 	case CAINTEOIR_AUDIO_FORMATS:
 		cainteoir::supported_audio_formats(formats->priv->metadata);
 		formats->priv->format = rdf::tts("AudioFormat");
+		break;
+	case CAINTEOIR_METADATA_FORMATS:
+		cainteoir::supportedDocumentFormats(formats->priv->metadata, cainteoir::metadata_support);
+		formats->priv->format = rdf::tts("DocumentFormat");
 		break;
 	default:
 		fprintf(stderr, "error: unknown cainteoir format type\n");

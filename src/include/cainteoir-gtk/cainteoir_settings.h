@@ -63,6 +63,8 @@ GType                                  cainteoir_settings_get_type(void) G_GNUC_
 
 CainteoirSettings *                    cainteoir_settings_new(const gchar *filename);
 
+void                                   cainteoir_settings_save(CainteoirSettings *settings);
+
 G_END_DECLS
 
 #endif

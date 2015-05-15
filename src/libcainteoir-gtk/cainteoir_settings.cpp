@@ -25,6 +25,7 @@
 #include <cainteoir-gtk/cainteoir_settings.h>
 
 #include <cstdlib>
+#include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -71,5 +72,34 @@ cainteoir_settings_new(const gchar *filename)
 	settings->priv->filename = g_strdup_printf("%s/%s", root, filename ? filename : "settings.dat");
 	g_free(root);
 
+	if (!g_key_file_load_from_file(settings->priv->settings, settings->priv->filename, G_KEY_FILE_KEEP_COMMENTS, nullptr))
+	{
+		// On error try parsing the old settings format ...
+
+		std::ifstream is(settings->priv->filename);
+		std::string group;
+		std::string key;
+		std::string value;
+		while (std::getline(is, group, '.') && std::getline(is, key, '=') && std::getline(is, value))
+			g_key_file_set_value(settings->priv->settings, group.c_str(), key.c_str(), value.c_str());
+	}
+
 	return settings;
+}
+
+void
+cainteoir_settings_save(CainteoirSettings *settings)
+{
+	gsize length = 0;
+	gchar *data = g_key_file_to_data(settings->priv->settings, &length, nullptr);
+	if (data)
+	{
+		FILE *out = fopen(settings->priv->filename, "wb");
+		if (out)
+		{
+			fwrite(data, 1, length, out);
+			fclose(out);
+		}
+		g_free(data);
+	}
 }

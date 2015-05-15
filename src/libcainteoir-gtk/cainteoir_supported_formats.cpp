@@ -135,7 +135,8 @@ cainteoir_supported_formats_add_file_filters(CainteoirSupportedFormats *formats,
 	}
 }
 
-gboolean cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFormats *formats, const gchar *mimetype)
+gboolean
+cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFormats *formats, const gchar *mimetype)
 {
 	for (auto &mime : formats->priv->mimetypes)
 	{

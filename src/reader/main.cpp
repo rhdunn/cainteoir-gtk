@@ -22,6 +22,7 @@
 #include "i18n.h"
 
 #include <gtk/gtk.h>
+#include "reader_window.h"
 #include <cainteoir-gtk/cainteoir_document_view.h>
 
 static void
@@ -35,35 +36,11 @@ main(int argc, char ** argv)
 {
 	gtk_init(&argc, &argv);
 
-	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
-
-#ifdef HAVE_GTK3_HEADER_BAR
-	GtkWidget *header = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(header), i18n("Cainteoir Text-to-Speech"));
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
-	gtk_window_set_titlebar(GTK_WINDOW(window), header);
-#else
-	gtk_window_set_title(GTK_WINDOW(window), i18n("Cainteoir Text-to-Speech"));
-#endif
-
-	GtkWidget *scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(window), scroll);
-
-	GtkWidget *view = cainteoir_document_view_new();
-	gtk_container_add(GTK_CONTAINER(scroll), view);
-
+	GtkWidget *window = reader_window_new();
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
 
 	if (argc == 2)
-	{
-		CainteoirDocument *doc = cainteoir_document_new(argv[1]);
-		if (doc)
-		{
-			cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(view), doc);
-			g_object_unref(doc);
-		}
-	}
+		reader_window_load_document(READER_WINDOW(window), argv[1]);
 
 	gtk_widget_show_all(window);
 	gtk_main();

@@ -180,6 +180,8 @@ bin_PROGRAMS += src/cainteoir-reader
 src_cainteoir_reader_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
 src_cainteoir_reader_SOURCES = \
 	src/i18n.h \
+	src/reader/reader_window.h \
+	src/reader/reader_window.cpp \
 	src/reader/main.cpp
 
 EXTRA_DIST += ${man1_MANS}

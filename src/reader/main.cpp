@@ -36,11 +36,8 @@ main(int argc, char ** argv)
 {
 	gtk_init(&argc, &argv);
 
-	GtkWidget *window = reader_window_new();
+	GtkWidget *window = reader_window_new((argc == 2) ? argv[1] : nullptr);
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
-
-	if (argc == 2)
-		reader_window_load_document(READER_WINDOW(window), argv[1]);
 
 	gtk_widget_show_all(window);
 	gtk_main();

@@ -24,8 +24,15 @@
 #include <gtk/gtk.h>
 
 #include "reader_window.h"
+
 #include <cainteoir-gtk/cainteoir_document_view.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
+
+#include "libcainteoir-gtk/cainteoir_document_private.h"
+#include <cainteoir/metadata.hpp>
+
+namespace rdf = cainteoir::rdf;
+namespace rql = cainteoir::rdf::query;
 
 struct _ReaderWindowPrivate
 {
@@ -92,7 +99,7 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 }
 
 GtkWidget *
-reader_window_new()
+reader_window_new(const gchar *filename)
 {
 	ReaderWindow *reader = READER_WINDOW(g_object_new(READER_TYPE_WINDOW, nullptr));
 	gtk_window_set_default_size(GTK_WINDOW(reader), 400, 300);
@@ -124,6 +131,18 @@ reader_window_new()
 	if (cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
 		gtk_window_maximize(GTK_WINDOW(reader));
 
+	if (filename)
+		reader_window_load_document(reader, filename);
+	else
+	{
+		gchar *prev_filename = cainteoir_settings_get_string(reader->priv->settings, "document", "filename", nullptr);
+		if (prev_filename)
+		{
+			reader_window_load_document(reader, prev_filename);
+			g_free(prev_filename);
+		}
+	}
+
 	return GTK_WIDGET(reader);
 }
 
@@ -135,6 +154,16 @@ reader_window_load_document(ReaderWindow *reader,
 	if (doc)
 	{
 		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view), doc);
+
+		rdf::uri subject = rdf::uri(filename, std::string());
+		rdf::graph &rdf_metadata = *cainteoir_document_get_metadata(doc);
+		rql::results data = rql::select(rdf_metadata, rql::subject == subject);
+		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
+
+		cainteoir_settings_set_string(reader->priv->settings, "document", "filename", filename);
+		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype.empty() ? nullptr : mimetype.c_str());
+		cainteoir_settings_save(reader->priv->settings);
+
 		g_object_unref(doc);
 		return TRUE;
 	}

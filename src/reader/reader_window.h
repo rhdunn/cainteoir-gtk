@@ -61,7 +61,7 @@ struct _ReaderWindowClass
 
 GType                                  reader_window_get_type(void) G_GNUC_CONST;
 
-GtkWidget *                            reader_window_new(void);
+GtkWidget *                            reader_window_new(const gchar *filename);
 
 gboolean                               reader_window_load_document(ReaderWindow *reader,
                                                                    const gchar *filename);

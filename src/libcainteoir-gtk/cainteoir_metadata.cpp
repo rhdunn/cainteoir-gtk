@@ -94,3 +94,107 @@ cainteoir_metadata_get_string(CainteoirMetadata *metadata,
 	}
 	return nullptr;
 }
+
+GArray *
+cainteoir_metadata_get_strings(CainteoirMetadata *metadata,
+                               const gchar *predicate)
+{
+	GArray *items = g_array_new(FALSE, TRUE, sizeof(gchar *));
+	rdf::uri selector = rdf::href(predicate);
+	for (auto &query : metadata->priv->data)
+	{
+		if (rql::predicate(query) == selector)
+		{
+			const rdf::uri &object = rql::object(query);
+			if (object.empty())
+			{
+				gchar *value = g_strdup(rql::value(query).c_str());
+				g_array_append_val(items, value);
+			}
+			else
+			{
+				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				{
+					if (rql::predicate(data) == rdf::rdf("value"))
+					{
+						gchar *value = g_strdup(rql::value(data).c_str());
+						g_array_append_val(items, value);
+					}
+				}
+			}
+		}
+	}
+	return items;
+}
+
+gchar *
+cainteoir_metadata_get_string_by_context(CainteoirMetadata *metadata,
+                                         const gchar *predicate,
+                                         const gchar *context_predicate,
+                                         const gchar *context_value)
+{
+	rdf::uri selector = rdf::href(predicate);
+	rdf::uri context  = rdf::href(context_predicate);
+	for (auto &query : metadata->priv->data)
+	{
+		if (rql::predicate(query) == selector)
+		{
+			const rdf::uri &object = rql::object(query);
+			if (!object.empty())
+			{
+				std::string type;
+				std::string value;
+
+				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				{
+					if (rql::predicate(data) == rdf::rdf("value"))
+						value = rql::value(data);
+					else if (rql::predicate(data) == context)
+						type = rql::value(data);
+				}
+
+				if (!value.empty() && type == context_value)
+					return g_strdup(value.c_str());
+			}
+		}
+	}
+	return nullptr;
+}
+
+GArray *
+cainteoir_metadata_get_strings_by_context(CainteoirMetadata *metadata,
+                                          const gchar *predicate,
+                                          const gchar *context_predicate,
+                                          const gchar *context_value)
+{
+	GArray *items = g_array_new(FALSE, TRUE, sizeof(gchar *));
+	rdf::uri selector = rdf::href(predicate);
+	rdf::uri context  = rdf::href(context_predicate);
+	for (auto &query : metadata->priv->data)
+	{
+		if (rql::predicate(query) == selector)
+		{
+			const rdf::uri &object = rql::object(query);
+			if (!object.empty())
+			{
+				std::string type;
+				std::string value;
+
+				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				{
+					if (rql::predicate(data) == rdf::rdf("value"))
+						value = rql::value(data);
+					else if (rql::predicate(data) == context)
+						type = rql::value(data);
+				}
+
+				if (!value.empty() && type == context_value)
+				{
+					gchar *item = g_strdup(value.c_str());
+					g_array_append_val(items, item);
+				}
+			}
+		}
+	}
+	return items;
+}

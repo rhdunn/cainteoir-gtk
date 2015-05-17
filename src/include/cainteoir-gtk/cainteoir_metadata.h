@@ -76,10 +76,26 @@ struct _CainteoirMetadataClass
 #define CAINTEOIR_METADATA_TITLE       "http://purl.org/dc/elements/1.1/title"
 #define CAINTEOIR_METADATA_TYPE        "http://purl.org/dc/elements/1.1/type"
 
+#define CAINTEOIR_OPF_ROLE             "http://www.idpf.org/2007/opf#role"
+#define CAINTEOIR_OPF_EVENT            "http://www.idpf.org/2007/opf#event"
+
 GType                                  cainteoir_metadata_get_type(void) G_GNUC_CONST;
 
 gchar *                                cainteoir_metadata_get_string(CainteoirMetadata *metadata,
                                                                      const gchar *predicate);
+
+GArray *                               cainteoir_metadata_get_strings(CainteoirMetadata *metadata,
+                                                                      const gchar *predicate);
+
+gchar *                                cainteoir_metadata_get_string_by_context(CainteoirMetadata *metadata,
+                                                                                const gchar *predicate,
+                                                                                const gchar *context_predicate,
+                                                                                const gchar *context_value);
+
+GArray *                               cainteoir_metadata_get_strings_by_context(CainteoirMetadata *metadata,
+                                                                                 const gchar *predicate,
+                                                                                 const gchar *context_predicate,
+                                                                                 const gchar *context_value);
 
 G_END_DECLS
 

@@ -117,6 +117,7 @@ libcainteoir_gtk_include_HEADERS = \
 	src/include/cainteoir-gtk/cainteoir_audio_data_s16.h \
 	src/include/cainteoir-gtk/cainteoir_document.h \
 	src/include/cainteoir-gtk/cainteoir_document_view.h \
+	src/include/cainteoir-gtk/cainteoir_metadata.h \
 	src/include/cainteoir-gtk/cainteoir_settings.h \
 	src/include/cainteoir-gtk/cainteoir_speech_synthesizers.h \
 	src/include/cainteoir-gtk/cainteoir_supported_formats.h \
@@ -128,6 +129,7 @@ src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
 	src/libcainteoir-gtk/cainteoir_audio_data_s16.cpp \
 	src/libcainteoir-gtk/cainteoir_document.cpp \
 	src/libcainteoir-gtk/cainteoir_document_view.cpp \
+	src/libcainteoir-gtk/cainteoir_metadata.cpp \
 	src/libcainteoir-gtk/cainteoir_settings.cpp \
 	src/libcainteoir-gtk/cainteoir_speech_synthesizers.cpp \
 	src/libcainteoir-gtk/cainteoir_supported_formats.cpp \

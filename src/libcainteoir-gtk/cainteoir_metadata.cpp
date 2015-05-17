@@ -71,7 +71,26 @@ cainteoir_metadata_new(const std::shared_ptr<rdf::graph> &metadata,
 }
 
 gchar *
-cainteoir_metadata_get_mimetype(CainteoirMetadata *metadata)
+cainteoir_metadata_get_string(CainteoirMetadata *metadata,
+                              const gchar *predicate)
 {
-	return g_strdup(rql::select_value<std::string>(metadata->priv->data, rql::predicate == rdf::tts("mimetype")).c_str());
+	rdf::uri selector = rdf::href(predicate);
+	for (auto &query : metadata->priv->data)
+	{
+		if (rql::predicate(query) == selector)
+		{
+			const rdf::uri &object = rql::object(query);
+			if (object.empty())
+				return g_strdup(rql::value(query).c_str());
+			else
+			{
+				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				{
+					if (rql::predicate(data) == rdf::rdf("value"))
+						return g_strdup(rql::value(data).c_str());
+				}
+			}
+		}
+	}
+	return nullptr;
 }

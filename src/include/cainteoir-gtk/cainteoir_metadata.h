@@ -59,9 +59,27 @@ struct _CainteoirMetadataClass
 	void (*_reserved4)(void);
 };
 
+#define CAINTEOIR_METADATA_CONTRIBUTOR "http://purl.org/dc/elements/1.1/contributor"
+#define CAINTEOIR_METADATA_COVERAGE    "http://purl.org/dc/elements/1.1/coverage"
+#define CAINTEOIR_METADATA_CREATOR     "http://purl.org/dc/elements/1.1/creator"
+#define CAINTEOIR_METADATA_DATE        "http://purl.org/dc/elements/1.1/date"
+#define CAINTEOIR_METADATA_DESCRIPTION "http://purl.org/dc/elements/1.1/description"
+#define CAINTEOIR_METADATA_FORMAT      "http://purl.org/dc/elements/1.1/format"
+#define CAINTEOIR_METADATA_IDENTIFIER  "http://purl.org/dc/elements/1.1/identifier"
+#define CAINTEOIR_METADATA_LANGUAGE    "http://purl.org/dc/elements/1.1/language"
+#define CAINTEOIR_METADATA_MIMETYPE    "http://reecedunn.co.uk/schema/2014/tts#mimetype"
+#define CAINTEOIR_METADATA_PUBLISHER   "http://purl.org/dc/elements/1.1/publisher"
+#define CAINTEOIR_METADATA_RELATION    "http://purl.org/dc/elements/1.1/relation"
+#define CAINTEOIR_METADATA_RIGHTS      "http://purl.org/dc/elements/1.1/rights"
+#define CAINTEOIR_METADATA_SOURCE      "http://purl.org/dc/elements/1.1/source"
+#define CAINTEOIR_METADATA_SUBJECT     "http://purl.org/dc/elements/1.1/subject"
+#define CAINTEOIR_METADATA_TITLE       "http://purl.org/dc/elements/1.1/title"
+#define CAINTEOIR_METADATA_TYPE        "http://purl.org/dc/elements/1.1/type"
+
 GType                                  cainteoir_metadata_get_type(void) G_GNUC_CONST;
 
-gchar *                                cainteoir_metadata_get_mimetype(CainteoirMetadata *metadata);
+gchar *                                cainteoir_metadata_get_string(CainteoirMetadata *metadata,
+                                                                     const gchar *predicate);
 
 G_END_DECLS
 

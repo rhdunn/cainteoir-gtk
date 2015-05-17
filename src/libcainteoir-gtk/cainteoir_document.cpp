@@ -30,6 +30,7 @@
 #include <stack>
 
 namespace rdf    = cainteoir::rdf;
+namespace rql    = cainteoir::rdf::query;
 namespace css    = cainteoir::css;
 namespace events = cainteoir::events;
 
@@ -39,6 +40,7 @@ struct _CainteoirDocumentPrivate
 {
 	std::shared_ptr<cainteoir::document> doc;
 	rdf::graph metadata;
+	rdf::uri subject;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocument, cainteoir_document, G_TYPE_OBJECT)
@@ -78,6 +80,7 @@ cainteoir_document_new(const char *filename)
 			throw std::runtime_error("the document type is not supported");
 
 		self->priv->doc = std::make_shared<cainteoir::document>(reader, self->priv->metadata);
+		self->priv->subject = rdf::uri(filename, std::string());
 	}
 	catch (const std::exception &e)
 	{
@@ -108,6 +111,14 @@ cainteoir_document_estimate_duration(CainteoirDocument *doc, double words_per_mi
 {
 	if (!doc) return 0.0;
 	return ((double)doc->priv->doc->text_length() / CHARACTERS_PER_WORD / words_per_minute) * 60.0;
+}
+
+gchar *
+cainteoir_document_get_mimetype(CainteoirDocument *doc)
+{
+	if (!doc) return nullptr;
+	rql::results data = rql::select(doc->priv->metadata, rql::subject == doc->priv->subject);
+	return g_strdup(rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype")).c_str());
 }
 
 // private api ////////////////////////////////////////////////////////////////

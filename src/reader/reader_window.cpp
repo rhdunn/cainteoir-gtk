@@ -28,12 +28,6 @@
 #include <cainteoir-gtk/cainteoir_document_view.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
-#include "libcainteoir-gtk/cainteoir_document_private.h"
-#include <cainteoir/metadata.hpp>
-
-namespace rdf = cainteoir::rdf;
-namespace rql = cainteoir::rdf::query;
-
 struct _ReaderWindowPrivate
 {
 	GtkWidget *view;
@@ -155,15 +149,13 @@ reader_window_load_document(ReaderWindow *reader,
 	{
 		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view), doc);
 
-		rdf::uri subject = rdf::uri(filename, std::string());
-		rdf::graph &rdf_metadata = *cainteoir_document_get_metadata(doc);
-		rql::results data = rql::select(rdf_metadata, rql::subject == subject);
-		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
+		gchar *mimetype = cainteoir_document_get_mimetype(doc);
 
 		cainteoir_settings_set_string(reader->priv->settings, "document", "filename", filename);
-		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype.empty() ? nullptr : mimetype.c_str());
+		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype);
 		cainteoir_settings_save(reader->priv->settings);
 
+		if (mimetype) g_free(mimetype);
 		g_object_unref(doc);
 		return TRUE;
 	}

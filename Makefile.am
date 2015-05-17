@@ -175,6 +175,13 @@ src_cainteoir_editor_SOURCES = \
 	src/i18n.h \
 	src/editor/main.cpp
 
+bin_PROGRAMS += src/cainteoir-reader
+
+src_cainteoir_reader_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
+src_cainteoir_reader_SOURCES = \
+	src/i18n.h \
+	src/reader/main.cpp
+
 EXTRA_DIST += ${man1_MANS}
 
 ############################# tests ###########################################

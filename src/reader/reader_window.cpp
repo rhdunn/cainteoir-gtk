@@ -25,10 +25,13 @@
 
 #include "reader_window.h"
 #include <cainteoir-gtk/cainteoir_document_view.h>
+#include <cainteoir-gtk/cainteoir_settings.h>
 
 struct _ReaderWindowPrivate
 {
-	GtkWidget * view;
+	GtkWidget *view;
+
+	CainteoirSettings *settings;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_WINDOW)
@@ -52,6 +55,40 @@ static void
 reader_window_init(ReaderWindow *reader)
 {
 	reader->priv = (ReaderWindowPrivate *)reader_window_get_instance_private(reader);
+	reader->priv->settings = cainteoir_settings_new("settings.dat");
+}
+
+static gboolean
+on_window_state_changed(GtkWidget *widget, GdkEvent *event, void *data)
+{
+	CainteoirSettings *settings = (CainteoirSettings *)data;
+	gboolean maximized = (((GdkEventWindowState *)event)->new_window_state & GDK_WINDOW_STATE_MAXIMIZED);
+	cainteoir_settings_set_boolean(settings, "window", "maximized", maximized);
+	cainteoir_settings_save(settings);
+	return TRUE;
+}
+
+static gboolean
+on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+	if (!cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
+	{
+		gint width = 0;
+		gint height = 0;
+		gint top = 0;
+		gint left = 0;
+
+		gtk_window_get_position(GTK_WINDOW(reader), &left, &top);
+		gtk_window_get_size(GTK_WINDOW(reader), &width, &height);
+
+		cainteoir_settings_set_integer(reader->priv->settings, "window", "width",  width);
+		cainteoir_settings_set_integer(reader->priv->settings, "window", "height", height);
+		cainteoir_settings_set_integer(reader->priv->settings, "window", "top",    top);
+		cainteoir_settings_set_integer(reader->priv->settings, "window", "left",   left);
+	}
+	cainteoir_settings_save(reader->priv->settings);
+	return FALSE;
 }
 
 GtkWidget *
@@ -74,6 +111,18 @@ reader_window_new()
 
 	reader->priv->view = cainteoir_document_view_new();
 	gtk_container_add(GTK_CONTAINER(scroll), reader->priv->view);
+
+	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
+	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
+
+	gtk_window_resize(GTK_WINDOW(reader),
+	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "width",  700),
+	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "height", 445));
+	gtk_window_move(GTK_WINDOW(reader),
+	                cainteoir_settings_get_integer(reader->priv->settings, "window", "left", 0),
+	                cainteoir_settings_get_integer(reader->priv->settings, "window", "top",  0));
+	if (cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
+		gtk_window_maximize(GTK_WINDOW(reader));
 
 	return GTK_WIDGET(reader);
 }

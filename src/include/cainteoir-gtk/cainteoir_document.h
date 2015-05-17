@@ -74,8 +74,6 @@ double                                 cainteoir_document_estimate_duration(Cain
 
 CainteoirMetadata *                    cainteoir_document_get_metadata(CainteoirDocument *doc);
 
-gchar *                                cainteoir_document_get_mimetype(CainteoirDocument *doc);
-
 G_END_DECLS
 
 #endif

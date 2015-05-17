@@ -122,14 +122,6 @@ cainteoir_document_get_metadata(CainteoirDocument *doc)
 	return cainteoir_metadata_new(doc->priv->metadata, doc->priv->subject);
 }
 
-gchar *
-cainteoir_document_get_mimetype(CainteoirDocument *doc)
-{
-	if (!doc) return nullptr;
-	rql::results data = rql::select(*doc->priv->metadata, rql::subject == doc->priv->subject);
-	return g_strdup(rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype")).c_str());
-}
-
 // private api ////////////////////////////////////////////////////////////////
 
 struct tag_block

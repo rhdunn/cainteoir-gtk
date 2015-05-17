@@ -149,12 +149,14 @@ reader_window_load_document(ReaderWindow *reader,
 	{
 		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view), doc);
 
-		gchar *mimetype = cainteoir_document_get_mimetype(doc);
+		CainteoirMetadata *metadata = cainteoir_document_get_metadata(doc);
+		gchar *mimetype = cainteoir_metadata_get_mimetype(metadata);
 
 		cainteoir_settings_set_string(reader->priv->settings, "document", "filename", filename);
 		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype);
 		cainteoir_settings_save(reader->priv->settings);
 
+		g_object_unref(metadata);
 		if (mimetype) g_free(mimetype);
 		g_object_unref(doc);
 		return TRUE;

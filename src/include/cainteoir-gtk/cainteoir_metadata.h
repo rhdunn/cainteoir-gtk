@@ -61,6 +61,8 @@ struct _CainteoirMetadataClass
 
 GType                                  cainteoir_metadata_get_type(void) G_GNUC_CONST;
 
+gchar *                                cainteoir_metadata_get_mimetype(CainteoirMetadata *metadata);
+
 G_END_DECLS
 
 #endif

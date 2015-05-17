@@ -69,3 +69,9 @@ cainteoir_metadata_new(const std::shared_ptr<rdf::graph> &metadata,
 	self->priv->data = rql::select(*self->priv->metadata, rql::subject == subject);
 	return self;
 }
+
+gchar *
+cainteoir_metadata_get_mimetype(CainteoirMetadata *metadata)
+{
+	return g_strdup(rql::select_value<std::string>(metadata->priv->data, rql::predicate == rdf::tts("mimetype")).c_str());
+}

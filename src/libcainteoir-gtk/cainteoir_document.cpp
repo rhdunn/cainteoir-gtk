@@ -26,6 +26,7 @@
 #include <cainteoir/document.hpp>
 
 #include "cainteoir_document_private.h"
+#include "cainteoir_metadata_private.h"
 
 #include <stack>
 
@@ -39,7 +40,7 @@ static constexpr int CHARACTERS_PER_WORD = 6;
 struct _CainteoirDocumentPrivate
 {
 	std::shared_ptr<cainteoir::document> doc;
-	rdf::graph metadata;
+	std::shared_ptr<rdf::graph> metadata;
 	rdf::uri subject;
 };
 
@@ -75,11 +76,12 @@ cainteoir_document_new(const char *filename)
 
 	try
 	{
-		auto reader = cainteoir::createDocumentReader(filename, self->priv->metadata, std::string());
+		self->priv->metadata = std::make_shared<rdf::graph>();
+		auto reader = cainteoir::createDocumentReader(filename, *self->priv->metadata, std::string());
 		if (!reader)
 			throw std::runtime_error("the document type is not supported");
 
-		self->priv->doc = std::make_shared<cainteoir::document>(reader, self->priv->metadata);
+		self->priv->doc = std::make_shared<cainteoir::document>(reader, *self->priv->metadata);
 		self->priv->subject = rdf::uri(filename, std::string());
 	}
 	catch (const std::exception &e)
@@ -113,11 +115,18 @@ cainteoir_document_estimate_duration(CainteoirDocument *doc, double words_per_mi
 	return ((double)doc->priv->doc->text_length() / CHARACTERS_PER_WORD / words_per_minute) * 60.0;
 }
 
+CainteoirMetadata *
+cainteoir_document_get_metadata(CainteoirDocument *doc)
+{
+	if (!doc) return nullptr;
+	return cainteoir_metadata_new(doc->priv->metadata, doc->priv->subject);
+}
+
 gchar *
 cainteoir_document_get_mimetype(CainteoirDocument *doc)
 {
 	if (!doc) return nullptr;
-	rql::results data = rql::select(doc->priv->metadata, rql::subject == doc->priv->subject);
+	rql::results data = rql::select(*doc->priv->metadata, rql::subject == doc->priv->subject);
 	return g_strdup(rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype")).c_str());
 }
 
@@ -346,8 +355,8 @@ cainteoir_document_get_document(CainteoirDocument *doc)
 }
 
 cainteoir::rdf::graph *
-cainteoir_document_get_metadata(CainteoirDocument *doc)
+cainteoir_document_get_rdf_metadata(CainteoirDocument *doc)
 {
 	if (!doc) return nullptr;
-	return &doc->priv->metadata;
+	return doc->priv->metadata.get();
 }

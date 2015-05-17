@@ -30,6 +30,6 @@ GtkTextBuffer *                        cainteoir_document_create_buffer(Cainteoi
 
 cainteoir::document *                  cainteoir_document_get_document(CainteoirDocument *doc);
 
-cainteoir::rdf::graph *                cainteoir_document_get_metadata(CainteoirDocument *doc);
+cainteoir::rdf::graph *                cainteoir_document_get_rdf_metadata(CainteoirDocument *doc);
 
 #endif

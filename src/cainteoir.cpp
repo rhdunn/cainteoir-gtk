@@ -389,7 +389,7 @@ void Cainteoir::save_settings()
 
 void Cainteoir::read()
 {
-	auto doc_metadata = cainteoir_document_get_metadata(mDocument);
+	auto doc_metadata = cainteoir_document_get_rdf_metadata(mDocument);
 	out = cainteoir::open_audio_device(nullptr, *doc_metadata, subject, tts_metadata, tts.voice());
 	on_speak(i18n("reading"));
 }
@@ -417,7 +417,7 @@ void Cainteoir::record()
 		settings("recording.mimetype") = mimetype;
 		settings.save();
 
-		auto doc_metadata = cainteoir_document_get_metadata(mDocument);
+		auto doc_metadata = cainteoir_document_get_rdf_metadata(mDocument);
 		out = cainteoir::create_audio_file(filename.c_str(), type, 0.3, *doc_metadata, subject, tts_metadata, tts.voice());
 		on_speak(i18n("recording"));
 
@@ -516,7 +516,7 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		subject = rdf::uri(filename, std::string());
 		gtk_recent_manager_add_item(recentManager, ("file://" + filename).c_str());
 
-		rdf::graph &rdf_metadata = *cainteoir_document_get_metadata(mDocument);
+		rdf::graph &rdf_metadata = *cainteoir_document_get_rdf_metadata(mDocument);
 		rql::results data     = rql::select(rdf_metadata, rql::subject == subject);
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));

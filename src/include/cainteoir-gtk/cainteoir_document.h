@@ -21,6 +21,8 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_H
 #define CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_H
 
+#include "cainteoir_metadata.h"
+
 G_BEGIN_DECLS
 
 #define CAINTEOIR_TYPE_DOCUMENT \
@@ -69,6 +71,8 @@ size_t                                 cainteoir_document_estimate_word_count(Ca
 
 double                                 cainteoir_document_estimate_duration(CainteoirDocument *doc,
                                                                             double words_per_minute);
+
+CainteoirMetadata *                    cainteoir_document_get_metadata(CainteoirDocument *doc);
 
 gchar *                                cainteoir_document_get_mimetype(CainteoirDocument *doc);
 

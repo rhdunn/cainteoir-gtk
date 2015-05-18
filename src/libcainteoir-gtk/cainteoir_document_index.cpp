@@ -73,6 +73,26 @@ cainteoir_document_index_init(CainteoirDocumentIndex *index)
 }
 
 static void
+on_cursor_changed(GtkTreeView *view, void *data)
+{
+	GtkTreeSelection *toc_selection = gtk_tree_view_get_selection(view);
+	GtkTreeModel *model = gtk_tree_view_get_model(view);
+	GList *selected = gtk_tree_selection_get_selected_rows(toc_selection, nullptr);
+	GList *item = g_list_first(selected);
+
+	GtkTreeIter iter;
+	if (item && gtk_tree_model_get_iter(model, &iter, (GtkTreePath *)item->data))
+	{
+		gchar *anchor = nullptr;
+		gtk_tree_model_get(model, &iter, INDEX_ANCHOR, &anchor, -1);
+
+		cainteoir_document_view_scroll_to_anchor(CAINTEOIR_DOCUMENT_VIEW(data), anchor);
+
+		g_free(anchor);
+	}
+}
+
+static void
 add_icon_column(GtkTreeView *treeview, int i)
 {
 	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
@@ -89,7 +109,7 @@ add_text_column(GtkTreeView *treeview, int i)
 }
 
 GtkWidget *
-cainteoir_document_index_new(void)
+cainteoir_document_index_new(CainteoirDocumentView *view)
 {
 	CainteoirDocumentIndex *self = CAINTEOIR_DOCUMENT_INDEX(g_object_new(CAINTEOIR_TYPE_DOCUMENT_INDEX, nullptr));
 
@@ -103,6 +123,8 @@ cainteoir_document_index_new(void)
 
 	self->priv->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self));
 	gtk_tree_selection_set_mode(self->priv->selection, GTK_SELECTION_MULTIPLE);
+
+	g_signal_connect(GTK_TREE_VIEW(self), "cursor-changed", G_CALLBACK(on_cursor_changed), view);
 
 	return GTK_WIDGET(self);
 }

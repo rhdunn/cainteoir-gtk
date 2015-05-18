@@ -21,7 +21,7 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_INDEX_H
 #define CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_INDEX_H
 
-#include "cainteoir_document.h"
+#include "cainteoir_document_view.h"
 
 G_BEGIN_DECLS
 
@@ -65,7 +65,7 @@ struct _CainteoirDocumentIndexClass
 
 GType                                  cainteoir_document_index_get_type(void) G_GNUC_CONST;
 
-GtkWidget *                            cainteoir_document_index_new(void);
+GtkWidget *                            cainteoir_document_index_new(CainteoirDocumentView *view);
 
 void                                   cainteoir_document_index_build(CainteoirDocumentIndex *index,
                                                                       CainteoirDocument *doc,

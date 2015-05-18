@@ -42,6 +42,7 @@ enum IndexColumns
 struct _CainteoirDocumentIndexPrivate
 {
 	GtkTreeStore *store;
+	GtkTreeSelection *selection;
 	std::vector<cainteoir::ref_entry> index;
 };
 
@@ -99,6 +100,9 @@ cainteoir_document_index_new(void)
 	gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(self), TRUE);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(self), FALSE);
 	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(self), INDEX_TITLE);
+
+	self->priv->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self));
+	gtk_tree_selection_set_mode(self->priv->selection, GTK_SELECTION_MULTIPLE);
 
 	return GTK_WIDGET(self);
 }

@@ -29,8 +29,19 @@
 
 namespace rdf = cainteoir::rdf;
 
+enum IndexColumns
+{
+	INDEX_ENTRY_PTR,
+	INDEX_GUTTER,
+	INDEX_TITLE,
+	INDEX_ANCHOR,
+	INDEX_DISPLAY,
+	INDEX_COUNT
+};
+
 struct _CainteoirDocumentIndexPrivate
 {
+	GtkTreeStore *store;
 	std::vector<cainteoir::ref_entry> index;
 };
 
@@ -57,6 +68,7 @@ cainteoir_document_index_init(CainteoirDocumentIndex *index)
 {
 	void * data = cainteoir_document_index_get_instance_private(index);
 	index->priv = new (data)CainteoirDocumentIndexPrivate();
+	index->priv->store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 }
 
 CainteoirDocumentIndex *
@@ -74,4 +86,31 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
 	rdf::graph &metadata = *cainteoir_document_get_rdf_metadata(doc);
 	rdf::uri &subject = *cainteoir_document_get_subject(doc);
 	index->priv->index = cainteoir::navigation(metadata, subject, rdf::href(index_type));
+
+	gtk_tree_store_clear(index->priv->store);
+
+	GtkTreeIter row;
+	int initial_depth = index->priv->index.front().depth;
+	for (const auto &entry : index->priv->index)
+	{
+		std::ostringstream title;
+		for (const auto &i : cainteoir::range<int>(initial_depth, entry.depth))
+			title << "... ";
+		title << entry.title;
+
+		gtk_tree_store_append(index->priv->store, &row, nullptr);
+		gtk_tree_store_set(index->priv->store, &row,
+			INDEX_ENTRY_PTR, &entry,
+			INDEX_GUTTER,    "",
+			INDEX_TITLE,     entry.title.c_str(),
+			INDEX_ANCHOR,    entry.location.str().c_str(),
+			INDEX_DISPLAY,   title.str().c_str(),
+			-1);
+	}
+}
+
+GtkTreeModel *
+cainteoir_document_index_get_tree_model(CainteoirDocumentIndex *index)
+{
+	return GTK_TREE_MODEL(index->priv->store);
 }

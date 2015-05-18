@@ -71,6 +71,8 @@ void                                   cainteoir_document_index_build(CainteoirD
                                                                       CainteoirDocument *doc,
                                                                       const gchar *index_type);
 
+GtkTreeModel *                         cainteoir_document_index_get_tree_model(CainteoirDocumentIndex *index);
+
 G_END_DECLS
 
 #endif

@@ -352,3 +352,10 @@ cainteoir_document_get_rdf_metadata(CainteoirDocument *doc)
 	if (!doc) return nullptr;
 	return doc->priv->metadata.get();
 }
+
+cainteoir::rdf::uri *
+cainteoir_document_get_subject(CainteoirDocument *doc)
+{
+	if (!doc) return nullptr;
+	return &doc->priv->subject;
+}

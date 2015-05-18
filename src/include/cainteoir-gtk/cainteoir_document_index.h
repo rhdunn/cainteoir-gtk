@@ -21,6 +21,8 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_INDEX_H
 #define CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_INDEX_H
 
+#include "cainteoir_document.h"
+
 G_BEGIN_DECLS
 
 #define CAINTEOIR_TYPE_DOCUMENT_INDEX \
@@ -59,9 +61,15 @@ struct _CainteoirDocumentIndexClass
 	void (*_reserved4)(void);
 };
 
+#define CAINTEOIR_INDEXTYPE_TOC        "http://www.idpf.org/epub/vocab/structure/#toc"
+
 GType                                  cainteoir_document_index_get_type(void) G_GNUC_CONST;
 
 CainteoirDocumentIndex *               cainteoir_document_index_new(void);
+
+void                                   cainteoir_document_index_build(CainteoirDocumentIndex *index,
+                                                                      CainteoirDocument *doc,
+                                                                      const gchar *index_type);
 
 G_END_DECLS
 

@@ -32,4 +32,6 @@ cainteoir::document *                  cainteoir_document_get_document(Cainteoir
 
 cainteoir::rdf::graph *                cainteoir_document_get_rdf_metadata(CainteoirDocument *doc);
 
+cainteoir::rdf::uri *                  cainteoir_document_get_subject(CainteoirDocument *doc);
+
 #endif

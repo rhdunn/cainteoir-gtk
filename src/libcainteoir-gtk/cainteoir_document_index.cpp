@@ -25,8 +25,13 @@
 #include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir/document.hpp>
 
+#include "cainteoir_document_private.h"
+
+namespace rdf = cainteoir::rdf;
+
 struct _CainteoirDocumentIndexPrivate
 {
+	std::vector<cainteoir::ref_entry> index;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocumentIndex, cainteoir_document_index, G_TYPE_OBJECT)
@@ -48,10 +53,10 @@ cainteoir_document_index_class_init(CainteoirDocumentIndexClass *klass)
 }
 
 static void
-cainteoir_document_index_init(CainteoirDocumentIndex *doc)
+cainteoir_document_index_init(CainteoirDocumentIndex *index)
 {
-	void * data = cainteoir_document_index_get_instance_private(doc);
-	doc->priv = new (data)CainteoirDocumentIndexPrivate();
+	void * data = cainteoir_document_index_get_instance_private(index);
+	index->priv = new (data)CainteoirDocumentIndexPrivate();
 }
 
 CainteoirDocumentIndex *
@@ -59,4 +64,14 @@ cainteoir_document_index_new(void)
 {
 	CainteoirDocumentIndex *self = CAINTEOIR_DOCUMENT_INDEX(g_object_new(CAINTEOIR_TYPE_DOCUMENT_INDEX, nullptr));
 	return self;
+}
+
+void
+cainteoir_document_index_build(CainteoirDocumentIndex *index,
+                               CainteoirDocument *doc,
+                               const gchar *index_type)
+{
+	rdf::graph &metadata = *cainteoir_document_get_rdf_metadata(doc);
+	rdf::uri &subject = *cainteoir_document_get_subject(doc);
+	index->priv->index = cainteoir::navigation(metadata, subject, rdf::href(index_type));
 }

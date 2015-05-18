@@ -45,7 +45,7 @@ struct _CainteoirDocumentIndexPrivate
 	std::vector<cainteoir::ref_entry> index;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocumentIndex, cainteoir_document_index, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocumentIndex, cainteoir_document_index, GTK_TYPE_TREE_VIEW)
 
 static void
 cainteoir_document_index_finalize(GObject *object)
@@ -71,11 +71,36 @@ cainteoir_document_index_init(CainteoirDocumentIndex *index)
 	index->priv->store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 }
 
-CainteoirDocumentIndex *
+static void
+add_icon_column(GtkTreeView *treeview, int i)
+{
+	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "icon-name", i, nullptr);
+	gtk_tree_view_append_column(treeview, column);
+}
+
+static void
+add_text_column(GtkTreeView *treeview, int i)
+{
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, nullptr);
+	gtk_tree_view_append_column(treeview, column);
+}
+
+GtkWidget *
 cainteoir_document_index_new(void)
 {
 	CainteoirDocumentIndex *self = CAINTEOIR_DOCUMENT_INDEX(g_object_new(CAINTEOIR_TYPE_DOCUMENT_INDEX, nullptr));
-	return self;
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(self), GTK_TREE_MODEL(self->priv->store));
+	add_icon_column(GTK_TREE_VIEW(self), INDEX_GUTTER);
+	add_text_column(GTK_TREE_VIEW(self), INDEX_DISPLAY);
+
+	gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(self), TRUE);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(self), FALSE);
+	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(self), INDEX_TITLE);
+
+	return GTK_WIDGET(self);
 }
 
 void
@@ -107,10 +132,4 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
 			INDEX_DISPLAY,   title.str().c_str(),
 			-1);
 	}
-}
-
-GtkTreeModel *
-cainteoir_document_index_get_tree_model(CainteoirDocumentIndex *index)
-{
-	return GTK_TREE_MODEL(index->priv->store);
 }

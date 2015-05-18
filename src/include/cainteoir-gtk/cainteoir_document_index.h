@@ -44,7 +44,7 @@ typedef struct _CainteoirDocumentIndexClass   CainteoirDocumentIndexClass;
 
 struct _CainteoirDocumentIndex
 {
-	GObject parent_instance;
+	GtkTreeView parent_instance;
 
 	/*< private >*/
 	CainteoirDocumentIndexPrivate *priv;
@@ -52,7 +52,7 @@ struct _CainteoirDocumentIndex
 
 struct _CainteoirDocumentIndexClass
 {
-	GObjectClass parent_class;
+	GtkTreeViewClass parent_class;
 
 	/* Padding for future expansion */
 	void (*_reserved1)(void);
@@ -65,13 +65,11 @@ struct _CainteoirDocumentIndexClass
 
 GType                                  cainteoir_document_index_get_type(void) G_GNUC_CONST;
 
-CainteoirDocumentIndex *               cainteoir_document_index_new(void);
+GtkWidget *                            cainteoir_document_index_new(void);
 
 void                                   cainteoir_document_index_build(CainteoirDocumentIndex *index,
                                                                       CainteoirDocument *doc,
                                                                       const gchar *index_type);
-
-GtkTreeModel *                         cainteoir_document_index_get_tree_model(CainteoirDocumentIndex *index);
 
 G_END_DECLS
 

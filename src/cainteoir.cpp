@@ -26,8 +26,11 @@
 
 #include "cainteoir.hpp"
 
+#include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir-gtk/cainteoir_document_view.h>
+
 #include "libcainteoir-gtk/cainteoir_document_private.h"
+#include "libcainteoir-gtk/cainteoir_document_index_private.h"
 
 #include <cainteoir/path.hpp>
 #include <stdexcept>
@@ -270,9 +273,6 @@ Cainteoir::Cainteoir(const char *filename)
 	engine_metadata.create_entry(rdf::tts("name"), i18n("Name"), 0);
 	engine_metadata.create_entry(rdf::tts("version"), i18n("Version"), 1);
 
-	GtkWidget *toc_view = GTK_WIDGET(gtk_builder_get_object(ui, "toc-view"));
-	gtk_container_add(GTK_CONTAINER(toc_view), toc);
-
 	metadata_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), doc_metadata, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(metadata_view), voice_metadata, FALSE, FALSE, 0);
@@ -288,7 +288,12 @@ Cainteoir::Cainteoir(const char *filename)
 	GtkWidget *doc_pane = GTK_WIDGET(gtk_builder_get_object(ui, "doc-pane"));
 	docview = cainteoir_document_view_new();
 	gtk_container_add(GTK_CONTAINER(doc_pane), docview);
-	toc.connect(docview);
+
+	toc = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(docview));
+	gtk_widget_set_name(toc, "toc");
+
+	GtkWidget *toc_view = GTK_WIDGET(gtk_builder_get_object(ui, "toc-view"));
+	gtk_container_add(GTK_CONTAINER(toc_view), toc);
 
 	GtkWidget *pane = GTK_WIDGET(gtk_builder_get_object(ui, "document-page"));
 	gtk_drag_dest_set(pane, GTK_DEST_DEFAULT_ALL, dnd_drop_targets, 3, (GdkDragAction)(GDK_ACTION_COPY|GDK_ACTION_MOVE|GDK_ACTION_LINK));
@@ -448,7 +453,9 @@ void Cainteoir::on_speak(const char * status)
 		     : tts::media_overlays_mode::media_overlays_only;
 
 	auto doc = cainteoir_document_get_document(mDocument);
-	speech = tts.speak(out, toc.listing(), doc->children(toc.selection()), mode);
+	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(toc));
+	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(toc));
+	speech = tts.speak(out, listing, doc->children(sel), mode);
 
 	gtk_action_set_visible(readAction, FALSE);
 	gtk_action_set_visible(stopAction, TRUE);
@@ -463,7 +470,7 @@ bool Cainteoir::on_speaking()
 	if (speech->is_speaking())
 	{
 		timebar->update(speech->elapsedTime(), speech->totalTime(), speech->completed());
-		toc.set_playing(speech->context());
+		cainteoir_document_index_set_playing(CAINTEOIR_DOCUMENT_INDEX(toc), speech->context());
 		return true;
 	}
 
@@ -510,7 +517,6 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		mDocument = document;
 		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(docview), mDocument);
 
-		toc.clear();
 		doc_metadata.clear();
 
 		subject = rdf::uri(filename, std::string());
@@ -521,8 +527,8 @@ bool Cainteoir::load_document(std::string filename, bool suppress_error_message)
 		std::string  mimetype = rql::select_value<std::string>(data, rql::predicate == rdf::tts("mimetype"));
 		std::string  title    = rql::select_value<std::string>(data, rql::predicate == rdf::dc("title"));
 
-		toc.set_listing(cainteoir::navigation(rdf_metadata, subject, rdf::epv("toc")));
-		if (toc.empty())
+		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(toc), document, CAINTEOIR_INDEXTYPE_TOC);
+		if (cainteoir_document_index_is_empty(CAINTEOIR_DOCUMENT_INDEX(toc)))
 			gtk_widget_hide(toc);
 		else
 			gtk_widget_show(toc);

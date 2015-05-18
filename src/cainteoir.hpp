@@ -33,7 +33,6 @@
 #include "timebar.hpp"
 #include "library.hpp"
 #include "navbar.hpp"
-#include "toc.hpp"
 
 class Cainteoir
 {
@@ -66,11 +65,11 @@ private:
 	CainteoirSupportedFormats *mAudioFormats;
 
 	std::shared_ptr<TimeBar> timebar;
-	TocPane toc;
 	NavigationBar navbar;
 
 	GtkWidget *window;
 	GtkWidget *view;
+	GtkWidget *toc;
 
 	MetadataView doc_metadata;
 	MetadataView voice_metadata;

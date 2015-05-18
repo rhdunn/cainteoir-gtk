@@ -154,8 +154,6 @@ src_cainteoir_gtk_SOURCES = \
 	src/compatibility.cpp \
 	src/settings.hpp \
 	src/settings.cpp \
-	src/toc.hpp \
-	src/toc.cpp \
 	src/settings_view.hpp \
 	src/settings_view.cpp \
 	src/voice_selection.hpp \

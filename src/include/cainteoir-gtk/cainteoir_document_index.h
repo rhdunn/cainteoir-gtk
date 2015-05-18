@@ -71,6 +71,8 @@ void                                   cainteoir_document_index_build(CainteoirD
                                                                       CainteoirDocument *doc,
                                                                       const gchar *index_type);
 
+gboolean                               cainteoir_document_index_is_empty(CainteoirDocumentIndex *index);
+
 G_END_DECLS
 
 #endif

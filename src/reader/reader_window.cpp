@@ -134,6 +134,20 @@ create_index_type_combo(void)
 	return combo;
 }
 
+static void
+on_index_type_changed(GtkWidget *window, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+	if (doc)
+	{
+		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc,
+		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
+		g_object_unref(G_OBJECT(doc));
+	}
+}
+
 GtkWidget *
 reader_window_new(const gchar *filename)
 {
@@ -176,6 +190,7 @@ reader_window_new(const gchar *filename)
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
+	g_signal_connect(reader->priv->index_type, "changed", G_CALLBACK(on_index_type_changed), reader);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "width",  700),
@@ -225,7 +240,8 @@ reader_window_load_document(ReaderWindow *reader,
 		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype);
 		cainteoir_settings_save(reader->priv->settings);
 
-		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc, CAINTEOIR_INDEXTYPE_TOC);
+		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc,
+		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
 		if (cainteoir_document_index_is_empty(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index)))
 			gtk_widget_hide(reader->priv->index);
 		else

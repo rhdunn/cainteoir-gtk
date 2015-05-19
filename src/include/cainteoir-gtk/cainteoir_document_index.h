@@ -61,6 +61,7 @@ struct _CainteoirDocumentIndexClass
 	void (*_reserved4)(void);
 };
 
+#define CAINTEOIR_INDEXTYPE_AUDIO      "http://www.idpf.org/epub/vocab/structure/#loa"
 #define CAINTEOIR_INDEXTYPE_ILLUSTRATIONS "http://www.idpf.org/epub/vocab/structure/#loi"
 #define CAINTEOIR_INDEXTYPE_LANDMARKS  "http://www.idpf.org/epub/vocab/structure/#landmarks"
 #define CAINTEOIR_INDEXTYPE_PAGE_LIST  "http://www.idpf.org/epub/vocab/structure/#page-list"

@@ -62,6 +62,7 @@ struct _CainteoirDocumentIndexClass
 };
 
 #define CAINTEOIR_INDEXTYPE_LANDMARKS  "http://www.idpf.org/epub/vocab/structure/#landmarks"
+#define CAINTEOIR_INDEXTYPE_PAGE_LIST  "http://www.idpf.org/epub/vocab/structure/#page-list"
 #define CAINTEOIR_INDEXTYPE_TOC        "http://www.idpf.org/epub/vocab/structure/#toc"
 
 GType                                  cainteoir_document_index_get_type(void) G_GNUC_CONST;

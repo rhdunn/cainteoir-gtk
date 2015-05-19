@@ -129,6 +129,12 @@ create_index_type_combo(void)
 	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_LANDMARKS,
 	                   -1);
 
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
+	                   INDEX_TYPE_LABEL, i18n("Pages"),
+	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_PAGE_LIST,
+	                   -1);
+
 	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 	gtk_combo_box_set_id_column(GTK_COMBO_BOX(combo), INDEX_TYPE_ID);
 

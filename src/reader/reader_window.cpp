@@ -26,10 +26,12 @@
 #include "reader_window.h"
 
 #include <cainteoir-gtk/cainteoir_document_view.h>
+#include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
 struct _ReaderWindowPrivate
 {
+	GtkWidget *index;
 	GtkWidget *view;
 
 	CainteoirSettings *settings;
@@ -107,11 +109,21 @@ reader_window_new(const gchar *filename)
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));
 #endif
 
-	GtkWidget *scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_container_add(GTK_CONTAINER(reader), scroll);
+	GtkWidget *document_layout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+	gtk_container_add(GTK_CONTAINER(reader), document_layout);
 
-	reader->priv->view = cainteoir_document_view_new();
-	gtk_container_add(GTK_CONTAINER(scroll), reader->priv->view);
+	GtkWidget *view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_box_pack_end(GTK_BOX(document_layout), view_scroll, TRUE, TRUE, 0);
+
+	reader->priv->view  = cainteoir_document_view_new();
+	gtk_container_add(GTK_CONTAINER(view_scroll), reader->priv->view);
+
+	GtkWidget *index_scroll = gtk_scrolled_window_new(nullptr, nullptr);
+	g_object_set(G_OBJECT(index_scroll), "width-request", 265, nullptr);
+	gtk_box_pack_end(GTK_BOX(document_layout), index_scroll, FALSE, TRUE, 0);
+
+	reader->priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+	gtk_container_add(GTK_CONTAINER(index_scroll), reader->priv->index);
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
@@ -155,6 +167,12 @@ reader_window_load_document(ReaderWindow *reader,
 		cainteoir_settings_set_string(reader->priv->settings, "document", "filename", filename);
 		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype);
 		cainteoir_settings_save(reader->priv->settings);
+
+		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc, CAINTEOIR_INDEXTYPE_TOC);
+		if (cainteoir_document_index_is_empty(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index)))
+			gtk_widget_hide(reader->priv->index);
+		else
+			gtk_widget_show(reader->priv->index);
 
 		if (mimetype) g_free(mimetype);
 		g_object_unref(metadata);

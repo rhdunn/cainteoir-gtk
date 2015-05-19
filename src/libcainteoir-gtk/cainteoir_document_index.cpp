@@ -181,6 +181,8 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
 	index->priv->index = cainteoir::navigation(metadata, subject, rdf::href(index_type));
 
 	gtk_tree_store_clear(index->priv->store);
+	if (index->priv->index.empty())
+		return;
 
 	GtkTreeIter row;
 	int initial_depth = index->priv->index.front().depth;

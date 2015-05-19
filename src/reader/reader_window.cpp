@@ -31,6 +31,7 @@
 
 struct _ReaderWindowPrivate
 {
+	GtkWidget *doc_pane;
 	GtkWidget *index;
 	GtkWidget *view;
 
@@ -75,6 +76,7 @@ static gboolean
 on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 {
 	ReaderWindow *reader = (ReaderWindow *)data;
+
 	if (!cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
 	{
 		gint width = 0;
@@ -90,6 +92,10 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 		cainteoir_settings_set_integer(reader->priv->settings, "window", "top",    top);
 		cainteoir_settings_set_integer(reader->priv->settings, "window", "left",   left);
 	}
+
+	cainteoir_settings_set_integer(reader->priv->settings, "document", "splitter.pos",
+	                               gtk_paned_get_position(GTK_PANED(reader->priv->doc_pane)));
+
 	cainteoir_settings_save(reader->priv->settings);
 	return FALSE;
 }
@@ -97,8 +103,11 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 GtkWidget *
 reader_window_new(const gchar *filename)
 {
+	static constexpr int INDEX_PANE_WIDTH = 265;
+	static constexpr int DOCUMENT_PANE_WIDTH = 300;
+
 	ReaderWindow *reader = READER_WINDOW(g_object_new(READER_TYPE_WINDOW, nullptr));
-	gtk_window_set_default_size(GTK_WINDOW(reader), 400, 300);
+	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));
 
 #ifdef HAVE_GTK3_HEADER_BAR
@@ -108,18 +117,19 @@ reader_window_new(const gchar *filename)
 	gtk_window_set_titlebar(GTK_WINDOW(reader), header);
 #endif
 
-	GtkWidget *document_layout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-	gtk_container_add(GTK_CONTAINER(reader), document_layout);
+	reader->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_container_add(GTK_CONTAINER(reader), reader->priv->doc_pane);
 
 	GtkWidget *view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_box_pack_end(GTK_BOX(document_layout), view_scroll, TRUE, TRUE, 0);
+	gtk_widget_set_size_request(view_scroll, DOCUMENT_PANE_WIDTH, -1);
+	gtk_paned_pack2(GTK_PANED(reader->priv->doc_pane), view_scroll, TRUE, FALSE);
 
 	reader->priv->view  = cainteoir_document_view_new();
 	gtk_container_add(GTK_CONTAINER(view_scroll), reader->priv->view);
 
 	GtkWidget *index_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	g_object_set(G_OBJECT(index_scroll), "width-request", 265, nullptr);
-	gtk_box_pack_end(GTK_BOX(document_layout), index_scroll, FALSE, TRUE, 0);
+	gtk_widget_set_size_request(index_scroll, INDEX_PANE_WIDTH, -1);
+	gtk_paned_pack1(GTK_PANED(reader->priv->doc_pane), index_scroll, TRUE, FALSE);
 
 	reader->priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
 	gtk_container_add(GTK_CONTAINER(index_scroll), reader->priv->index);
@@ -135,6 +145,9 @@ reader_window_new(const gchar *filename)
 	                cainteoir_settings_get_integer(reader->priv->settings, "window", "top",  0));
 	if (cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
 		gtk_window_maximize(GTK_WINDOW(reader));
+
+	gtk_paned_set_position(GTK_PANED(reader->priv->doc_pane),
+	                       cainteoir_settings_get_integer(reader->priv->settings, "document", "splitter.pos", INDEX_PANE_WIDTH));
 
 	if (filename)
 		reader_window_load_document(reader, filename);

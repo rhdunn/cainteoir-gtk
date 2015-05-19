@@ -63,6 +63,9 @@ GType                                  cainteoir_speech_synthesizers_get_type(vo
 
 CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new();
 
+gboolean                               cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers *synthesizers,
+                                                                                           const gchar *lang);
+
 G_END_DECLS
 
 #endif

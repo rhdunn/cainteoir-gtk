@@ -24,8 +24,10 @@
 
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 #include <cainteoir/engines.hpp>
+#include <cainteoir/locale.hpp>
 
 namespace rdf = cainteoir::rdf;
+namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
 
 struct _CainteoirSpeechSynthesizersPrivate
@@ -70,4 +72,35 @@ CainteoirSpeechSynthesizers *
 cainteoir_speech_synthesizers_new()
 {
 	return CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_new(CAINTEOIR_TYPE_SPEECH_SYNTHESIZERS, nullptr));
+}
+
+gboolean
+cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers *synthesizers,
+                                                    const gchar *lang)
+{
+	auto language = cainteoir::language::make_lang(lang);
+
+	// Does the current voice support this language? ...
+
+	std::string current = rql::select_value<std::string>(synthesizers->priv->metadata,
+	                      rql::subject == synthesizers->priv->tts.voice() && rql::predicate == rdf::dc("language"));
+
+	if (cainteoir::language::make_lang(current) == language)
+		return TRUE;
+
+	// The current voice does not support this language, so search the available voices ...
+
+	for (auto &voice : rql::select(synthesizers->priv->metadata,
+	                               rql::predicate == rdf::rdf("type") && rql::object == rdf::tts("Voice")))
+	{
+		const rdf::uri &uri = rql::subject(voice);
+
+		std::string lang = rql::select_value<std::string>(synthesizers->priv->metadata,
+		                   rql::subject == uri && rql::predicate == rdf::dc("language"));
+
+		if (cainteoir::language::make_lang(lang) == language &&
+		    synthesizers->priv->tts.select_voice(synthesizers->priv->metadata, uri))
+			return TRUE;
+	}
+	return FALSE;
 }

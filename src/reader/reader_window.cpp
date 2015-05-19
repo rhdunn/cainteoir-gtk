@@ -125,6 +125,12 @@ create_index_type_combo(void)
 
 	gtk_tree_store_append(store, &row, nullptr);
 	gtk_tree_store_set(store, &row,
+	                   INDEX_TYPE_LABEL, i18n("Index (Abridged)"),
+	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_TOC_BRIEF,
+	                   -1);
+
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
 	                   INDEX_TYPE_LABEL, i18n("Landmarks"),
 	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_LANDMARKS,
 	                   -1);

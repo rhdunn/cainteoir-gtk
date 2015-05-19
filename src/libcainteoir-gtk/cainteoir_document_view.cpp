@@ -161,7 +161,7 @@ cainteoir_document_view_get_document(CainteoirDocumentView *view)
 {
 	g_return_val_if_fail(CAINTEOIR_DOCUMENT_VIEW(view), nullptr);
 
-	return CAINTEOIR_DOCUMENT(g_object_ref(view->priv->doc));
+	return view->priv->doc ? CAINTEOIR_DOCUMENT(g_object_ref(view->priv->doc)) : nullptr;
 }
 
 void

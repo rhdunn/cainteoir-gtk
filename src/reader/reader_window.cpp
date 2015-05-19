@@ -29,9 +29,17 @@
 #include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
+enum IndexTypeColumns
+{
+	INDEX_TYPE_LABEL,
+	INDEX_TYPE_ID,
+	INDEX_TYPE_COUNT,
+};
+
 struct _ReaderWindowPrivate
 {
 	GtkWidget *doc_pane;
+	GtkWidget *index_type;
 	GtkWidget *index;
 	GtkWidget *view;
 
@@ -93,11 +101,37 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 		cainteoir_settings_set_integer(reader->priv->settings, "window", "left",   left);
 	}
 
+	cainteoir_settings_set_string(reader->priv->settings, "document", "index-type",
+	                              gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
+
 	cainteoir_settings_set_integer(reader->priv->settings, "document", "splitter.pos",
 	                               gtk_paned_get_position(GTK_PANED(reader->priv->doc_pane)));
 
 	cainteoir_settings_save(reader->priv->settings);
 	return FALSE;
+}
+
+static GtkWidget *
+create_index_type_combo(void)
+{
+	GtkTreeStore *store = gtk_tree_store_new(INDEX_TYPE_COUNT, G_TYPE_STRING, G_TYPE_STRING);
+	GtkTreeIter row;
+
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
+	                   INDEX_TYPE_LABEL, i18n("Index"),
+	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_TOC,
+	                   -1);
+
+	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtk_combo_box_set_id_column(GTK_COMBO_BOX(combo), INDEX_TYPE_ID);
+
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
+	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer, "text", INDEX_TYPE_LABEL, nullptr);
+
+	g_object_unref(G_OBJECT(store));
+	return combo;
 }
 
 GtkWidget *
@@ -127,9 +161,15 @@ reader_window_new(const gchar *filename)
 	reader->priv->view  = cainteoir_document_view_new();
 	gtk_container_add(GTK_CONTAINER(view_scroll), reader->priv->view);
 
+	GtkWidget *index_pane = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	gtk_widget_set_size_request(index_pane, INDEX_PANE_WIDTH, -1);
+	gtk_paned_pack1(GTK_PANED(reader->priv->doc_pane), index_pane, TRUE, FALSE);
+
+	reader->priv->index_type = create_index_type_combo();
+	gtk_box_pack_start(GTK_BOX(index_pane), reader->priv->index_type, FALSE, FALSE, 0);
+
 	GtkWidget *index_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_widget_set_size_request(index_scroll, INDEX_PANE_WIDTH, -1);
-	gtk_paned_pack1(GTK_PANED(reader->priv->doc_pane), index_scroll, TRUE, FALSE);
+	gtk_box_pack_start(GTK_BOX(index_pane), index_scroll, TRUE, TRUE, 0);
 
 	reader->priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
 	gtk_container_add(GTK_CONTAINER(index_scroll), reader->priv->index);
@@ -145,6 +185,11 @@ reader_window_new(const gchar *filename)
 	                cainteoir_settings_get_integer(reader->priv->settings, "window", "top",  0));
 	if (cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
 		gtk_window_maximize(GTK_WINDOW(reader));
+
+
+	gchar *active_index = cainteoir_settings_get_string(reader->priv->settings, "document", "index-type", CAINTEOIR_INDEXTYPE_TOC);
+	gtk_combo_box_set_active_id(GTK_COMBO_BOX(reader->priv->index_type), active_index);
+	g_free(active_index);
 
 	gtk_paned_set_position(GTK_PANED(reader->priv->doc_pane),
 	                       cainteoir_settings_get_integer(reader->priv->settings, "document", "splitter.pos", INDEX_PANE_WIDTH));

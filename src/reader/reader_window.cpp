@@ -284,10 +284,6 @@ reader_window_load_document(ReaderWindow *reader,
 
 		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc,
 		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
-		if (cainteoir_document_index_is_empty(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index)))
-			gtk_widget_hide(reader->priv->index);
-		else
-			gtk_widget_show(reader->priv->index);
 
 		if (mimetype) g_free(mimetype);
 		g_object_unref(metadata);

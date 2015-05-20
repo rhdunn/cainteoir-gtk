@@ -72,7 +72,7 @@ cainteoir_settings_new(const gchar *filename)
 	settings->priv->filename = g_strdup_printf("%s/%s", root, filename ? filename : "settings.dat");
 	g_free(root);
 
-	if (!g_key_file_load_from_file(settings->priv->settings, settings->priv->filename, G_KEY_FILE_KEEP_COMMENTS, nullptr))
+	if (!g_key_file_load_from_file(settings->priv->settings, settings->priv->filename, G_KEY_FILE_NONE, nullptr))
 	{
 		// On error try parsing the old settings format ...
 

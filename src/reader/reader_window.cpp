@@ -289,8 +289,11 @@ reader_window_new(const gchar *filename)
 	gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), create_main_menu(reader));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
 
+	GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_add(GTK_CONTAINER(reader), layout);
+
 	reader->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_container_add(GTK_CONTAINER(reader), reader->priv->doc_pane);
+	gtk_box_pack_start(GTK_BOX(layout), reader->priv->doc_pane, TRUE, TRUE, 0);
 
 	GtkWidget *view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(view_scroll, DOCUMENT_PANE_WIDTH, -1);
@@ -321,6 +324,10 @@ reader_window_new(const gchar *filename)
 
 	reader->priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
 	gtk_container_add(GTK_CONTAINER(index_scroll), reader->priv->index);
+
+	GtkWidget *bottombar = gtk_toolbar_new();
+	gtk_widget_set_size_request(bottombar, -1, 45);
+	gtk_box_pack_start(GTK_BOX(layout), bottombar, FALSE, FALSE, 0);
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);

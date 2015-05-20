@@ -29,6 +29,9 @@
 #include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
+static constexpr int INDEX_PANE_WIDTH = 265;
+static constexpr int DOCUMENT_PANE_WIDTH = 300;
+
 enum IndexTypeColumns
 {
 	INDEX_TYPE_LABEL,
@@ -107,8 +110,34 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 	cainteoir_settings_set_integer(reader->priv->settings, "index", "position",
 	                               gtk_paned_get_position(GTK_PANED(reader->priv->doc_pane)));
 
+	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible",
+	                               gtk_widget_get_visible(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane))));
+
 	cainteoir_settings_save(reader->priv->settings);
 	return FALSE;
+}
+
+static void
+on_index_splitter_restore(GtkWidget *window, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	gtk_paned_set_position(GTK_PANED(reader->priv->doc_pane),
+	                       cainteoir_settings_get_integer(reader->priv->settings, "index", "position", INDEX_PANE_WIDTH));
+
+	if (cainteoir_settings_get_boolean(reader->priv->settings, "index", "visible", TRUE))
+		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
+	else
+		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
+}
+
+static void
+on_index_pane_close(GtkWidget *window, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible", FALSE);
+	gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
 }
 
 static GtkWidget *
@@ -193,9 +222,6 @@ on_index_type_changed(GtkWidget *window, gpointer data)
 GtkWidget *
 reader_window_new(const gchar *filename)
 {
-	static constexpr int INDEX_PANE_WIDTH = 265;
-	static constexpr int DOCUMENT_PANE_WIDTH = 300;
-
 	ReaderWindow *reader = READER_WINDOW(g_object_new(READER_TYPE_WINDOW, nullptr));
 	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));
@@ -221,8 +247,18 @@ reader_window_new(const gchar *filename)
 	gtk_widget_set_size_request(index_pane, INDEX_PANE_WIDTH, -1);
 	gtk_paned_pack1(GTK_PANED(reader->priv->doc_pane), index_pane, TRUE, FALSE);
 
+	GtkWidget *index_pane_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	gtk_box_pack_start(GTK_BOX(index_pane), index_pane_header, FALSE, FALSE, 0);
+
 	reader->priv->index_type = create_index_type_combo();
-	gtk_box_pack_start(GTK_BOX(index_pane), reader->priv->index_type, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(index_pane_header), reader->priv->index_type, TRUE, TRUE, 0);
+	g_signal_connect(reader->priv->index_type, "changed", G_CALLBACK(on_index_type_changed), reader);
+
+	GtkWidget *index_pane_close = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_button_set_always_show_image(GTK_BUTTON(index_pane_close), TRUE);
+	gtk_button_set_relief(GTK_BUTTON(index_pane_close), GTK_RELIEF_NONE);
+	gtk_box_pack_start(GTK_BOX(index_pane_header), index_pane_close, FALSE, FALSE, 0);
+	g_signal_connect(index_pane_close, "clicked", G_CALLBACK(on_index_pane_close), reader);
 
 	GtkWidget *index_scroll = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_box_pack_start(GTK_BOX(index_pane), index_scroll, TRUE, TRUE, 0);
@@ -232,7 +268,7 @@ reader_window_new(const gchar *filename)
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
-	g_signal_connect(reader->priv->index_type, "changed", G_CALLBACK(on_index_type_changed), reader);
+	g_signal_connect(reader, "show", G_CALLBACK(on_index_splitter_restore), reader);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "width",  700),
@@ -246,9 +282,6 @@ reader_window_new(const gchar *filename)
 	gchar *active_index = cainteoir_settings_get_string(reader->priv->settings, "index", "type", CAINTEOIR_INDEXTYPE_TOC);
 	gtk_combo_box_set_active_id(GTK_COMBO_BOX(reader->priv->index_type), active_index);
 	g_free(active_index);
-
-	gtk_paned_set_position(GTK_PANED(reader->priv->doc_pane),
-	                       cainteoir_settings_get_integer(reader->priv->settings, "index", "position", INDEX_PANE_WIDTH));
 
 	if (filename)
 		reader_window_load_document(reader, filename);

@@ -32,6 +32,12 @@
 static constexpr int INDEX_PANE_WIDTH = 265;
 static constexpr int DOCUMENT_PANE_WIDTH = 300;
 
+#if GTK_CHECK_VERSION(3, 14, 0)
+#define HAMBURGER_MENU_ICON "open-menu-symbolic"
+#else
+#define HAMBURGER_MENU_ICON "view-list-symbolic"
+#endif
+
 enum IndexTypeColumns
 {
 	INDEX_TYPE_LABEL,
@@ -45,6 +51,9 @@ struct _ReaderWindowPrivate
 	GtkWidget *index_type;
 	GtkWidget *index;
 	GtkWidget *view;
+
+	GSimpleActionGroup *actions;
+	GSimpleAction *index_pane_action;
 
 	CainteoirSettings *settings;
 };
@@ -138,6 +147,25 @@ on_index_pane_close(GtkWidget *window, gpointer data)
 
 	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible", FALSE);
 	gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
+	g_simple_action_set_state(reader->priv->index_pane_action, g_variant_new_boolean(FALSE));
+}
+
+static void
+on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	GVariant *action_state = g_action_get_state(G_ACTION(action));
+	gboolean active = !g_variant_get_boolean(action_state);
+
+	g_simple_action_set_state(action, g_variant_new_boolean(active));
+	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible", active);
+	cainteoir_settings_save(reader->priv->settings);
+
+	if (active)
+		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
+	else
+		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
 }
 
 static GtkWidget *
@@ -205,6 +233,28 @@ create_index_type_combo(void)
 	return combo;
 }
 
+static GSimpleActionGroup *
+create_action_group(ReaderWindow *reader)
+{
+	GSimpleActionGroup *actions = g_simple_action_group_new();
+
+	gboolean side_pane = cainteoir_settings_get_boolean(reader->priv->settings, "index", "visible", TRUE);
+
+	reader->priv->index_pane_action = g_simple_action_new_stateful("side-pane", nullptr, g_variant_new_boolean(side_pane));
+	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->index_pane_action));
+	g_signal_connect(reader->priv->index_pane_action, "activate", G_CALLBACK(on_index_pane_toggle_action), reader);
+
+	return actions;
+}
+
+static GMenuModel *
+create_main_menu(ReaderWindow *reader)
+{
+	GMenu *menu = g_menu_new();
+	g_menu_append(menu, "Side Pane", "cainteoir.side-pane");
+	return G_MENU_MODEL(menu);
+}
+
 static void
 on_index_type_changed(GtkWidget *window, gpointer data)
 {
@@ -230,6 +280,14 @@ reader_window_new(const gchar *filename)
 	gtk_header_bar_set_title(GTK_HEADER_BAR(header), i18n("Cainteoir Text-to-Speech"));
 	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
 	gtk_window_set_titlebar(GTK_WINDOW(reader), header);
+
+	reader->priv->actions = create_action_group(reader);
+	gtk_widget_insert_action_group(GTK_WIDGET(reader), "cainteoir", G_ACTION_GROUP(reader->priv->actions));
+
+	GtkWidget *menu_button = gtk_menu_button_new();
+	gtk_button_set_image(GTK_BUTTON(menu_button), gtk_image_new_from_icon_name(HAMBURGER_MENU_ICON, GTK_ICON_SIZE_SMALL_TOOLBAR));
+	gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), create_main_menu(reader));
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
 
 	reader->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add(GTK_CONTAINER(reader), reader->priv->doc_pane);

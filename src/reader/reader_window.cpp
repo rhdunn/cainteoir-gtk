@@ -226,12 +226,10 @@ reader_window_new(const gchar *filename)
 	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));
 
-#ifdef HAVE_GTK3_HEADER_BAR
 	GtkWidget *header = gtk_header_bar_new();
 	gtk_header_bar_set_title(GTK_HEADER_BAR(header), i18n("Cainteoir Text-to-Speech"));
 	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
 	gtk_window_set_titlebar(GTK_WINDOW(reader), header);
-#endif
 
 	reader->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add(GTK_CONTAINER(reader), reader->priv->doc_pane);

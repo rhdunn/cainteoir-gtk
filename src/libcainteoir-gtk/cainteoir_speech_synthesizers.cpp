@@ -41,6 +41,7 @@ struct _CainteoirSpeechSynthesizersPrivate
 
 	std::shared_ptr<cainteoir::tts::speech> speech;
 	std::shared_ptr<cainteoir::audio> out;
+	gchar *device_name;
 
 	_CainteoirSpeechSynthesizersPrivate();
 };
@@ -48,6 +49,7 @@ struct _CainteoirSpeechSynthesizersPrivate
 _CainteoirSpeechSynthesizersPrivate::_CainteoirSpeechSynthesizersPrivate()
 	: tts(metadata)
 	, narration(tts::media_overlays_mode::tts_only)
+	, device_name(nullptr)
 {
 }
 
@@ -56,8 +58,9 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechSynthesizers, cainteoir_speech_synthes
 static void
 cainteoir_speech_synthesizers_finalize(GObject *object)
 {
-	CainteoirSpeechSynthesizers *doc = CAINTEOIR_SPEECH_SYNTHESIZERS(object);
-	doc->priv->~CainteoirSpeechSynthesizersPrivate();
+	CainteoirSpeechSynthesizers *synthesizers = CAINTEOIR_SPEECH_SYNTHESIZERS(object);
+	g_free(synthesizers->priv->device_name);
+	synthesizers->priv->~CainteoirSpeechSynthesizersPrivate();
 
 	G_OBJECT_CLASS(cainteoir_speech_synthesizers_parent_class)->finalize(object);
 }
@@ -70,10 +73,10 @@ cainteoir_speech_synthesizers_class_init(CainteoirSpeechSynthesizersClass *klass
 }
 
 static void
-cainteoir_speech_synthesizers_init(CainteoirSpeechSynthesizers *doc)
+cainteoir_speech_synthesizers_init(CainteoirSpeechSynthesizers *synthesizers)
 {
-	void * data = cainteoir_speech_synthesizers_get_instance_private(doc);
-	doc->priv = new (data)CainteoirSpeechSynthesizersPrivate();
+	void * data = cainteoir_speech_synthesizers_get_instance_private(synthesizers);
+	synthesizers->priv = new (data)CainteoirSpeechSynthesizersPrivate();
 }
 
 static void
@@ -165,8 +168,11 @@ cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
 
 	try
 	{
+		g_free(synthesizers->priv->device_name);
+		synthesizers->priv->device_name = g_strdup(device_name);
+
 		synthesizers->priv->out = cainteoir::open_audio_device(
-			device_name,
+			synthesizers->priv->device_name,
 			*cainteoir_document_get_rdf_metadata(doc),
 			*cainteoir_document_get_subject(doc),
 			synthesizers->priv->metadata,

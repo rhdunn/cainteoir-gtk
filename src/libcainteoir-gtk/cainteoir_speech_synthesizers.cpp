@@ -37,6 +37,7 @@ struct _CainteoirSpeechSynthesizersPrivate
 {
 	rdf::graph metadata;
 	tts::engines tts;
+	tts::media_overlays_mode narration;
 
 	std::shared_ptr<cainteoir::tts::speech> speech;
 	std::shared_ptr<cainteoir::audio> out;
@@ -46,6 +47,7 @@ struct _CainteoirSpeechSynthesizersPrivate
 
 _CainteoirSpeechSynthesizersPrivate::_CainteoirSpeechSynthesizersPrivate()
 	: tts(metadata)
+	, narration(tts::media_overlays_mode::tts_only)
 {
 }
 
@@ -79,12 +81,10 @@ cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizers *synthesizers,
                                     CainteoirDocument *document,
                                     CainteoirDocumentIndex *index)
 {
-	auto mode = tts::media_overlays_mode::tts_only;
-
 	auto doc = cainteoir_document_get_document(document);
 	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(index));
 	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(index));
-	synthesizers->priv->speech = synthesizers->priv->tts.speak(synthesizers->priv->out, listing, doc->children(sel), mode);
+	synthesizers->priv->speech = synthesizers->priv->tts.speak(synthesizers->priv->out, listing, doc->children(sel), synthesizers->priv->narration);
 }
 
 CainteoirSpeechSynthesizers *
@@ -122,6 +122,36 @@ cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers 
 			return TRUE;
 	}
 	return FALSE;
+}
+
+CainteoirNarration
+cainteoir_speech_synthesizers_get_narration(CainteoirSpeechSynthesizers *synthesizers)
+{
+	switch (synthesizers->priv->narration)
+	{
+	case tts::media_overlays_mode::tts_only:               return CAINTEOIR_NARRATION_TTS_ONLY;
+	case tts::media_overlays_mode::media_overlays_only:    return CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY;
+	case tts::media_overlays_mode::tts_and_media_overlays: return CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS;
+	default:                                               return CAINTEOIR_NARRATION_TTS_ONLY;
+	}
+}
+
+void
+cainteoir_speech_synthesizers_set_narration(CainteoirSpeechSynthesizers *synthesizers,
+                                            CainteoirNarration narration)
+{
+	switch (narration)
+	{
+	case CAINTEOIR_NARRATION_TTS_ONLY:
+		synthesizers->priv->narration = tts::media_overlays_mode::tts_only;
+		break;
+	case CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY:
+		synthesizers->priv->narration = tts::media_overlays_mode::media_overlays_only;
+		break;
+	case CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS:
+		synthesizers->priv->narration = tts::media_overlays_mode::tts_and_media_overlays;
+		break;
+	}
 }
 
 void

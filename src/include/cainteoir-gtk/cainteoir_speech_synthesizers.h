@@ -62,12 +62,24 @@ struct _CainteoirSpeechSynthesizersClass
 	void (*_reserved4)(void);
 };
 
+enum CainteoirNarration
+{
+	CAINTEOIR_NARRATION_TTS_ONLY,
+	CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY,
+	CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS,
+};
+
 GType                                  cainteoir_speech_synthesizers_get_type(void) G_GNUC_CONST;
 
 CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new();
 
 gboolean                               cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers *synthesizers,
                                                                                            const gchar *lang);
+
+CainteoirNarration                     cainteoir_speech_synthesizers_get_narration(CainteoirSpeechSynthesizers *synthesizers);
+
+void                                   cainteoir_speech_synthesizers_set_narration(CainteoirSpeechSynthesizers *synthesizers,
+                                                                                   CainteoirNarration narration);
 
 void                                   cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
                                                                           CainteoirDocument *doc,

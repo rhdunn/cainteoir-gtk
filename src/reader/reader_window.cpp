@@ -27,6 +27,7 @@
 
 #include <cainteoir-gtk/cainteoir_document_view.h>
 #include <cainteoir-gtk/cainteoir_document_index.h>
+#include <cainteoir-gtk/cainteoir_supported_formats.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
 static constexpr int INDEX_PANE_WIDTH = 265;
@@ -54,8 +55,10 @@ struct _ReaderWindowPrivate
 
 	GSimpleActionGroup *actions;
 	GSimpleAction *index_pane_action;
+	GSimpleAction *open_action;
 
 	CainteoirSettings *settings;
+	CainteoirSupportedFormats *document_formats;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_WINDOW)
@@ -80,6 +83,31 @@ reader_window_init(ReaderWindow *reader)
 {
 	reader->priv = (ReaderWindowPrivate *)reader_window_get_instance_private(reader);
 	reader->priv->settings = cainteoir_settings_new("settings.dat");
+	reader->priv->document_formats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
+}
+
+static gchar *
+select_file(GtkWindow *window,
+            const gchar *title,
+            GtkFileChooserAction action,
+            const gchar *open_id,
+            const gchar *filename,
+            const gchar *default_mimetype,
+            CainteoirSupportedFormats *formats)
+{
+	GtkWidget *dialog = gtk_file_chooser_dialog_new(title, window, action,
+		i18n("_Cancel"), GTK_RESPONSE_CANCEL,
+		open_id,         GTK_RESPONSE_OK,
+		nullptr);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
+	cainteoir_supported_formats_add_file_filters(formats, GTK_FILE_CHOOSER(dialog), default_mimetype);
+
+	gchar *path = nullptr;
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK)
+		path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+
+	gtk_widget_destroy(dialog);
+	return path;
 }
 
 static gboolean
@@ -168,6 +196,31 @@ on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, gpointer
 		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
 }
 
+static void
+on_open_file_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+	gchar *current_filename = cainteoir_settings_get_string(reader->priv->settings, "document", "filename", nullptr);
+	gchar *current_mimetype = cainteoir_settings_get_string(reader->priv->settings, "document", "mimetype", "text/plain");
+
+	gchar *filename = select_file(GTK_WINDOW(reader),
+		i18n("Open Document"),
+		GTK_FILE_CHOOSER_ACTION_OPEN,
+		i18n("_Open"),
+		current_filename,
+		current_mimetype,
+		reader->priv->document_formats);
+
+	g_free(current_filename);
+	g_free(current_mimetype);
+
+	if (filename)
+	{
+		reader_window_load_document(reader, filename);
+		g_free(filename);
+	}
+}
+
 static GtkWidget *
 create_index_type_combo(void)
 {
@@ -243,6 +296,10 @@ create_action_group(ReaderWindow *reader)
 	reader->priv->index_pane_action = g_simple_action_new_stateful("side-pane", nullptr, g_variant_new_boolean(side_pane));
 	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->index_pane_action));
 	g_signal_connect(reader->priv->index_pane_action, "activate", G_CALLBACK(on_index_pane_toggle_action), reader);
+
+	reader->priv->open_action = g_simple_action_new("open", nullptr);
+	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->open_action));
+	g_signal_connect(reader->priv->open_action, "activate", G_CALLBACK(on_open_file_action), reader);
 
 	return actions;
 }
@@ -328,6 +385,10 @@ reader_window_new(const gchar *filename)
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);
 	gtk_box_pack_start(GTK_BOX(layout), bottombar, FALSE, FALSE, 0);
+
+	GtkToolItem *open = gtk_tool_button_new(gtk_image_new_from_icon_name("document-open-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
+	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), open, 0);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(open), "cainteoir.open");
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);

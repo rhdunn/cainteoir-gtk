@@ -176,3 +176,45 @@ cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
 		fprintf(stderr, "error: %s\n", e.what());
 	}
 }
+
+gboolean
+cainteoir_speech_synthesizers_is_speaking(CainteoirSpeechSynthesizers *synthesizers)
+{
+	if (!synthesizers->priv->speech) return FALSE;
+	return synthesizers->priv->speech->is_speaking();
+}
+
+void
+cainteoir_speech_synthesizers_stop(CainteoirSpeechSynthesizers *synthesizers)
+{
+	if (!synthesizers->priv->speech) return;
+	synthesizers->priv->speech->stop();
+}
+
+gdouble
+cainteoir_speech_synthesizers_get_elapsed_time(CainteoirSpeechSynthesizers *synthesizers)
+{
+	if (!synthesizers->priv->speech) return 0.0;
+	return synthesizers->priv->speech->elapsedTime();
+}
+
+gdouble
+cainteoir_speech_synthesizers_get_total_time(CainteoirSpeechSynthesizers *synthesizers)
+{
+	if (!synthesizers->priv->speech) return 0.0;
+	return synthesizers->priv->speech->totalTime();
+}
+
+gdouble
+cainteoir_speech_synthesizers_get_percentage_complete(CainteoirSpeechSynthesizers *synthesizers)
+{
+	if (!synthesizers->priv->speech) return 0.0;
+	return synthesizers->priv->speech->completed();
+}
+
+size_t
+cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesizers)
+{
+	if (!synthesizers->priv->speech) return 0;
+	return synthesizers->priv->speech->position();
+}

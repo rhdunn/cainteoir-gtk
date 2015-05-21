@@ -86,6 +86,18 @@ void                                   cainteoir_speech_synthesizers_read(Cainte
                                                                           CainteoirDocumentIndex *index,
                                                                           const gchar *device_name);
 
+gboolean                               cainteoir_speech_synthesizers_is_speaking(CainteoirSpeechSynthesizers *synthesizers);
+
+void                                   cainteoir_speech_synthesizers_stop(CainteoirSpeechSynthesizers *synthesizers);
+
+gdouble                                cainteoir_speech_synthesizers_get_elapsed_time(CainteoirSpeechSynthesizers *synthesizers);
+
+gdouble                                cainteoir_speech_synthesizers_get_total_time(CainteoirSpeechSynthesizers *synthesizers);
+
+gdouble                                cainteoir_speech_synthesizers_get_percentage_complete(CainteoirSpeechSynthesizers *synthesizers);
+
+size_t                                 cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesizers);
+
 G_END_DECLS
 
 #endif

@@ -160,6 +160,9 @@ cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
                                    CainteoirDocumentIndex *index,
                                    const gchar *device_name)
 {
+	if (cainteoir_speech_synthesizers_is_speaking(synthesizers))
+		return;
+
 	try
 	{
 		synthesizers->priv->out = cainteoir::open_audio_device(

@@ -1,6 +1,6 @@
 /* A GTK+ wrapper around the cainteoir::tts::engines class.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -26,6 +26,9 @@
 #include <cainteoir/engines.hpp>
 #include <cainteoir/locale.hpp>
 
+#include "cainteoir_document_private.h"
+#include "cainteoir_document_index_private.h"
+
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
@@ -34,6 +37,9 @@ struct _CainteoirSpeechSynthesizersPrivate
 {
 	rdf::graph metadata;
 	tts::engines tts;
+
+	std::shared_ptr<cainteoir::tts::speech> speech;
+	std::shared_ptr<cainteoir::audio> out;
 
 	_CainteoirSpeechSynthesizersPrivate();
 };
@@ -66,6 +72,19 @@ cainteoir_speech_synthesizers_init(CainteoirSpeechSynthesizers *doc)
 {
 	void * data = cainteoir_speech_synthesizers_get_instance_private(doc);
 	doc->priv = new (data)CainteoirSpeechSynthesizersPrivate();
+}
+
+static void
+cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizers *synthesizers,
+                                    CainteoirDocument *document,
+                                    CainteoirDocumentIndex *index)
+{
+	auto mode = tts::media_overlays_mode::tts_only;
+
+	auto doc = cainteoir_document_get_document(document);
+	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(index));
+	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(index));
+	synthesizers->priv->speech = synthesizers->priv->tts.speak(synthesizers->priv->out, listing, doc->children(sel), mode);
 }
 
 CainteoirSpeechSynthesizers *
@@ -103,4 +122,27 @@ cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers 
 			return TRUE;
 	}
 	return FALSE;
+}
+
+void
+cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
+                                   CainteoirDocument *doc,
+                                   CainteoirDocumentIndex *index,
+                                   const gchar *device_name)
+{
+	try
+	{
+		synthesizers->priv->out = cainteoir::open_audio_device(
+			device_name,
+			*cainteoir_document_get_rdf_metadata(doc),
+			*cainteoir_document_get_subject(doc),
+			synthesizers->priv->metadata,
+			synthesizers->priv->tts.voice());
+
+		cainteoir_speech_synthesizers_speak(synthesizers, doc, index);
+	}
+	catch (const std::exception &e)
+	{
+		fprintf(stderr, "error: %s\n", e.what());
+	}
 }

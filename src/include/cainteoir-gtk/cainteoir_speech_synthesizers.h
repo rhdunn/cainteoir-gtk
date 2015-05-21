@@ -1,6 +1,6 @@
 /* A GTK+ wrapper around the cainteoir::tts::engines class.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -20,6 +20,9 @@
 
 #ifndef CAINTEOIR_GTK_CAINTEOIR_SPEECH_SYNTHESIZERS_H
 #define CAINTEOIR_GTK_CAINTEOIR_SPEECH_SYNTHESIZERS_H
+
+#include "cainteoir_document.h"
+#include "cainteoir_document_index.h"
 
 G_BEGIN_DECLS
 
@@ -65,6 +68,11 @@ CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new();
 
 gboolean                               cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers *synthesizers,
                                                                                            const gchar *lang);
+
+void                                   cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
+                                                                          CainteoirDocument *doc,
+                                                                          CainteoirDocumentIndex *index,
+                                                                          const gchar *device_name);
 
 G_END_DECLS
 

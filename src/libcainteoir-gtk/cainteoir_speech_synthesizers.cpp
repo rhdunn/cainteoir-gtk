@@ -59,6 +59,8 @@ static void
 cainteoir_speech_synthesizers_finalize(GObject *object)
 {
 	CainteoirSpeechSynthesizers *synthesizers = CAINTEOIR_SPEECH_SYNTHESIZERS(object);
+	cainteoir_speech_synthesizers_stop(synthesizers);
+
 	g_free(synthesizers->priv->device_name);
 	synthesizers->priv->~CainteoirSpeechSynthesizersPrivate();
 

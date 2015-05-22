@@ -67,6 +67,9 @@ void                                   cainteoir_timebar_set_time(CainteoirTimeB
                                                                   gdouble elapsed_time,
                                                                   gdouble total_time);
 
+void                                   cainteoir_timebar_set_progress(CainteoirTimeBar *timebar,
+                                                                      gdouble progress);
+
 G_END_DECLS
 
 #endif

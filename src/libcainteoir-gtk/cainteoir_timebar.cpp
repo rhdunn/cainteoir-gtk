@@ -24,7 +24,6 @@
 
 #include <cainteoir-gtk/cainteoir_timebar.h>
 
-#include <stdlib.h>
 #include <math.h>
 
 struct _CainteoirTimeBarPrivate
@@ -97,10 +96,11 @@ cainteoir_timebar_set_time(CainteoirTimeBar *timebar,
 {
 	format_time(timebar->priv->elapsed, elapsed_time);
 	format_time(timebar->priv->total, total_time);
+}
 
-	gdouble completed = 0.0;
-	if (labs(total_time - elapsed_time) > 0.0000001)
-		completed = elapsed_time / total_time;
-
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(timebar->priv->progress), completed);
+void
+cainteoir_timebar_set_progress(CainteoirTimeBar *timebar,
+                               gdouble progress)
+{
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(timebar->priv->progress), progress / 100.0);
 }

@@ -63,3 +63,46 @@ cainteoir_speech_parameter_new(const std::shared_ptr<cainteoir::tts::parameter> 
 	self->priv->param = parameter;
 	return self;
 }
+
+const gchar *
+cainteoir_speech_parameter_get_name(CainteoirSpeechParameter *parameter)
+{
+	return parameter->priv->param->name();
+}
+
+const gchar *
+cainteoir_speech_parameter_get_units(CainteoirSpeechParameter *parameter)
+{
+	return parameter->priv->param->units();
+}
+
+gint
+cainteoir_speech_parameter_get_minimum(CainteoirSpeechParameter *parameter)
+{
+	return parameter->priv->param->minimum();
+}
+
+gint
+cainteoir_speech_parameter_get_maximum(CainteoirSpeechParameter *parameter)
+{
+	return parameter->priv->param->maximum();
+}
+
+gint
+cainteoir_speech_parameter_get_default(CainteoirSpeechParameter *parameter)
+{
+	return parameter->priv->param->default_value();
+}
+
+gint
+cainteoir_speech_parameter_get_value(CainteoirSpeechParameter *parameter)
+{
+	return parameter->priv->param->value();
+}
+
+gboolean
+cainteoir_speech_parameter_set_value(CainteoirSpeechParameter *parameter,
+                                     gint value)
+{
+	return parameter->priv->param->set_value(value);
+}

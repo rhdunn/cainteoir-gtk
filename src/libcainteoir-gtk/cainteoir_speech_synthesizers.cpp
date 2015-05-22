@@ -232,8 +232,8 @@ cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesi
 }
 
 CainteoirSpeechParameter *
-cainteoir_speech_synthesizer_get_parameter(CainteoirSpeechSynthesizers *synthesizers,
-                                           CainteoirSpeechParameterType parameter)
+cainteoir_speech_synthesizers_get_parameter(CainteoirSpeechSynthesizers *synthesizers,
+                                            CainteoirSpeechParameterType parameter)
 {
 	tts::parameter::type type;
 	switch (parameter)

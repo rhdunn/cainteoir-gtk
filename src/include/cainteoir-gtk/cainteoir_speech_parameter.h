@@ -61,6 +61,21 @@ struct _CainteoirSpeechParameterClass
 
 GType                                  cainteoir_speech_parameter_get_type(void) G_GNUC_CONST;
 
+const gchar *                          cainteoir_speech_parameter_get_name(CainteoirSpeechParameter *parameter);
+
+const gchar *                          cainteoir_speech_parameter_get_units(CainteoirSpeechParameter *parameter);
+
+gint                                   cainteoir_speech_parameter_get_minimum(CainteoirSpeechParameter *parameter);
+
+gint                                   cainteoir_speech_parameter_get_maximum(CainteoirSpeechParameter *parameter);
+
+gint                                   cainteoir_speech_parameter_get_default(CainteoirSpeechParameter *parameter);
+
+gint                                   cainteoir_speech_parameter_get_value(CainteoirSpeechParameter *parameter);
+
+gboolean                               cainteoir_speech_parameter_set_value(CainteoirSpeechParameter *parameter,
+                                                                            gint value);
+
 G_END_DECLS
 
 #endif

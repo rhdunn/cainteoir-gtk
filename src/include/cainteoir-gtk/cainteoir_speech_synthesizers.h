@@ -108,8 +108,8 @@ gdouble                                cainteoir_speech_synthesizers_get_percent
 
 size_t                                 cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesizers);
 
-CainteoirSpeechParameter *             cainteoir_speech_synthesizer_get_parameter(CainteoirSpeechSynthesizers *synthesizers,
-                                                                                  CainteoirSpeechParameterType parameter);
+CainteoirSpeechParameter *             cainteoir_speech_synthesizers_get_parameter(CainteoirSpeechSynthesizers *synthesizers,
+                                                                                   CainteoirSpeechParameterType parameter);
 
 G_END_DECLS
 

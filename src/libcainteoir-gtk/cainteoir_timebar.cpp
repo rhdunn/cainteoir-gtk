@@ -24,8 +24,14 @@
 
 #include <cainteoir-gtk/cainteoir_timebar.h>
 
+#include <stdlib.h>
+#include <math.h>
+
 struct _CainteoirTimeBarPrivate
 {
+	GtkWidget *elapsed;
+	GtkWidget *total;
+	GtkWidget *progress;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirTimeBar, cainteoir_timebar, GTK_TYPE_BOX)
@@ -55,6 +61,46 @@ GtkWidget *
 cainteoir_timebar_new()
 {
 	CainteoirTimeBar *self = CAINTEOIR_TIMEBAR(g_object_new(CAINTEOIR_TYPE_TIMEBAR, nullptr));
+	self->priv->elapsed = gtk_label_new("00:00:00.0");
+	self->priv->total = gtk_label_new("00:00:00.0");
+	self->priv->progress = gtk_progress_bar_new();
+
+	gtk_widget_set_valign(self->priv->progress, GTK_ALIGN_CENTER);
+
+	gtk_box_pack_start(GTK_BOX(self), self->priv->elapsed, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(self), self->priv->progress, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(self), self->priv->total, FALSE, TRUE, 0);
 
 	return GTK_WIDGET(self);
+}
+
+static void
+format_time(GtkWidget *time_label, gdouble seconds)
+{
+	int ms = int(seconds * 10.0) % 10;
+
+	int minutes = floor(seconds / 60.0);
+	seconds = seconds - (minutes * 60.0);
+
+	int hours = floor(minutes / 60.0);
+	minutes = minutes - (hours * 60.0);
+
+	char time[80];
+	snprintf(time, sizeof(time), "%02d:%02d:%02d.%01d", hours, minutes, (int)floor(seconds), ms);
+	gtk_label_set_text(GTK_LABEL(time_label), time);
+}
+
+void
+cainteoir_timebar_set_time(CainteoirTimeBar *timebar,
+                           gdouble elapsed_time,
+                           gdouble total_time)
+{
+	format_time(timebar->priv->elapsed, elapsed_time);
+	format_time(timebar->priv->total, total_time);
+
+	gdouble completed = 0.0;
+	if (labs(total_time - elapsed_time) > 0.0000001)
+		completed = elapsed_time / total_time;
+
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(timebar->priv->progress), completed);
 }

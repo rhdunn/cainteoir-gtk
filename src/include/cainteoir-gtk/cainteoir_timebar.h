@@ -63,6 +63,10 @@ GType                                  cainteoir_timebar_get_type(void) G_GNUC_C
 
 GtkWidget *                            cainteoir_timebar_new(void);
 
+void                                   cainteoir_timebar_set_time(CainteoirTimeBar *timebar,
+                                                                  gdouble elapsed_time,
+                                                                  gdouble total_time);
+
 G_END_DECLS
 
 #endif

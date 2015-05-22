@@ -60,6 +60,9 @@ struct _ReaderWindowPrivate
 	GSimpleAction *play_action;
 	GSimpleAction *stop_action;
 
+	GtkToolItem *play;
+	GtkToolItem *stop;
+
 	CainteoirSettings *settings;
 	CainteoirSupportedFormats *document_formats;
 	CainteoirSpeechSynthesizers *tts;
@@ -116,6 +119,29 @@ select_file(GtkWindow *window,
 }
 
 static gboolean
+on_speaking_timer(ReaderWindow *reader)
+{
+	if (cainteoir_speech_synthesizers_is_speaking(reader->priv->tts))
+	{
+		return TRUE;
+	}
+
+	gtk_widget_show(GTK_WIDGET(reader->priv->play));
+	gtk_widget_hide(GTK_WIDGET(reader->priv->stop));
+
+	return FALSE;
+}
+
+static void
+on_speak(ReaderWindow *reader)
+{
+	gtk_widget_hide(GTK_WIDGET(reader->priv->play));
+	gtk_widget_show(GTK_WIDGET(reader->priv->stop));
+
+	g_timeout_add(100, (GSourceFunc)on_speaking_timer, reader);
+}
+
+static gboolean
 on_window_state_changed(GtkWidget *widget, GdkEvent *event, void *data)
 {
 	CainteoirSettings *settings = (CainteoirSettings *)data;
@@ -160,7 +186,7 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 }
 
 static void
-on_index_splitter_restore(GtkWidget *window, gpointer data)
+on_window_show(GtkWidget *window, gpointer data)
 {
 	ReaderWindow *reader = (ReaderWindow *)data;
 
@@ -171,6 +197,8 @@ on_index_splitter_restore(GtkWidget *window, gpointer data)
 		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
 	else
 		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
+
+	gtk_widget_hide(GTK_WIDGET(reader->priv->stop));
 }
 
 static void
@@ -235,6 +263,7 @@ on_play_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 	gchar *device_name = cainteoir_settings_get_string(reader->priv->settings, "audio", "device-name", nullptr);
 
 	cainteoir_speech_synthesizers_read(reader->priv->tts, doc, CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), device_name);
+	on_speak(reader);
 
 	g_free(device_name);
 	g_object_unref(G_OBJECT(doc));
@@ -421,13 +450,13 @@ reader_window_new(const gchar *filename)
 	gtk_widget_set_size_request(bottombar, -1, 45);
 	gtk_box_pack_start(GTK_BOX(layout), bottombar, FALSE, FALSE, 0);
 
-	GtkToolItem *play = gtk_tool_button_new(gtk_image_new_from_icon_name("media-playback-start-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
-	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), play, -1);
-	gtk_actionable_set_action_name(GTK_ACTIONABLE(play), "cainteoir.play");
+	reader->priv->play = gtk_tool_button_new(gtk_image_new_from_icon_name("media-playback-start-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
+	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), reader->priv->play, -1);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(reader->priv->play), "cainteoir.play");
 
-	GtkToolItem *stop = gtk_tool_button_new(gtk_image_new_from_icon_name("media-playback-stop-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
-	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), stop, -1);
-	gtk_actionable_set_action_name(GTK_ACTIONABLE(stop), "cainteoir.stop");
+	reader->priv->stop = gtk_tool_button_new(gtk_image_new_from_icon_name("media-playback-stop-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
+	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), reader->priv->stop, -1);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(reader->priv->stop), "cainteoir.stop");
 
 	GtkToolItem *open = gtk_tool_button_new(gtk_image_new_from_icon_name("document-open-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
 	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), open, -1);
@@ -435,7 +464,7 @@ reader_window_new(const gchar *filename)
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
-	g_signal_connect(reader, "show", G_CALLBACK(on_index_splitter_restore), reader);
+	g_signal_connect(reader, "show", G_CALLBACK(on_window_show), reader);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "width",  700),

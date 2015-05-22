@@ -189,6 +189,39 @@ cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
 	}
 }
 
+void
+cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
+                                     CainteoirDocument *doc,
+                                     CainteoirDocumentIndex *index,
+                                     const gchar *filename,
+                                     const gchar *type,
+                                     gfloat quality)
+{
+	if (cainteoir_speech_synthesizers_is_speaking(synthesizers))
+		return;
+
+	try
+	{
+		g_free(synthesizers->priv->device_name);
+		synthesizers->priv->device_name = g_strdup(filename);
+
+		synthesizers->priv->out = cainteoir::create_audio_file(
+			synthesizers->priv->device_name,
+			type,
+			quality,
+			*cainteoir_document_get_rdf_metadata(doc),
+			*cainteoir_document_get_subject(doc),
+			synthesizers->priv->metadata,
+			synthesizers->priv->tts.voice());
+
+		cainteoir_speech_synthesizers_speak(synthesizers, doc, index);
+	}
+	catch (const std::exception &e)
+	{
+		fprintf(stderr, "error: %s\n", e.what());
+	}
+}
+
 gboolean
 cainteoir_speech_synthesizers_is_speaking(CainteoirSpeechSynthesizers *synthesizers)
 {

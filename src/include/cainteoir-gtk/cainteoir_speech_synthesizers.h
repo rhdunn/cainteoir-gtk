@@ -96,6 +96,13 @@ void                                   cainteoir_speech_synthesizers_read(Cainte
                                                                           CainteoirDocumentIndex *index,
                                                                           const gchar *device_name);
 
+void                                   cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
+                                                                            CainteoirDocument *doc,
+                                                                            CainteoirDocumentIndex *index,
+                                                                            const gchar *filename,
+                                                                            const gchar *type,
+                                                                            gfloat quality);
+
 gboolean                               cainteoir_speech_synthesizers_is_speaking(CainteoirSpeechSynthesizers *synthesizers);
 
 void                                   cainteoir_speech_synthesizers_stop(CainteoirSpeechSynthesizers *synthesizers);

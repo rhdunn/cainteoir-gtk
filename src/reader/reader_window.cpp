@@ -60,11 +60,13 @@ struct _ReaderWindowPrivate
 	GSimpleAction *index_pane_action;
 	GSimpleAction *open_action;
 	GSimpleAction *play_stop_action;
+	GSimpleAction *record_action;
 
 	GtkToolItem *play_stop;
 
 	CainteoirSettings *settings;
 	CainteoirSupportedFormats *document_formats;
+	CainteoirSupportedFormats *audio_formats;
 	CainteoirSpeechSynthesizers *tts;
 };
 
@@ -91,6 +93,7 @@ reader_window_init(ReaderWindow *reader)
 	reader->priv = (ReaderWindowPrivate *)reader_window_get_instance_private(reader);
 	reader->priv->settings = cainteoir_settings_new("settings.dat");
 	reader->priv->document_formats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
+	reader->priv->audio_formats = cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS);
 	reader->priv->tts = cainteoir_speech_synthesizers_new();
 }
 
@@ -107,7 +110,8 @@ select_file(GtkWindow *window,
 		i18n("_Cancel"), GTK_RESPONSE_CANCEL,
 		open_id,         GTK_RESPONSE_OK,
 		nullptr);
-	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
+	if (filename)
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
 	cainteoir_supported_formats_add_file_filters(formats, GTK_FILE_CHOOSER(dialog), default_mimetype);
 
 	gchar *path = nullptr;
@@ -295,6 +299,48 @@ on_play_stop_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 	}
 }
 
+static void
+on_record_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+	gchar *current_filename = cainteoir_settings_get_string(reader->priv->settings, "recording", "filename", nullptr);
+	gchar *current_mimetype = cainteoir_settings_get_string(reader->priv->settings, "recording", "mimetype", "audio/x-vorbis+ogg");
+
+	gchar *filename = select_file(GTK_WINDOW(reader),
+		i18n("Record Document"),
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		i18n("_Record"),
+		current_filename,
+		current_mimetype,
+		reader->priv->audio_formats);
+
+	g_free(current_filename);
+	g_free(current_mimetype);
+
+	if (!filename)
+		return;
+
+	gchar *type = nullptr;
+	gchar *mimetype = nullptr;
+	if (cainteoir_supported_formats_file_info(reader->priv->audio_formats, filename, &type, &mimetype))
+	{
+		CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+
+		cainteoir_settings_set_string(reader->priv->settings, "recording", "filename", filename);
+		cainteoir_settings_set_string(reader->priv->settings, "recording", "mimetype", mimetype);
+		cainteoir_settings_save(reader->priv->settings);
+
+		cainteoir_speech_synthesizers_record(reader->priv->tts, doc, CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), filename, type, 0.3);
+		on_speak(reader);
+
+		g_free(type);
+		g_free(mimetype);
+		g_object_unref(G_OBJECT(doc));
+	}
+
+	g_free(filename);
+}
+
 static GtkWidget *
 create_index_type_combo(void)
 {
@@ -378,6 +424,10 @@ create_action_group(ReaderWindow *reader)
 	reader->priv->play_stop_action = g_simple_action_new("play-stop", nullptr);
 	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->play_stop_action));
 	g_signal_connect(reader->priv->play_stop_action, "activate", G_CALLBACK(on_play_stop_action), reader);
+
+	reader->priv->record_action = g_simple_action_new("record", nullptr);
+	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->record_action));
+	g_signal_connect(reader->priv->record_action, "activate", G_CALLBACK(on_record_action), reader);
 
 	return actions;
 }
@@ -463,6 +513,10 @@ reader_window_new(const gchar *filename)
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);
 	gtk_box_pack_start(GTK_BOX(layout), bottombar, FALSE, FALSE, 0);
+
+	GtkToolItem *record = gtk_tool_button_new(gtk_image_new_from_icon_name("media-record-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
+	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), record, -1);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(record), "cainteoir.record");
 
 	reader->priv->play_stop = gtk_tool_button_new(nullptr, nullptr);
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(reader->priv->play_stop), "media-playback-start-symbolic");

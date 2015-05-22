@@ -57,7 +57,7 @@ cainteoir_speech_parameter_init(CainteoirSpeechParameter *param)
 }
 
 CainteoirSpeechParameter *
-cainteoir_speech_parameter_new(std::shared_ptr<cainteoir::tts::parameter> &parameter)
+cainteoir_speech_parameter_new(const std::shared_ptr<cainteoir::tts::parameter> &parameter)
 {
 	CainteoirSpeechParameter *self = CAINTEOIR_SPEECH_PARAMETER(g_object_new(CAINTEOIR_TYPE_SPEECH_PARAMETER, nullptr));
 	self->priv->param = parameter;

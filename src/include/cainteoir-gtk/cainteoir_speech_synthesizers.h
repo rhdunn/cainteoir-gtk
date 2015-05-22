@@ -23,6 +23,7 @@
 
 #include "cainteoir_document.h"
 #include "cainteoir_document_index.h"
+#include "cainteoir_speech_parameter.h"
 
 G_BEGIN_DECLS
 
@@ -69,6 +70,15 @@ enum CainteoirNarration
 	CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS,
 };
 
+enum CainteoirSpeechParameterType
+{
+	CAINTEOIR_SPEECH_RATE,
+	CAINTEOIR_SPEECH_VOLUME,
+	CAINTEOIR_SPEECH_PITCH,
+	CAINTEOIR_SPEECH_PITCH_RANGE,
+	CAINTEOIR_SPEECH_WORD_GAP,
+};
+
 GType                                  cainteoir_speech_synthesizers_get_type(void) G_GNUC_CONST;
 
 CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new();
@@ -97,6 +107,9 @@ gdouble                                cainteoir_speech_synthesizers_get_total_t
 gdouble                                cainteoir_speech_synthesizers_get_percentage_complete(CainteoirSpeechSynthesizers *synthesizers);
 
 size_t                                 cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesizers);
+
+CainteoirSpeechParameter *             cainteoir_speech_synthesizer_get_parameter(CainteoirSpeechSynthesizers *synthesizers,
+                                                                                  CainteoirSpeechParameterType parameter);
 
 G_END_DECLS
 

@@ -28,6 +28,7 @@
 
 #include "cainteoir_document_private.h"
 #include "cainteoir_document_index_private.h"
+#include "cainteoir_speech_parameter_private.h"
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
@@ -228,4 +229,21 @@ cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesi
 {
 	if (!synthesizers->priv->speech) return 0;
 	return synthesizers->priv->speech->position();
+}
+
+CainteoirSpeechParameter *
+cainteoir_speech_synthesizer_get_parameter(CainteoirSpeechSynthesizers *synthesizers,
+                                           CainteoirSpeechParameterType parameter)
+{
+	tts::parameter::type type;
+	switch (parameter)
+	{
+	case CAINTEOIR_SPEECH_RATE:        type = tts::parameter::rate;        break;
+	case CAINTEOIR_SPEECH_VOLUME:      type = tts::parameter::volume;      break;
+	case CAINTEOIR_SPEECH_PITCH:       type = tts::parameter::pitch;       break;
+	case CAINTEOIR_SPEECH_PITCH_RANGE: type = tts::parameter::pitch_range; break;
+	case CAINTEOIR_SPEECH_WORD_GAP:    type = tts::parameter::word_gap;    break;
+	default:                           return nullptr;
+	}
+	return cainteoir_speech_parameter_new(synthesizers->priv->tts.parameter(type));
 }

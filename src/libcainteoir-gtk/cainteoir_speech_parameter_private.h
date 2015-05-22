@@ -23,6 +23,6 @@
 
 #include <cainteoir/engines.hpp>
 
-CainteoirSpeechParameter *             cainteoir_speech_parameter_new(std::shared_ptr<cainteoir::tts::parameter> &parameter);
+CainteoirSpeechParameter *             cainteoir_speech_parameter_new(const std::shared_ptr<cainteoir::tts::parameter> &parameter);
 
 #endif

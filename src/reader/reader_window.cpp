@@ -30,6 +30,7 @@
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
+#include <cainteoir-gtk/cainteoir_timebar.h>
 
 static constexpr int INDEX_PANE_WIDTH = 265;
 static constexpr int DOCUMENT_PANE_WIDTH = 300;
@@ -53,6 +54,7 @@ struct _ReaderWindowPrivate
 	GtkWidget *index_type;
 	GtkWidget *index;
 	GtkWidget *view;
+	GtkWidget *timebar;
 
 	GSimpleActionGroup *actions;
 	GSimpleAction *index_pane_action;
@@ -121,10 +123,18 @@ on_speaking_timer(ReaderWindow *reader)
 {
 	if (cainteoir_speech_synthesizers_is_speaking(reader->priv->tts))
 	{
+		cainteoir_timebar_set_time(CAINTEOIR_TIMEBAR(reader->priv->timebar),
+		                           cainteoir_speech_synthesizers_get_elapsed_time(reader->priv->tts),
+		                           cainteoir_speech_synthesizers_get_total_time(reader->priv->tts));
+		cainteoir_timebar_set_progress(CAINTEOIR_TIMEBAR(reader->priv->timebar),
+		                               cainteoir_speech_synthesizers_get_percentage_complete(reader->priv->tts));
 		return TRUE;
 	}
 
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(reader->priv->play_stop), "media-playback-start-symbolic");
+
+	cainteoir_timebar_set_time(CAINTEOIR_TIMEBAR(reader->priv->timebar), 0.0, 0.0);
+	cainteoir_timebar_set_progress(CAINTEOIR_TIMEBAR(reader->priv->timebar), 0.0);
 
 	return FALSE;
 }
@@ -447,6 +457,13 @@ reader_window_new(const gchar *filename)
 	GtkToolItem *open = gtk_tool_button_new(gtk_image_new_from_icon_name("document-open-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);
 	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), open, -1);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(open), "cainteoir.open");
+
+	GtkToolItem *timebar = gtk_tool_item_new();
+	gtk_tool_item_set_expand(GTK_TOOL_ITEM(timebar), TRUE);
+	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), timebar, -1);
+
+	reader->priv->timebar = cainteoir_timebar_new();
+	gtk_container_add(GTK_CONTAINER(timebar), reader->priv->timebar);
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);

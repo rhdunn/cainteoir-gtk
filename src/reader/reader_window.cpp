@@ -118,6 +118,23 @@ select_file(GtkWindow *window,
 	return path;
 }
 
+static void
+reset_timebar(ReaderWindow *reader)
+{
+	CainteoirSpeechParameter *param = cainteoir_speech_synthesizers_get_parameter(reader->priv->tts, CAINTEOIR_SPEECH_RATE);
+	gint rate = cainteoir_speech_parameter_get_value(param);
+	g_object_unref(G_OBJECT(param));
+
+	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+
+	cainteoir_timebar_set_time(CAINTEOIR_TIMEBAR(reader->priv->timebar),
+	                           0.0,
+	                           cainteoir_document_estimate_duration(doc, rate));
+	cainteoir_timebar_set_progress(CAINTEOIR_TIMEBAR(reader->priv->timebar), 0.0);
+
+	g_object_unref(G_OBJECT(doc));
+}
+
 static gboolean
 on_speaking_timer(ReaderWindow *reader)
 {
@@ -132,9 +149,7 @@ on_speaking_timer(ReaderWindow *reader)
 	}
 
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(reader->priv->play_stop), "media-playback-start-symbolic");
-
-	cainteoir_timebar_set_time(CAINTEOIR_TIMEBAR(reader->priv->timebar), 0.0, 0.0);
-	cainteoir_timebar_set_progress(CAINTEOIR_TIMEBAR(reader->priv->timebar), 0.0);
+	reset_timebar(reader);
 
 	return FALSE;
 }
@@ -512,6 +527,8 @@ reader_window_load_document(ReaderWindow *reader,
 		cainteoir_settings_set_string(reader->priv->settings, "document", "filename", filename);
 		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype);
 		cainteoir_settings_save(reader->priv->settings);
+
+		reset_timebar(reader);
 
 		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc,
 		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));

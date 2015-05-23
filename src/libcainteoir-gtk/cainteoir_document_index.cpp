@@ -176,11 +176,13 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
                                CainteoirDocument *doc,
                                const gchar *index_type)
 {
+	gtk_tree_store_clear(index->priv->store);
+	if (!index_type)
+		return;
+
 	rdf::graph &metadata = *cainteoir_document_get_rdf_metadata(doc);
 	rdf::uri &subject = *cainteoir_document_get_subject(doc);
 	index->priv->index = cainteoir::navigation(metadata, subject, rdf::href(index_type));
-
-	gtk_tree_store_clear(index->priv->store);
 	if (index->priv->index.empty())
 		return;
 

@@ -24,16 +24,11 @@
 #include <gtk/gtk.h>
 
 #include "reader_window.h"
+#include "reader_document_view.h"
 
-#include <cainteoir-gtk/cainteoir_document_view.h>
-#include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
-#include <cainteoir-gtk/cainteoir_settings.h>
 #include <cainteoir-gtk/cainteoir_timebar.h>
-
-static constexpr int INDEX_PANE_WIDTH = 265;
-static constexpr int DOCUMENT_PANE_WIDTH = 300;
 
 #if GTK_CHECK_VERSION(3, 14, 0)
 #define HAMBURGER_MENU_ICON "open-menu-symbolic"
@@ -41,28 +36,18 @@ static constexpr int DOCUMENT_PANE_WIDTH = 300;
 #define HAMBURGER_MENU_ICON "view-list-symbolic"
 #endif
 
-enum IndexTypeColumns
-{
-	INDEX_TYPE_LABEL,
-	INDEX_TYPE_ID,
-	INDEX_TYPE_COUNT,
-};
-
 struct _ReaderWindowPrivate
 {
-	GtkWidget *doc_pane;
-	GtkWidget *index_type;
-	GtkWidget *index;
 	GtkWidget *view;
 	GtkWidget *timebar;
+
+	GtkToolItem *play_stop;
 
 	GSimpleActionGroup *actions;
 	GSimpleAction *index_pane_action;
 	GSimpleAction *open_action;
 	GSimpleAction *play_stop_action;
 	GSimpleAction *record_action;
-
-	GtkToolItem *play_stop;
 
 	CainteoirSettings *settings;
 	CainteoirSupportedFormats *document_formats;
@@ -76,6 +61,7 @@ static void
 reader_window_finalize(GObject *object)
 {
 	ReaderWindow *reader = READER_WINDOW(object);
+	g_object_unref(G_OBJECT(reader->priv->settings));
 
 	G_OBJECT_CLASS(reader_window_parent_class)->finalize(object);
 }
@@ -129,7 +115,7 @@ reset_timebar(ReaderWindow *reader)
 	gint rate = cainteoir_speech_parameter_get_value(param);
 	g_object_unref(G_OBJECT(param));
 
-	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+	CainteoirDocument *doc = reader_document_view_get_document(READER_DOCUMENT_VIEW(reader->priv->view));
 
 	cainteoir_timebar_set_time(CAINTEOIR_TIMEBAR(reader->priv->timebar),
 	                           0.0,
@@ -198,40 +184,16 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 	}
 
 	cainteoir_settings_set_string(reader->priv->settings, "index", "type",
-	                              gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
+	                              reader_document_view_get_index_type(READER_DOCUMENT_VIEW(reader->priv->view)));
 
 	cainteoir_settings_set_integer(reader->priv->settings, "index", "position",
-	                               gtk_paned_get_position(GTK_PANED(reader->priv->doc_pane)));
+	                               reader_document_view_get_index_pane_position(READER_DOCUMENT_VIEW(reader->priv->view)));
 
 	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible",
-	                               gtk_widget_get_visible(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane))));
+	                               reader_document_view_get_index_pane_visible(READER_DOCUMENT_VIEW(reader->priv->view)));
 
 	cainteoir_settings_save(reader->priv->settings);
 	return FALSE;
-}
-
-static void
-on_window_show(GtkWidget *window, gpointer data)
-{
-	ReaderWindow *reader = (ReaderWindow *)data;
-
-	gtk_paned_set_position(GTK_PANED(reader->priv->doc_pane),
-	                       cainteoir_settings_get_integer(reader->priv->settings, "index", "position", INDEX_PANE_WIDTH));
-
-	if (cainteoir_settings_get_boolean(reader->priv->settings, "index", "visible", TRUE))
-		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
-	else
-		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
-}
-
-static void
-on_index_pane_close(GtkWidget *window, gpointer data)
-{
-	ReaderWindow *reader = (ReaderWindow *)data;
-
-	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible", FALSE);
-	gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
-	g_simple_action_set_state(reader->priv->index_pane_action, g_variant_new_boolean(FALSE));
 }
 
 static void
@@ -246,10 +208,7 @@ on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, gpointer
 	cainteoir_settings_set_boolean(reader->priv->settings, "index", "visible", active);
 	cainteoir_settings_save(reader->priv->settings);
 
-	if (active)
-		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
-	else
-		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(reader->priv->doc_pane)));
+	reader_document_view_set_index_pane_visible(READER_DOCUMENT_VIEW(reader->priv->view), active);
 }
 
 static void
@@ -288,13 +247,15 @@ on_play_stop_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 	}
 	else
 	{
-		CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+		CainteoirDocument *doc = reader_document_view_get_document(READER_DOCUMENT_VIEW(reader->priv->view));
+		CainteoirDocumentIndex *index = reader_document_view_get_document_index(READER_DOCUMENT_VIEW(reader->priv->view));
 		gchar *device_name = cainteoir_settings_get_string(reader->priv->settings, "audio", "device-name", nullptr);
 
-		cainteoir_speech_synthesizers_read(reader->priv->tts, doc, CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), device_name);
+		cainteoir_speech_synthesizers_read(reader->priv->tts, doc, index, device_name);
 		on_speak(reader);
 
 		g_free(device_name);
+		g_object_unref(G_OBJECT(index));
 		g_object_unref(G_OBJECT(doc));
 	}
 }
@@ -324,86 +285,23 @@ on_record_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 	gchar *mimetype = nullptr;
 	if (cainteoir_supported_formats_file_info(reader->priv->audio_formats, filename, &type, &mimetype))
 	{
-		CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
+		CainteoirDocument *doc = reader_document_view_get_document(READER_DOCUMENT_VIEW(reader->priv->view));
+		CainteoirDocumentIndex *index = reader_document_view_get_document_index(READER_DOCUMENT_VIEW(reader->priv->view));
 
 		cainteoir_settings_set_string(reader->priv->settings, "recording", "filename", filename);
 		cainteoir_settings_set_string(reader->priv->settings, "recording", "mimetype", mimetype);
 		cainteoir_settings_save(reader->priv->settings);
 
-		cainteoir_speech_synthesizers_record(reader->priv->tts, doc, CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), filename, type, 0.3);
+		cainteoir_speech_synthesizers_record(reader->priv->tts, doc, index, filename, type, 0.3);
 		on_speak(reader);
 
 		g_free(type);
 		g_free(mimetype);
+		g_object_unref(G_OBJECT(index));
 		g_object_unref(G_OBJECT(doc));
 	}
 
 	g_free(filename);
-}
-
-static GtkWidget *
-create_index_type_combo(void)
-{
-	GtkTreeStore *store = gtk_tree_store_new(INDEX_TYPE_COUNT, G_TYPE_STRING, G_TYPE_STRING);
-	GtkTreeIter row;
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Index"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_TOC,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Index (Abridged)"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_TOC_BRIEF,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Landmarks"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_LANDMARKS,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Pages"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_PAGE_LIST,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Illustrations"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_ILLUSTRATIONS,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Tables"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_TABLES,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Audio"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_AUDIO,
-	                   -1);
-
-	gtk_tree_store_append(store, &row, nullptr);
-	gtk_tree_store_set(store, &row,
-	                   INDEX_TYPE_LABEL, i18n("Video"),
-	                   INDEX_TYPE_ID,    CAINTEOIR_INDEXTYPE_VIDEO,
-	                   -1);
-
-	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtk_combo_box_set_id_column(GTK_COMBO_BOX(combo), INDEX_TYPE_ID);
-
-	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
-	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer, "text", INDEX_TYPE_LABEL, nullptr);
-
-	g_object_unref(G_OBJECT(store));
-	return combo;
 }
 
 static GSimpleActionGroup *
@@ -440,20 +338,6 @@ create_main_menu(ReaderWindow *reader)
 	return G_MENU_MODEL(menu);
 }
 
-static void
-on_index_type_changed(GtkWidget *window, gpointer data)
-{
-	ReaderWindow *reader = (ReaderWindow *)data;
-
-	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
-	if (doc)
-	{
-		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc,
-		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
-		g_object_unref(G_OBJECT(doc));
-	}
-}
-
 GtkWidget *
 reader_window_new(const gchar *filename)
 {
@@ -477,38 +361,9 @@ reader_window_new(const gchar *filename)
 	GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(reader), layout);
 
-	reader->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(layout), reader->priv->doc_pane, TRUE, TRUE, 0);
-
-	GtkWidget *view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_widget_set_size_request(view_scroll, DOCUMENT_PANE_WIDTH, -1);
-	gtk_paned_pack2(GTK_PANED(reader->priv->doc_pane), view_scroll, TRUE, FALSE);
-
-	reader->priv->view  = cainteoir_document_view_new();
-	gtk_container_add(GTK_CONTAINER(view_scroll), reader->priv->view);
-
-	GtkWidget *index_pane = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-	gtk_widget_set_size_request(index_pane, INDEX_PANE_WIDTH, -1);
-	gtk_paned_pack1(GTK_PANED(reader->priv->doc_pane), index_pane, TRUE, FALSE);
-
-	GtkWidget *index_pane_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	gtk_box_pack_start(GTK_BOX(index_pane), index_pane_header, FALSE, FALSE, 0);
-
-	reader->priv->index_type = create_index_type_combo();
-	gtk_box_pack_start(GTK_BOX(index_pane_header), reader->priv->index_type, TRUE, TRUE, 0);
-	g_signal_connect(reader->priv->index_type, "changed", G_CALLBACK(on_index_type_changed), reader);
-
-	GtkWidget *index_pane_close = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_SMALL_TOOLBAR);
-	gtk_button_set_always_show_image(GTK_BUTTON(index_pane_close), TRUE);
-	gtk_button_set_relief(GTK_BUTTON(index_pane_close), GTK_RELIEF_NONE);
-	gtk_box_pack_start(GTK_BOX(index_pane_header), index_pane_close, FALSE, FALSE, 0);
-	g_signal_connect(index_pane_close, "clicked", G_CALLBACK(on_index_pane_close), reader);
-
-	GtkWidget *index_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-	gtk_box_pack_start(GTK_BOX(index_pane), index_scroll, TRUE, TRUE, 0);
-
-	reader->priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view));
-	gtk_container_add(GTK_CONTAINER(index_scroll), reader->priv->index);
+	reader->priv->view = reader_document_view_new(reader->priv->settings);
+	gtk_box_pack_start(GTK_BOX(layout), reader->priv->view, TRUE, TRUE, 0);
+	reader_document_view_set_index_pane_close_action_name(READER_DOCUMENT_VIEW(reader->priv->view), "cainteoir.side-pane");
 
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);
@@ -536,7 +391,6 @@ reader_window_new(const gchar *filename)
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
-	g_signal_connect(reader, "show", G_CALLBACK(on_window_show), reader);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "width",  700),
@@ -546,10 +400,6 @@ reader_window_new(const gchar *filename)
 	                cainteoir_settings_get_integer(reader->priv->settings, "window", "top",  0));
 	if (cainteoir_settings_get_boolean(reader->priv->settings, "window", "maximized", FALSE))
 		gtk_window_maximize(GTK_WINDOW(reader));
-
-	gchar *active_index = cainteoir_settings_get_string(reader->priv->settings, "index", "type", CAINTEOIR_INDEXTYPE_TOC);
-	gtk_combo_box_set_active_id(GTK_COMBO_BOX(reader->priv->index_type), active_index);
-	g_free(active_index);
 
 	if (filename)
 		reader_window_load_document(reader, filename);
@@ -570,26 +420,9 @@ gboolean
 reader_window_load_document(ReaderWindow *reader,
                             const gchar *filename)
 {
-	CainteoirDocument *doc = cainteoir_document_new(filename);
-	if (doc)
+	if (reader_document_view_load_document(READER_DOCUMENT_VIEW(reader->priv->view), filename))
 	{
-		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(reader->priv->view), doc);
-
-		CainteoirMetadata *metadata = cainteoir_document_get_metadata(doc);
-		gchar *mimetype = cainteoir_metadata_get_string(metadata, CAINTEOIR_METADATA_MIMETYPE);
-
-		cainteoir_settings_set_string(reader->priv->settings, "document", "filename", filename);
-		cainteoir_settings_set_string(reader->priv->settings, "document", "mimetype", mimetype);
-		cainteoir_settings_save(reader->priv->settings);
-
 		reset_timebar(reader);
-
-		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(reader->priv->index), doc,
-		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(reader->priv->index_type)));
-
-		if (mimetype) g_free(mimetype);
-		g_object_unref(metadata);
-		g_object_unref(doc);
 		return TRUE;
 	}
 	return FALSE;

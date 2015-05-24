@@ -28,7 +28,7 @@
 #include <cainteoir/buffer.hpp>
 
 static void
-load_theme(const gchar *theme_name)
+load_theme(const gchar *theme_name, const gchar *theme_file)
 {
 	try
 	{
@@ -36,7 +36,11 @@ load_theme(const gchar *theme_name)
 		if (!data_dir)
 			data_dir = DATADIR "/" PACKAGE;
 
-		gchar *path = g_strdup_printf("%s/themes/%s", data_dir, theme_name);
+		gchar *path = nullptr;
+		if (theme_name)
+			path = g_strdup_printf("%s/themes/%s/%s", data_dir, theme_name, theme_file);
+		else
+			path = g_strdup_printf("%s/themes/%s", data_dir, theme_file);
 		auto theme = cainteoir::make_file_buffer(path);
 		g_free(path);
 
@@ -62,7 +66,12 @@ main(int argc, char ** argv)
 {
 	gtk_init(&argc, &argv);
 
-	load_theme("gtk3-common.css");
+	load_theme(nullptr, "gtk3-common.css");
+
+	gchar *theme_name = nullptr;
+	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, nullptr);
+	load_theme(theme_name, "gtk3.css");
+	g_free(theme_name);
 
 	GtkWidget *window = reader_window_new((argc == 2) ? argv[1] : nullptr);
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);

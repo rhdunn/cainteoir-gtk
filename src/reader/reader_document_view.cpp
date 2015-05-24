@@ -191,6 +191,7 @@ reader_document_view_new(CainteoirSettings *settings)
 	g_signal_connect(view->priv->index_type, "changed", G_CALLBACK(on_index_type_changed), view);
 
 	view->priv->index_pane_close = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_style_context_add_class(gtk_widget_get_style_context(view->priv->index_pane_close), "close-pane");
 	gtk_button_set_always_show_image(GTK_BUTTON(view->priv->index_pane_close), TRUE);
 	gtk_button_set_relief(GTK_BUTTON(view->priv->index_pane_close), GTK_RELIEF_NONE);
 	gtk_box_pack_start(GTK_BOX(index_pane_header), view->priv->index_pane_close, FALSE, FALSE, 0);

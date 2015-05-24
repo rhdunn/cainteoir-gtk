@@ -8,3 +8,7 @@ GtkNotebook {
 	border-color: #888;
 	border-top-width: 1px;
 }
+
+.close-pane {
+	padding: 0;
+}

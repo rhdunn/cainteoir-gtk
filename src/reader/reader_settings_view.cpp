@@ -30,6 +30,7 @@ struct SpeechParameterSetting
 	GtkWidget *label;
 	GtkWidget *value;
 	GtkWidget *units;
+	GtkWidget *reset;
 
 	gulong signal;
 	const gchar *key;
@@ -46,6 +47,14 @@ on_speech_parameter_changed(GtkRange *range, gpointer data)
 	cainteoir_settings_set_integer(setting->settings, "voice", setting->key,
 	                               gtk_range_get_value(GTK_RANGE(setting->value)));
 	cainteoir_settings_save(setting->settings);
+}
+
+static void
+on_speech_parameter_reset(GtkWidget *range, gpointer data)
+{
+	SpeechParameterSetting *setting = (SpeechParameterSetting *)data;
+
+	gtk_range_set_value(GTK_RANGE(setting->value), cainteoir_speech_parameter_get_default(setting->parameter));
 }
 
 static void
@@ -70,6 +79,10 @@ speech_parameter_setting_init(SpeechParameterSetting *setting, GtkWidget *grid, 
 	setting->units = gtk_label_new(nullptr);
 	gtk_widget_set_halign(setting->units, GTK_ALIGN_START);
 	gtk_grid_attach(GTK_GRID(grid), setting->units, 2, row, 1, 1);
+
+	setting->reset = gtk_button_new_with_label(i18n("Reset"));
+	gtk_grid_attach(GTK_GRID(grid), setting->reset, 3, row, 1, 1);
+	g_signal_connect(setting->reset, "clicked", G_CALLBACK(on_speech_parameter_reset), setting);
 }
 
 static void

@@ -438,6 +438,7 @@ reader_window_new(const gchar *filename)
 
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);
+	gtk_style_context_add_class(gtk_widget_get_style_context(bottombar), "bottombar");
 	gtk_box_pack_start(GTK_BOX(layout), bottombar, FALSE, FALSE, 0);
 
 	GtkToolItem *record = gtk_tool_button_new(gtk_image_new_from_icon_name("media-record-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR), nullptr);

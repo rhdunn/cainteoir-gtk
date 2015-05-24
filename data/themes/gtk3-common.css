@@ -1,7 +1,10 @@
-/* Give the notebook a border at the top and bottom ...
- */
-
 GtkNotebook {
 	border-style: solid;
 	border-width: 0;
+}
+
+.bottombar {
+	border-style: solid;
+	border-color: #888;
+	border-top-width: 1px;
 }

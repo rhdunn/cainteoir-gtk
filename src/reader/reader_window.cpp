@@ -348,8 +348,7 @@ on_view_change_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 	GtkWidget *current = gtk_stack_get_visible_child(GTK_STACK(reader->priv->stack));
 	gtk_stack_set_visible_child_name(GTK_STACK(reader->priv->stack), g_variant_get_string(parameter, nullptr));
 
-	if (reader->priv->view_history.empty() ||
-	    reader->priv->view_history.top() != gtk_stack_get_visible_child(GTK_STACK(reader->priv->stack)));
+	if (current != gtk_stack_get_visible_child(GTK_STACK(reader->priv->stack)))
 	{
 		reader->priv->view_history.push(current);
 
@@ -397,6 +396,10 @@ create_main_menu(ReaderWindow *reader)
 	GMenu *menu = g_menu_new();
 
 	g_menu_append(menu, i18n("Side Pane"), "cainteoir.side-pane");
+
+	GMenuItem *document = g_menu_item_new(i18n("Document"), nullptr);
+	g_menu_item_set_action_and_target_value(document, "cainteoir.view-change", g_variant_new_string("document"));
+	g_menu_append_item(menu, document);
 
 	GMenuItem *settings = g_menu_item_new(i18n("Settings"), nullptr);
 	g_menu_item_set_action_and_target_value(settings, "cainteoir.view-change", g_variant_new_string("settings"));

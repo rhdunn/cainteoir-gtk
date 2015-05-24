@@ -41,7 +41,6 @@ struct _ReaderDocumentViewPrivate
 	GtkWidget *index_pane_close;
 	GtkWidget *index;
 	GtkWidget *view;
-	GtkWidget *timebar;
 
 	CainteoirSettings *settings;
 };
@@ -170,7 +169,8 @@ reader_document_view_new(CainteoirSettings *settings)
 	view->priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
 
 	view->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(view), view->priv->doc_pane, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(view->priv->doc_pane, TRUE);
+	gtk_container_add(GTK_CONTAINER(view), view->priv->doc_pane);
 
 	GtkWidget *view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(view_scroll, DOCUMENT_PANE_WIDTH, -1);

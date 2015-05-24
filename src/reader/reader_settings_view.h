@@ -22,6 +22,7 @@
 #define CAINTEOIR_READER_SETTINGS_VIEW_H
 
 #include <cainteoir-gtk/cainteoir_settings.h>
+#include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 
 G_BEGIN_DECLS
 
@@ -63,7 +64,8 @@ struct _ReaderSettingsViewClass
 
 GType                                  reader_settings_view_get_type(void) G_GNUC_CONST;
 
-GtkWidget *                            reader_settings_view_new(CainteoirSettings *settings);
+GtkWidget *                            reader_settings_view_new(CainteoirSettings *settings,
+                                                                CainteoirSpeechSynthesizers *synthesizers);
 
 G_END_DECLS
 

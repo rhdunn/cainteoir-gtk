@@ -430,7 +430,7 @@ reader_window_new(const gchar *filename)
 	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->view, "document", i18n("Document"));
 	reader_document_view_set_index_pane_close_action_name(READER_DOCUMENT_VIEW(reader->priv->view), "cainteoir.side-pane");
 
-	reader->priv->settings_view = reader_settings_view_new(reader->priv->settings);
+	reader->priv->settings_view = reader_settings_view_new(reader->priv->settings, reader->priv->tts);
 	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->settings_view, "settings", i18n("Settings"));
 
 	GtkWidget *bottombar = gtk_toolbar_new();

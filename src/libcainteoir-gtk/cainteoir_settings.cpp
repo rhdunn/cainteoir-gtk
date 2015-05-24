@@ -81,7 +81,10 @@ cainteoir_settings_new(const gchar *filename)
 		std::string key;
 		std::string value;
 		while (std::getline(is, group, '.') && std::getline(is, key, '=') && std::getline(is, value))
+		{
+			if (key == "tts_fallback") key = "tts-fallback";
 			g_key_file_set_value(settings->priv->settings, group.c_str(), key.c_str(), value.c_str());
+		}
 	}
 
 	return settings;

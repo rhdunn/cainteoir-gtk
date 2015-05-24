@@ -67,6 +67,8 @@ GType                                  reader_settings_view_get_type(void) G_GNU
 GtkWidget *                            reader_settings_view_new(CainteoirSettings *settings,
                                                                 CainteoirSpeechSynthesizers *synthesizers);
 
+void                                   reader_settings_view_update_speech_parameters(ReaderSettingsView *view);
+
 G_END_DECLS
 
 #endif

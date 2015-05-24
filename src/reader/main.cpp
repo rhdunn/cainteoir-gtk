@@ -25,6 +25,32 @@
 #include "reader_window.h"
 #include <cainteoir-gtk/cainteoir_document_view.h>
 
+#include <cainteoir/buffer.hpp>
+
+static void
+load_theme(const gchar *theme_name)
+{
+	try
+	{
+		const gchar *data_dir = getenv("CAINTEOIR_GTK_DATA_DIR");
+		if (!data_dir)
+			data_dir = DATADIR "/" PACKAGE;
+
+		gchar *path = g_strdup_printf("%s/themes/%s", data_dir, theme_name);
+		auto theme = cainteoir::make_file_buffer(path);
+		g_free(path);
+
+		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
+
+		GtkCssProvider *provider = gtk_css_provider_new();
+		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER (provider), theme->begin(), theme->size(), nullptr);
+	}
+	catch (const std::exception &e)
+	{
+	}
+}
+
 static void
 on_window_destroy(GtkWidget *object, gpointer data)
 {
@@ -35,6 +61,8 @@ int
 main(int argc, char ** argv)
 {
 	gtk_init(&argc, &argv);
+
+	load_theme("gtk3-common.css");
 
 	GtkWidget *window = reader_window_new((argc == 2) ? argv[1] : nullptr);
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);

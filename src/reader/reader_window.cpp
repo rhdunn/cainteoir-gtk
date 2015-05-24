@@ -30,6 +30,8 @@
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 #include <cainteoir-gtk/cainteoir_timebar.h>
 
+#include <stack>
+
 #if GTK_CHECK_VERSION(3, 14, 0)
 #define HAMBURGER_MENU_ICON "open-menu-symbolic"
 #else
@@ -38,7 +40,10 @@
 
 struct _ReaderWindowPrivate
 {
+	GtkWidget *stack;
+	GtkWidget *previous;
 	GtkWidget *view;
+	GtkWidget *settings_view;
 	GtkWidget *timebar;
 
 	GtkToolItem *play_stop;
@@ -48,11 +53,15 @@ struct _ReaderWindowPrivate
 	GSimpleAction *open_action;
 	GSimpleAction *play_stop_action;
 	GSimpleAction *record_action;
+	GSimpleAction *previous_action;
+	GSimpleAction *view_change_action;
 
 	CainteoirSettings *settings;
 	CainteoirSupportedFormats *document_formats;
 	CainteoirSupportedFormats *audio_formats;
 	CainteoirSpeechSynthesizers *tts;
+
+	std::stack<GtkWidget *> view_history;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_WINDOW)
@@ -62,6 +71,7 @@ reader_window_finalize(GObject *object)
 {
 	ReaderWindow *reader = READER_WINDOW(object);
 	g_object_unref(G_OBJECT(reader->priv->settings));
+	reader->priv->~ReaderWindowPrivate();
 
 	G_OBJECT_CLASS(reader_window_parent_class)->finalize(object);
 }
@@ -76,7 +86,8 @@ reader_window_class_init(ReaderWindowClass *klass)
 static void
 reader_window_init(ReaderWindow *reader)
 {
-	reader->priv = (ReaderWindowPrivate *)reader_window_get_instance_private(reader);
+	void * data = reader_window_get_instance_private(reader);
+	reader->priv = new (data)ReaderWindowPrivate();
 	reader->priv->settings = cainteoir_settings_new("settings.dat");
 	reader->priv->document_formats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
 	reader->priv->audio_formats = cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS);
@@ -197,6 +208,14 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 }
 
 static void
+on_window_show(GtkWidget *widget, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	gtk_widget_hide(reader->priv->previous);
+}
+
+static void
 on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 {
 	ReaderWindow *reader = (ReaderWindow *)data;
@@ -304,6 +323,39 @@ on_record_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 	g_free(filename);
 }
 
+static void
+on_previous_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	if (reader->priv->view_history.empty()) return;
+
+	GtkWidget *view = reader->priv->view_history.top();
+	reader->priv->view_history.pop();
+
+	gtk_stack_set_visible_child(GTK_STACK(reader->priv->stack), view);
+
+	if (reader->priv->view_history.empty())
+		gtk_widget_hide(reader->priv->previous);
+}
+
+static void
+on_view_change_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	ReaderWindow *reader = (ReaderWindow *)data;
+
+	GtkWidget *current = gtk_stack_get_visible_child(GTK_STACK(reader->priv->stack));
+	gtk_stack_set_visible_child_name(GTK_STACK(reader->priv->stack), g_variant_get_string(parameter, nullptr));
+
+	if (reader->priv->view_history.empty() ||
+	    reader->priv->view_history.top() != gtk_stack_get_visible_child(GTK_STACK(reader->priv->stack)));
+	{
+		reader->priv->view_history.push(current);
+
+		gtk_widget_show(reader->priv->previous);
+	}
+}
+
 static GSimpleActionGroup *
 create_action_group(ReaderWindow *reader)
 {
@@ -327,6 +379,14 @@ create_action_group(ReaderWindow *reader)
 	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->record_action));
 	g_signal_connect(reader->priv->record_action, "activate", G_CALLBACK(on_record_action), reader);
 
+	reader->priv->previous_action = g_simple_action_new("view-previous", nullptr);
+	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->previous_action));
+	g_signal_connect(reader->priv->previous_action, "activate", G_CALLBACK(on_previous_action), reader);
+
+	reader->priv->view_change_action = g_simple_action_new("view-change", G_VARIANT_TYPE_STRING);
+	g_action_map_add_action(G_ACTION_MAP(actions), G_ACTION(reader->priv->view_change_action));
+	g_signal_connect(reader->priv->view_change_action, "activate", G_CALLBACK(on_view_change_action), reader);
+
 	return actions;
 }
 
@@ -334,7 +394,13 @@ static GMenuModel *
 create_main_menu(ReaderWindow *reader)
 {
 	GMenu *menu = g_menu_new();
-	g_menu_append(menu, "Side Pane", "cainteoir.side-pane");
+
+	g_menu_append(menu, i18n("Side Pane"), "cainteoir.side-pane");
+
+	GMenuItem *settings = g_menu_item_new(i18n("Settings"), nullptr);
+	g_menu_item_set_action_and_target_value(settings, "cainteoir.view-change", g_variant_new_string("settings"));
+	g_menu_append_item(menu, settings);
+
 	return G_MENU_MODEL(menu);
 }
 
@@ -353,17 +419,18 @@ reader_window_new(const gchar *filename)
 	reader->priv->actions = create_action_group(reader);
 	gtk_widget_insert_action_group(GTK_WIDGET(reader), "cainteoir", G_ACTION_GROUP(reader->priv->actions));
 
-	GtkWidget *menu_button = gtk_menu_button_new();
-	gtk_button_set_image(GTK_BUTTON(menu_button), gtk_image_new_from_icon_name(HAMBURGER_MENU_ICON, GTK_ICON_SIZE_SMALL_TOOLBAR));
-	gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), create_main_menu(reader));
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
-
 	GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(reader), layout);
 
+	reader->priv->stack = gtk_stack_new();
+	gtk_box_pack_start(GTK_BOX(layout), reader->priv->stack, TRUE, TRUE, 0);
+
 	reader->priv->view = reader_document_view_new(reader->priv->settings);
-	gtk_box_pack_start(GTK_BOX(layout), reader->priv->view, TRUE, TRUE, 0);
+	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->view, "document", i18n("Document"));
 	reader_document_view_set_index_pane_close_action_name(READER_DOCUMENT_VIEW(reader->priv->view), "cainteoir.side-pane");
+
+	reader->priv->settings_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->settings_view, "settings", i18n("Settings"));
 
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);
@@ -389,8 +456,19 @@ reader_window_new(const gchar *filename)
 	reader->priv->timebar = cainteoir_timebar_new();
 	gtk_container_add(GTK_CONTAINER(timebar), reader->priv->timebar);
 
+	reader->priv->previous = gtk_button_new();
+	gtk_button_set_image(GTK_BUTTON(reader->priv->previous), gtk_image_new_from_icon_name("go-previous-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR));
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(header), reader->priv->previous);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(reader->priv->previous), "cainteoir.view-previous");
+
+	GtkWidget *menu_button = gtk_menu_button_new();
+	gtk_button_set_image(GTK_BUTTON(menu_button), gtk_image_new_from_icon_name(HAMBURGER_MENU_ICON, GTK_ICON_SIZE_SMALL_TOOLBAR));
+	gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), create_main_menu(reader));
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
+
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), reader->priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), reader);
+	g_signal_connect(reader, "show", G_CALLBACK(on_window_show), reader);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(reader->priv->settings, "window", "width",  700),

@@ -188,6 +188,8 @@ src_cainteoir_reader_SOURCES = \
 	src/i18n.h \
 	src/reader/reader_document_view.h \
 	src/reader/reader_document_view.cpp \
+	src/reader/reader_settings_view.h \
+	src/reader/reader_settings_view.cpp \
 	src/reader/reader_window.h \
 	src/reader/reader_window.cpp \
 	src/reader/main.cpp

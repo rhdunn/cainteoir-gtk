@@ -25,6 +25,7 @@
 
 #include "reader_window.h"
 #include "reader_document_view.h"
+#include "reader_settings_view.h"
 
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
@@ -429,7 +430,7 @@ reader_window_new(const gchar *filename)
 	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->view, "document", i18n("Document"));
 	reader_document_view_set_index_pane_close_action_name(READER_DOCUMENT_VIEW(reader->priv->view), "cainteoir.side-pane");
 
-	reader->priv->settings_view = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	reader->priv->settings_view = reader_settings_view_new(reader->priv->settings);
 	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->settings_view, "settings", i18n("Settings"));
 
 	GtkWidget *bottombar = gtk_toolbar_new();

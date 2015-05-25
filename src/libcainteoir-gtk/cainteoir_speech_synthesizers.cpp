@@ -29,6 +29,7 @@
 #include "cainteoir_document_private.h"
 #include "cainteoir_document_index_private.h"
 #include "cainteoir_speech_parameter_private.h"
+#include "cainteoir_speech_synthesizers_private.h"
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
@@ -279,4 +280,10 @@ cainteoir_speech_synthesizers_get_parameter(CainteoirSpeechSynthesizers *synthes
 	default:                           return nullptr;
 	}
 	return cainteoir_speech_parameter_new(synthesizers->priv->tts.parameter(type));
+}
+
+rdf::graph *
+cainteoir_speech_synthesizers_get_metadata(CainteoirSpeechSynthesizers *synthesizers)
+{
+	return &synthesizers->priv->metadata;
 }

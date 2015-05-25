@@ -442,8 +442,11 @@ reader_window_new(const gchar *filename)
 	reader->priv->settings_view = reader_settings_view_new(reader->priv->settings, reader->priv->tts);
 	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->settings_view, "settings", i18n("Settings"));
 
+	GtkWidget *scroll = gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), scroll, "voices", i18n("Voices"));
+
 	reader->priv->voice_view = cainteoir_speech_voice_view_new(reader->priv->tts);
-	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->voice_view, "voices", i18n("Voices"));
+	gtk_container_add(GTK_CONTAINER(scroll), reader->priv->voice_view);
 
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);

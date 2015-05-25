@@ -29,6 +29,7 @@
 
 #include <cainteoir-gtk/cainteoir_supported_formats.h>
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
+#include <cainteoir-gtk/cainteoir_speech_voice_view.h>
 #include <cainteoir-gtk/cainteoir_timebar.h>
 
 #include <stack>
@@ -45,6 +46,7 @@ struct _ReaderWindowPrivate
 	GtkWidget *previous;
 	GtkWidget *view;
 	GtkWidget *settings_view;
+	GtkWidget *voice_view;
 	GtkWidget *timebar;
 
 	GtkToolItem *play_stop;
@@ -405,6 +407,10 @@ create_main_menu(ReaderWindow *reader)
 	g_menu_item_set_action_and_target_value(settings, "cainteoir.view-change", g_variant_new_string("settings"));
 	g_menu_append_item(menu, settings);
 
+	GMenuItem *voices = g_menu_item_new(i18n("Voices"), nullptr);
+	g_menu_item_set_action_and_target_value(voices, "cainteoir.view-change", g_variant_new_string("voices"));
+	g_menu_append_item(menu, voices);
+
 	return G_MENU_MODEL(menu);
 }
 
@@ -435,6 +441,9 @@ reader_window_new(const gchar *filename)
 
 	reader->priv->settings_view = reader_settings_view_new(reader->priv->settings, reader->priv->tts);
 	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->settings_view, "settings", i18n("Settings"));
+
+	reader->priv->voice_view = cainteoir_speech_voice_view_new(reader->priv->tts);
+	gtk_stack_add_titled(GTK_STACK(reader->priv->stack), reader->priv->voice_view, "voices", i18n("Voices"));
 
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);

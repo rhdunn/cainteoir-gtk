@@ -122,6 +122,7 @@ libcainteoir_gtk_include_HEADERS = \
 	src/include/cainteoir-gtk/cainteoir_settings.h \
 	src/include/cainteoir-gtk/cainteoir_speech_parameter.h \
 	src/include/cainteoir-gtk/cainteoir_speech_synthesizers.h \
+	src/include/cainteoir-gtk/cainteoir_speech_voice_view.h \
 	src/include/cainteoir-gtk/cainteoir_supported_formats.h \
 	src/include/cainteoir-gtk/cainteoir_timebar.h \
 	src/include/cainteoir-gtk/cainteoir_waveform_view.h
@@ -137,6 +138,7 @@ src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
 	src/libcainteoir-gtk/cainteoir_settings.cpp \
 	src/libcainteoir-gtk/cainteoir_speech_parameter.cpp \
 	src/libcainteoir-gtk/cainteoir_speech_synthesizers.cpp \
+	src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp \
 	src/libcainteoir-gtk/cainteoir_supported_formats.cpp \
 	src/libcainteoir-gtk/cainteoir_timebar.cpp \
 	src/libcainteoir-gtk/cainteoir_waveform_view.cpp

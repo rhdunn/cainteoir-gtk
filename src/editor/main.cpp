@@ -1,6 +1,6 @@
 /* Cainteoir Editor Application.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -24,6 +24,8 @@
 #include <gtk/gtk.h>
 #include <cainteoir-gtk/cainteoir_waveform_view.h>
 
+#include <locale.h>
+
 static void
 on_window_destroy(GtkWidget *object, gpointer data)
 {
@@ -33,6 +35,10 @@ on_window_destroy(GtkWidget *object, gpointer data)
 int
 main(int argc, char ** argv)
 {
+	setlocale(LC_MESSAGES, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+
 	gtk_init(&argc, &argv);
 
 	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);

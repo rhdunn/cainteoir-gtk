@@ -26,6 +26,7 @@
 #include <cainteoir-gtk/cainteoir_document_view.h>
 
 #include <cainteoir/buffer.hpp>
+#include <locale.h>
 
 static void
 load_theme(const gchar *theme_name, const gchar *theme_file)
@@ -64,6 +65,10 @@ on_window_destroy(GtkWidget *object, gpointer data)
 int
 main(int argc, char ** argv)
 {
+	setlocale(LC_MESSAGES, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+
 	gtk_init(&argc, &argv);
 
 	load_theme(nullptr, "gtk3-common.css");

@@ -62,7 +62,15 @@ struct _CainteoirSpeechVoiceViewPrivate
 	CainteoirSpeechSynthesizers *tts;
 
 	cainteoir::languages languages;
+	cainteoir::language::tag filter_language;
+
+	_CainteoirSpeechVoiceViewPrivate();
 };
+
+_CainteoirSpeechVoiceViewPrivate::_CainteoirSpeechVoiceViewPrivate()
+	: filter_language({})
+{
+}
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechVoiceView, cainteoir_speech_voice_view, GTK_TYPE_TREE_VIEW)
 
@@ -101,6 +109,15 @@ refresh_view(CainteoirSpeechVoiceView *view)
 	                               rql::predicate == rdf::rdf("type") && rql::object == rdf::tts("Voice")))
 	{
 		rql::results statements = rql::select(metadata, rql::subject == rql::subject(voice));
+
+		if (!view->priv->filter_language.lang.empty())
+		{
+			std::string lang = rql::select_value<std::string>(statements,
+			                   rql::predicate == rdf::dc("language"));
+
+			if (!(cainteoir::language::make_lang(lang) == view->priv->filter_language))
+				continue;
+		}
 
 		GtkTreeIter row;
 		gtk_tree_store_append(view->priv->store, &row, nullptr);
@@ -164,4 +181,16 @@ cainteoir_speech_voice_view_new(CainteoirSpeechSynthesizers *synthesizers)
 	refresh_view(view);
 
 	return GTK_WIDGET(view);
+}
+
+void
+cainteoir_speech_voice_view_filter_by_language(CainteoirSpeechVoiceView *view,
+                                               const gchar *language)
+{
+	if (language)
+		view->priv->filter_language = cainteoir::language::make_lang(language);
+	else
+		view->priv->filter_language = {{}};
+
+	refresh_view(view);
 }

@@ -72,6 +72,8 @@ cainteoir_document_init(CainteoirDocument *doc)
 CainteoirDocument *
 cainteoir_document_new(const char *filename)
 {
+	if (!filename || filename[0] == '\0') return nullptr;
+
 	CainteoirDocument *self = CAINTEOIR_DOCUMENT(g_object_new(CAINTEOIR_TYPE_DOCUMENT, nullptr));
 
 	try

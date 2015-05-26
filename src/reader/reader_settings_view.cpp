@@ -25,6 +25,8 @@
 
 #include "reader_settings_view.h"
 
+#include <cainteoir-gtk/cainteoir_speech_parameter.h>
+
 struct SpeechParameterSetting
 {
 	GtkWidget *label;

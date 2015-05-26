@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
+#include <cainteoir-gtk/cainteoir_document_index.h>
 #include <cainteoir/engines.hpp>
 #include <cainteoir/locale.hpp>
 

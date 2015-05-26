@@ -21,9 +21,9 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_SPEECH_SYNTHESIZERS_H
 #define CAINTEOIR_GTK_CAINTEOIR_SPEECH_SYNTHESIZERS_H
 
-#include "cainteoir_document.h"
-#include "cainteoir_document_index.h"
-#include "cainteoir_speech_parameter.h"
+typedef struct _CainteoirDocument           CainteoirDocument;
+typedef struct _CainteoirDocumentIndex      CainteoirDocumentIndex;
+typedef struct _CainteoirSpeechParameter    CainteoirSpeechParameter;
 
 G_BEGIN_DECLS
 

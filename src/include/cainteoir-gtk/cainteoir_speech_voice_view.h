@@ -66,11 +66,11 @@ GType                                  cainteoir_speech_voice_view_get_type(void
 
 GtkWidget *                            cainteoir_speech_voice_view_new(CainteoirSpeechSynthesizers *synthesizers);
 
-void                                   cainteoir_speech_voice_view_filter_by_language(CainteoirSpeechVoiceView *view,
-                                                                                      const gchar *language);
+void                                   cainteoir_speech_voice_view_set_filter_language(CainteoirSpeechVoiceView *view,
+                                                                                       const gchar *language);
 
-void                                   cainteoir_speech_voice_view_filter_by_document_language(CainteoirSpeechVoiceView *view,
-                                                                                               CainteoirDocument *document);
+void                                   cainteoir_speech_voice_view_set_filter_language_from_document(CainteoirSpeechVoiceView *view,
+                                                                                                     CainteoirDocument *document);
 
 G_END_DECLS
 

@@ -184,8 +184,8 @@ cainteoir_speech_voice_view_new(CainteoirSpeechSynthesizers *synthesizers)
 }
 
 void
-cainteoir_speech_voice_view_filter_by_language(CainteoirSpeechVoiceView *view,
-                                               const gchar *language)
+cainteoir_speech_voice_view_set_filter_language(CainteoirSpeechVoiceView *view,
+                                                const gchar *language)
 {
 	if (language)
 		view->priv->filter_language = cainteoir::language::make_lang(language);
@@ -196,17 +196,17 @@ cainteoir_speech_voice_view_filter_by_language(CainteoirSpeechVoiceView *view,
 }
 
 void
-cainteoir_speech_voice_view_filter_by_document_language(CainteoirSpeechVoiceView *view,
-                                                        CainteoirDocument *document)
+cainteoir_speech_voice_view_set_filter_language_from_document(CainteoirSpeechVoiceView *view,
+                                                              CainteoirDocument *document)
 {
 	if (!document)
-		cainteoir_speech_voice_view_filter_by_language(view, nullptr);
+		cainteoir_speech_voice_view_set_filter_language(view, nullptr);
 	else
 	{
 		CainteoirMetadata *metadata = cainteoir_document_get_metadata(document);
 		gchar *language = cainteoir_metadata_get_string(metadata, CAINTEOIR_METADATA_LANGUAGE);
 
-		cainteoir_speech_voice_view_filter_by_language(view, language);
+		cainteoir_speech_voice_view_set_filter_language(view, language);
 
 		g_free(language);
 		g_object_unref(G_OBJECT(metadata));

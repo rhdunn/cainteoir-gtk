@@ -21,7 +21,7 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_VIEW_H
 #define CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_VIEW_H
 
-#include "cainteoir_document.h"
+typedef struct _CainteoirDocument      CainteoirDocument;
 
 G_BEGIN_DECLS
 

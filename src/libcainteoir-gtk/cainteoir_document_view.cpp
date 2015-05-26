@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 
 #include <cainteoir-gtk/cainteoir_document_view.h>
+#include <cainteoir-gtk/cainteoir_document.h>
 
 #include "cainteoir_document_private.h"
 

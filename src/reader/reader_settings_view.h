@@ -21,8 +21,8 @@
 #ifndef CAINTEOIR_READER_SETTINGS_VIEW_H
 #define CAINTEOIR_READER_SETTINGS_VIEW_H
 
-#include <cainteoir-gtk/cainteoir_settings.h>
-#include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
+typedef struct _CainteoirSettings           CainteoirSettings;
+typedef struct _CainteoirSpeechSynthesizers CainteoirSpeechSynthesizers;
 
 G_BEGIN_DECLS
 

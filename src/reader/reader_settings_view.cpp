@@ -25,7 +25,9 @@
 
 #include "reader_settings_view.h"
 
+#include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 #include <cainteoir-gtk/cainteoir_speech_parameter.h>
+#include <cainteoir-gtk/cainteoir_settings.h>
 
 struct SpeechParameterSetting
 {

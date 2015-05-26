@@ -32,6 +32,7 @@
 #include <cainteoir-gtk/cainteoir_speech_voice_view.h>
 #include <cainteoir-gtk/cainteoir_speech_parameter.h>
 #include <cainteoir-gtk/cainteoir_timebar.h>
+#include <cainteoir-gtk/cainteoir_document.h>
 
 #include <stack>
 

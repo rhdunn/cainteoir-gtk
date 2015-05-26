@@ -26,7 +26,10 @@
 #include "reader_document_view.h"
 
 #include <cainteoir-gtk/cainteoir_document_view.h>
+#include <cainteoir-gtk/cainteoir_document_index.h>
+#include <cainteoir-gtk/cainteoir_document.h>
 #include <cainteoir-gtk/cainteoir_metadata.h>
+#include <cainteoir-gtk/cainteoir_settings.h>
 
 enum IndexTypeColumns
 {

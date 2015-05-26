@@ -21,9 +21,9 @@
 #ifndef CAINTEOIR_READER_DOCUMENT_VIEW_H
 #define CAINTEOIR_READER_DOCUMENT_VIEW_H
 
-#include <cainteoir-gtk/cainteoir_settings.h>
-#include <cainteoir-gtk/cainteoir_document.h>
-#include <cainteoir-gtk/cainteoir_document_index.h>
+typedef struct _CainteoirSettings      CainteoirSettings;
+typedef struct _CainteoirDocument      CainteoirDocument;
+typedef struct _CainteoirDocumentIndex CainteoirDocumentIndex;
 
 G_BEGIN_DECLS
 

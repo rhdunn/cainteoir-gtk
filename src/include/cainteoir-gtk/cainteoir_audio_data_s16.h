@@ -1,6 +1,6 @@
 /* Audio Data (Samples).
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -39,15 +39,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_AUDIO_DATA_S16, CainteoirAudioDataS16Class))
 
 typedef struct _CainteoirAudioDataS16        CainteoirAudioDataS16;
-typedef struct _CainteoirAudioDataS16Private CainteoirAudioDataS16Private;
 typedef struct _CainteoirAudioDataS16Class   CainteoirAudioDataS16Class;
 
 struct _CainteoirAudioDataS16
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirAudioDataS16Private *priv;
 };
 
 struct _CainteoirAudioDataS16Class

@@ -1,6 +1,6 @@
 /* Audio Data (Samples).
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -30,6 +30,8 @@ namespace css = cainteoir::css;
 
 typedef cainteoir::audio_data<short> audio_data_t;
 
+typedef struct _CainteoirAudioDataS16Private CainteoirAudioDataS16Private;
+
 struct _CainteoirAudioDataS16Private
 {
 	audio_data_t data;
@@ -38,11 +40,14 @@ struct _CainteoirAudioDataS16Private
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirAudioDataS16, cainteoir_audio_data_s16, G_TYPE_OBJECT)
 
+#define CAINTEOIR_AUDIO_DATA_S16_PRIVATE(object) \
+	((CainteoirAudioDataS16Private *)cainteoir_audio_data_s16_get_instance_private(CAINTEOIR_AUDIO_DATA_S16(object)))
+
 static void
 cainteoir_audio_data_s16_finalize(GObject *object)
 {
-	CainteoirAudioDataS16 *audio = CAINTEOIR_AUDIO_DATA_S16(object);
-	(&audio->priv->data)->~audio_data_t();
+	CainteoirAudioDataS16Private *priv = CAINTEOIR_AUDIO_DATA_S16_PRIVATE(object);
+	(&priv->data)->~audio_data_t();
 
 	G_OBJECT_CLASS(cainteoir_audio_data_s16_parent_class)->finalize(object);
 }
@@ -57,8 +62,8 @@ cainteoir_audio_data_s16_class_init(CainteoirAudioDataS16Class *klass)
 static void
 cainteoir_audio_data_s16_init(CainteoirAudioDataS16 *audio)
 {
-	audio->priv = (CainteoirAudioDataS16Private *)cainteoir_audio_data_s16_get_instance_private(audio);
-	new (&audio->priv->data) audio_data_t();
+	CainteoirAudioDataS16Private *priv = CAINTEOIR_AUDIO_DATA_S16_PRIVATE(audio);
+	new (&priv->data) audio_data_t();
 }
 
 CainteoirAudioDataS16 *
@@ -69,6 +74,7 @@ cainteoir_audio_data_s16_new(const char *filename,
                              uint16_t frequency)
 {
 	CainteoirAudioDataS16 *self = CAINTEOIR_AUDIO_DATA_S16(g_object_new(CAINTEOIR_TYPE_AUDIO_DATA_S16, nullptr));
+	CainteoirAudioDataS16Private *priv = CAINTEOIR_AUDIO_DATA_S16_PRIVATE(self);
 
 	try
 	{
@@ -79,7 +85,7 @@ cainteoir_audio_data_s16_new(const char *filename,
 		css::time start = css::parse_smil_time(start_time);
 		css::time end   = css::parse_smil_time(end_time);
 
-		self->priv->data = cainteoir::read_s16_samples(audio, start, end, channel, frequency);
+		priv->data = cainteoir::read_s16_samples(audio, start, end, channel, frequency);
 	}
 	catch (const std::exception &e)
 	{
@@ -94,15 +100,13 @@ cainteoir_audio_data_s16_new(const char *filename,
 uint16_t
 cainteoir_audio_data_s16_get_frequency(CainteoirAudioDataS16 *audio)
 {
-	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), 0);
-	return audio->priv->data.info->frequency();
+	return CAINTEOIR_AUDIO_DATA_S16_PRIVATE(audio)->data.info->frequency();
 }
 
 uint32_t
 cainteoir_audio_data_s16_get_sample_count(CainteoirAudioDataS16 *audio)
 {
-	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), 0);
-	return audio->priv->data.samples.size();
+	return CAINTEOIR_AUDIO_DATA_S16_PRIVATE(audio)->data.samples.size();
 }
 
 float
@@ -115,6 +119,5 @@ cainteoir_audio_data_s16_get_duration(CainteoirAudioDataS16 *audio)
 const short *
 cainteoir_audio_data_s16_get_samples(CainteoirAudioDataS16 *audio)
 {
-	g_return_val_if_fail(CAINTEOIR_AUDIO_DATA_S16(audio), nullptr);
-	return &audio->priv->data.samples[0];
+	return &CAINTEOIR_AUDIO_DATA_S16_PRIVATE(audio)->data.samples[0];
 }

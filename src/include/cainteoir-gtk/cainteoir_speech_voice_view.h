@@ -22,6 +22,7 @@
 #define CAINTEOIR_GTK_CAINTEOIR_SPEECH_VOICE_VIEW_H
 
 #include "cainteoir_speech_synthesizers.h"
+#include "cainteoir_document.h"
 
 G_BEGIN_DECLS
 
@@ -67,6 +68,9 @@ GtkWidget *                            cainteoir_speech_voice_view_new(Cainteoir
 
 void                                   cainteoir_speech_voice_view_filter_by_language(CainteoirSpeechVoiceView *view,
                                                                                       const gchar *language);
+
+void                                   cainteoir_speech_voice_view_filter_by_document_language(CainteoirSpeechVoiceView *view,
+                                                                                               CainteoirDocument *document);
 
 G_END_DECLS
 

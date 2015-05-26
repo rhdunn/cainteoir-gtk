@@ -21,7 +21,9 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_WAVEFORM_VIEW_H
 #define CAINTEOIR_GTK_CAINTEOIR_WAVEFORM_VIEW_H
 
-#include "cainteoir_audio_data_s16.h"
+#include <stdint.h>
+
+typedef struct _CainteoirAudioDataS16  CainteoirAudioDataS16;
 
 G_BEGIN_DECLS
 

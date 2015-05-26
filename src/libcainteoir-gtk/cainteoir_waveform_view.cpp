@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 
 #include <cainteoir-gtk/cainteoir_waveform_view.h>
+#include <cainteoir-gtk/cainteoir_audio_data_s16.h>
 
 #include <algorithm>
 #include <cstdlib>

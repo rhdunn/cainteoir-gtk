@@ -24,6 +24,7 @@
 #include <gtk/gtk.h>
 
 #include <cainteoir-gtk/cainteoir_speech_voice_view.h>
+#include <cainteoir-gtk/cainteoir_metadata.h>
 
 #include "cainteoir_speech_synthesizers_private.h"
 

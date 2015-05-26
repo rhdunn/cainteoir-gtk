@@ -21,7 +21,7 @@
 #ifndef CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_H
 #define CAINTEOIR_GTK_CAINTEOIR_DOCUMENT_H
 
-#include "cainteoir_metadata.h"
+typedef struct _CainteoirMetadata      CainteoirMetadata;
 
 G_BEGIN_DECLS
 

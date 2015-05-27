@@ -51,20 +51,16 @@ struct SpeechParameterSetting
 };
 
 static void
-on_speech_parameter_changed(GtkRange *range, gpointer data)
+on_speech_parameter_changed(GtkRange *range, SpeechParameterSetting *setting)
 {
-	SpeechParameterSetting *setting = (SpeechParameterSetting *)data;
-
 	cainteoir_settings_set_integer(setting->settings, "voice", setting->key,
 	                               gtk_range_get_value(GTK_RANGE(setting->value)));
 	cainteoir_settings_save(setting->settings);
 }
 
 static void
-on_speech_parameter_reset(GtkWidget *range, gpointer data)
+on_speech_parameter_reset(GtkWidget *range, SpeechParameterSetting *setting)
 {
-	SpeechParameterSetting *setting = (SpeechParameterSetting *)data;
-
 	gtk_range_set_value(GTK_RANGE(setting->value), cainteoir_speech_parameter_get_default(setting->parameter));
 }
 
@@ -181,10 +177,8 @@ update_narration_mode(ReaderSettingsViewPrivate *priv)
 }
 
 static void
-on_narration_active(GtkWidget *narration, GdkEvent *event, gpointer data)
+on_narration_active(GtkWidget *narration, GdkEvent *event, ReaderSettingsViewPrivate *priv)
 {
-	ReaderSettingsViewPrivate *priv = (ReaderSettingsViewPrivate *)data;
-
 	cainteoir_settings_set_boolean(priv->settings, "narration", "enabled",
 	                               gtk_switch_get_active(GTK_SWITCH(narration)));
 	cainteoir_settings_save(priv->settings);
@@ -193,10 +187,8 @@ on_narration_active(GtkWidget *narration, GdkEvent *event, gpointer data)
 }
 
 static void
-on_tts_fallback_active(GtkWidget *tts_fallback, GdkEvent *event, gpointer data)
+on_tts_fallback_active(GtkWidget *tts_fallback, GdkEvent *event, ReaderSettingsViewPrivate *priv)
 {
-	ReaderSettingsViewPrivate *priv = (ReaderSettingsViewPrivate *)data;
-
 	cainteoir_settings_set_boolean(priv->settings, "narration", "tts-fallback",
 	                               gtk_switch_get_active(GTK_SWITCH(tts_fallback)));
 	cainteoir_settings_save(priv->settings);

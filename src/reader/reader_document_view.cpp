@@ -71,10 +71,8 @@ reader_document_view_class_init(ReaderDocumentViewClass *klass)
 }
 
 static void
-on_document_view_show(GtkWidget *widget, gpointer data)
+on_document_view_show(GtkWidget *widget, ReaderDocumentViewPrivate *priv)
 {
-	ReaderDocumentViewPrivate *priv = (ReaderDocumentViewPrivate *)data;
-
 	gtk_paned_set_position(GTK_PANED(priv->doc_pane),
 	                       cainteoir_settings_get_integer(priv->settings, "index", "position", INDEX_PANE_WIDTH));
 
@@ -150,10 +148,8 @@ create_index_type_combo(void)
 }
 
 static void
-on_index_type_changed(GtkWidget *widget, gpointer data)
+on_index_type_changed(GtkWidget *widget, ReaderDocumentViewPrivate *priv)
 {
-	ReaderDocumentViewPrivate *priv = (ReaderDocumentViewPrivate *)data;
-
 	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(priv->view));
 	if (doc)
 	{

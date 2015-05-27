@@ -170,20 +170,17 @@ on_speak(ReaderWindowPrivate *priv)
 }
 
 static gboolean
-on_window_state_changed(GtkWidget *widget, GdkEvent *event, void *data)
+on_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, CainteoirSettings *settings)
 {
-	CainteoirSettings *settings = (CainteoirSettings *)data;
-	gboolean maximized = (((GdkEventWindowState *)event)->new_window_state & GDK_WINDOW_STATE_MAXIMIZED);
+	gboolean maximized = event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
 	cainteoir_settings_set_boolean(settings, "window", "maximized", maximized);
 	cainteoir_settings_save(settings);
 	return TRUE;
 }
 
 static gboolean
-on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
+on_window_delete(GtkWidget *window, GdkEvent *event, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
-
 	if (!cainteoir_settings_get_boolean(priv->settings, "window", "maximized", FALSE))
 	{
 		gint width = 0;
@@ -214,18 +211,14 @@ on_window_delete(GtkWidget *window, GdkEvent *event, gpointer data)
 }
 
 static void
-on_window_show(GtkWidget *widget, gpointer data)
+on_window_show(GtkWidget *widget, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
-
 	gtk_widget_hide(priv->previous);
 }
 
 static void
-on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
-
 	GVariant *action_state = g_action_get_state(G_ACTION(action));
 	gboolean active = !g_variant_get_boolean(action_state);
 
@@ -237,9 +230,8 @@ on_index_pane_toggle_action(GSimpleAction *action, GVariant *parameter, gpointer
 }
 
 static void
-on_open_file_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+on_open_file_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
 	gchar *current_filename = cainteoir_settings_get_string(priv->settings, "document", "filename", nullptr);
 	gchar *current_mimetype = cainteoir_settings_get_string(priv->settings, "document", "mimetype", "text/plain");
 
@@ -262,10 +254,8 @@ on_open_file_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 }
 
 static void
-on_play_stop_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+on_play_stop_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
-
 	if (cainteoir_speech_synthesizers_is_speaking(priv->tts))
 	{
 		cainteoir_speech_synthesizers_stop(priv->tts);
@@ -286,9 +276,8 @@ on_play_stop_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 }
 
 static void
-on_record_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+on_record_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
 	gchar *current_filename = cainteoir_settings_get_string(priv->settings, "recording", "filename", nullptr);
 	gchar *current_mimetype = cainteoir_settings_get_string(priv->settings, "recording", "mimetype", "audio/x-vorbis+ogg");
 
@@ -330,10 +319,8 @@ on_record_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 }
 
 static void
-on_previous_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+on_previous_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
-
 	if (priv->view_history.empty()) return;
 
 	GtkWidget *view = priv->view_history.top();
@@ -346,10 +333,8 @@ on_previous_action(GSimpleAction *action, GVariant *parameter, gpointer data)
 }
 
 static void
-on_view_change_action(GSimpleAction *action, GVariant *parameter, gpointer data)
+on_view_change_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate *priv)
 {
-	ReaderWindowPrivate *priv = (ReaderWindowPrivate *)data;
-
 	GtkWidget *current = gtk_stack_get_visible_child(GTK_STACK(priv->stack));
 	gtk_stack_set_visible_child_name(GTK_STACK(priv->stack), g_variant_get_string(parameter, nullptr));
 

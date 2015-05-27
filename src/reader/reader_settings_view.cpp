@@ -127,6 +127,8 @@ speech_parameter_setting_update(SpeechParameterSetting *setting,
 	}
 }
 
+typedef struct _ReaderSettingsViewPrivate ReaderSettingsViewPrivate;
+
 struct _ReaderSettingsViewPrivate
 {
 	CainteoirSettings *settings;
@@ -141,17 +143,20 @@ struct _ReaderSettingsViewPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderSettingsView, reader_settings_view, GTK_TYPE_BIN)
 
+#define READER_SETTINGS_VIEW_PRIVATE(object) \
+	((ReaderSettingsViewPrivate *)reader_settings_view_get_instance_private(READER_SETTINGS_VIEW(object)))
+
 static void
 reader_settings_view_finalize(GObject *object)
 {
-	ReaderSettingsView *view = READER_SETTINGS_VIEW(object);
-	if (view->priv->rate.parameter)        g_object_unref(G_OBJECT(view->priv->rate.parameter));
-	if (view->priv->volume.parameter)      g_object_unref(G_OBJECT(view->priv->volume.parameter));
-	if (view->priv->pitch.parameter)       g_object_unref(G_OBJECT(view->priv->pitch.parameter));
-	if (view->priv->pitch_range.parameter) g_object_unref(G_OBJECT(view->priv->pitch_range.parameter));
-	if (view->priv->word_gap.parameter)    g_object_unref(G_OBJECT(view->priv->word_gap.parameter));
-	g_object_unref(G_OBJECT(view->priv->settings));
-	g_object_unref(G_OBJECT(view->priv->tts));
+	ReaderSettingsViewPrivate *priv = READER_SETTINGS_VIEW_PRIVATE(object);
+	if (priv->rate.parameter)        g_object_unref(G_OBJECT(priv->rate.parameter));
+	if (priv->volume.parameter)      g_object_unref(G_OBJECT(priv->volume.parameter));
+	if (priv->pitch.parameter)       g_object_unref(G_OBJECT(priv->pitch.parameter));
+	if (priv->pitch_range.parameter) g_object_unref(G_OBJECT(priv->pitch_range.parameter));
+	if (priv->word_gap.parameter)    g_object_unref(G_OBJECT(priv->word_gap.parameter));
+	g_object_unref(G_OBJECT(priv->settings));
+	g_object_unref(G_OBJECT(priv->tts));
 
 	G_OBJECT_CLASS(reader_settings_view_parent_class)->finalize(object);
 }
@@ -166,45 +171,44 @@ reader_settings_view_class_init(ReaderSettingsViewClass *klass)
 static void
 reader_settings_view_init(ReaderSettingsView *view)
 {
-	view->priv = (ReaderSettingsViewPrivate *)reader_settings_view_get_instance_private(view);
 }
 
 static void
-update_narration_mode(ReaderSettingsView *view)
+update_narration_mode(ReaderSettingsViewPrivate *priv)
 {
 	CainteoirNarration narration = CAINTEOIR_NARRATION_TTS_ONLY;
-	if (cainteoir_settings_get_boolean(view->priv->settings, "narration", "enabled", FALSE))
+	if (cainteoir_settings_get_boolean(priv->settings, "narration", "enabled", FALSE))
 	{
-		if (cainteoir_settings_get_boolean(view->priv->settings, "narration", "tts-fallback", FALSE))
+		if (cainteoir_settings_get_boolean(priv->settings, "narration", "tts-fallback", FALSE))
 			narration = CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS;
 		else
 			narration = CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY;
 	}
-	cainteoir_speech_synthesizers_set_narration(view->priv->tts, narration);
+	cainteoir_speech_synthesizers_set_narration(priv->tts, narration);
 }
 
 static void
 on_narration_active(GtkWidget *narration, GdkEvent *event, gpointer data)
 {
-	ReaderSettingsView *view = (ReaderSettingsView *)data;
+	ReaderSettingsViewPrivate *priv = (ReaderSettingsViewPrivate *)data;
 
-	cainteoir_settings_set_boolean(view->priv->settings, "narration", "enabled",
+	cainteoir_settings_set_boolean(priv->settings, "narration", "enabled",
 	                               gtk_switch_get_active(GTK_SWITCH(narration)));
-	cainteoir_settings_save(view->priv->settings);
+	cainteoir_settings_save(priv->settings);
 
-	update_narration_mode(view);
+	update_narration_mode(priv);
 }
 
 static void
 on_tts_fallback_active(GtkWidget *tts_fallback, GdkEvent *event, gpointer data)
 {
-	ReaderSettingsView *view = (ReaderSettingsView *)data;
+	ReaderSettingsViewPrivate *priv = (ReaderSettingsViewPrivate *)data;
 
-	cainteoir_settings_set_boolean(view->priv->settings, "narration", "tts-fallback",
+	cainteoir_settings_set_boolean(priv->settings, "narration", "tts-fallback",
 	                               gtk_switch_get_active(GTK_SWITCH(tts_fallback)));
-	cainteoir_settings_save(view->priv->settings);
+	cainteoir_settings_save(priv->settings);
 
-	update_narration_mode(view);
+	update_narration_mode(priv);
 }
 
 GtkWidget *
@@ -212,8 +216,9 @@ reader_settings_view_new(CainteoirSettings *settings,
                          CainteoirSpeechSynthesizers *synthesizers)
 {
 	ReaderSettingsView *view = READER_SETTINGS_VIEW(g_object_new(READER_TYPE_SETTINGS_VIEW, nullptr));
-	view->priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
-	view->priv->tts = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_ref(G_OBJECT(synthesizers)));
+	ReaderSettingsViewPrivate *priv = READER_SETTINGS_VIEW_PRIVATE(view);
+	priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
+	priv->tts = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_ref(G_OBJECT(synthesizers)));
 
 #if GTK_CHECK_VERSION(3, 12, 0)
 	gtk_widget_set_margin_start(GTK_WIDGET(view), 5);
@@ -231,11 +236,11 @@ reader_settings_view_new(CainteoirSettings *settings,
 	gtk_grid_set_column_spacing(GTK_GRID(parameter_grid), 5);
 	gtk_box_pack_start(GTK_BOX(layout), parameter_grid, FALSE, FALSE, 5);
 
-	speech_parameter_setting_init(&view->priv->rate, parameter_grid, 0, view->priv->settings, "rate");
-	speech_parameter_setting_init(&view->priv->volume, parameter_grid, 1, view->priv->settings, "volume");
-	speech_parameter_setting_init(&view->priv->pitch, parameter_grid, 2, view->priv->settings, "pitch");
-	speech_parameter_setting_init(&view->priv->pitch_range, parameter_grid, 3, view->priv->settings, "pitch-range");
-	speech_parameter_setting_init(&view->priv->word_gap, parameter_grid, 4, view->priv->settings, "word-gap");
+	speech_parameter_setting_init(&priv->rate, parameter_grid, 0, priv->settings, "rate");
+	speech_parameter_setting_init(&priv->volume, parameter_grid, 1, priv->settings, "volume");
+	speech_parameter_setting_init(&priv->pitch, parameter_grid, 2, priv->settings, "pitch");
+	speech_parameter_setting_init(&priv->pitch_range, parameter_grid, 3, priv->settings, "pitch-range");
+	speech_parameter_setting_init(&priv->word_gap, parameter_grid, 4, priv->settings, "word-gap");
 
 	GtkWidget *settings_grid = gtk_grid_new();
 	gtk_grid_set_row_spacing(GTK_GRID(settings_grid), 5);
@@ -250,8 +255,8 @@ reader_settings_view_new(CainteoirSettings *settings,
 	GtkWidget *narration = gtk_switch_new();
 	gtk_grid_attach(GTK_GRID(settings_grid), narration, 1, 0, 1, 1);
 	gtk_switch_set_active(GTK_SWITCH(narration),
-	                      cainteoir_settings_get_boolean(view->priv->settings, "narration", "enabled", FALSE));
-	g_signal_connect(narration, "notify::active", G_CALLBACK(on_narration_active), view);
+	                      cainteoir_settings_get_boolean(priv->settings, "narration", "enabled", FALSE));
+	g_signal_connect(narration, "notify::active", G_CALLBACK(on_narration_active), priv);
 
 	GtkWidget *tts_fallback_label = gtk_label_new(i18n("Text-to-Speech fallback"));
 	gtk_widget_set_hexpand(tts_fallback_label, TRUE);
@@ -261,10 +266,10 @@ reader_settings_view_new(CainteoirSettings *settings,
 	GtkWidget *tts_fallback = gtk_switch_new();
 	gtk_grid_attach(GTK_GRID(settings_grid), tts_fallback, 1, 1, 1, 1);
 	gtk_switch_set_active(GTK_SWITCH(tts_fallback),
-	                      cainteoir_settings_get_boolean(view->priv->settings, "narration", "tts-fallback", FALSE));
-	g_signal_connect(tts_fallback, "notify::active", G_CALLBACK(on_tts_fallback_active), view);
+	                      cainteoir_settings_get_boolean(priv->settings, "narration", "tts-fallback", FALSE));
+	g_signal_connect(tts_fallback, "notify::active", G_CALLBACK(on_tts_fallback_active), priv);
 
-	update_narration_mode(view);
+	update_narration_mode(priv);
 	reader_settings_view_update_speech_parameters(view);
 
 	return GTK_WIDGET(view);
@@ -273,9 +278,10 @@ reader_settings_view_new(CainteoirSettings *settings,
 void
 reader_settings_view_update_speech_parameters(ReaderSettingsView *view)
 {
-	speech_parameter_setting_update(&view->priv->rate, view->priv->tts, CAINTEOIR_SPEECH_RATE);
-	speech_parameter_setting_update(&view->priv->volume, view->priv->tts, CAINTEOIR_SPEECH_VOLUME);
-	speech_parameter_setting_update(&view->priv->pitch, view->priv->tts, CAINTEOIR_SPEECH_PITCH);
-	speech_parameter_setting_update(&view->priv->pitch_range, view->priv->tts, CAINTEOIR_SPEECH_PITCH_RANGE);
-	speech_parameter_setting_update(&view->priv->word_gap, view->priv->tts, CAINTEOIR_SPEECH_WORD_GAP);
+	ReaderSettingsViewPrivate *priv = READER_SETTINGS_VIEW_PRIVATE(view);
+	speech_parameter_setting_update(&priv->rate, priv->tts, CAINTEOIR_SPEECH_RATE);
+	speech_parameter_setting_update(&priv->volume, priv->tts, CAINTEOIR_SPEECH_VOLUME);
+	speech_parameter_setting_update(&priv->pitch, priv->tts, CAINTEOIR_SPEECH_PITCH);
+	speech_parameter_setting_update(&priv->pitch_range, priv->tts, CAINTEOIR_SPEECH_PITCH_RANGE);
+	speech_parameter_setting_update(&priv->word_gap, priv->tts, CAINTEOIR_SPEECH_WORD_GAP);
 }

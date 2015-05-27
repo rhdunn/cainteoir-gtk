@@ -40,15 +40,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), READER_TYPE_SETTINGS_VIEW, ReaderSettingsViewClass))
 
 typedef struct _ReaderSettingsView        ReaderSettingsView;
-typedef struct _ReaderSettingsViewPrivate ReaderSettingsViewPrivate;
 typedef struct _ReaderSettingsViewClass   ReaderSettingsViewClass;
 
 struct _ReaderSettingsView
 {
 	GtkBin parent_instance;
-
-	/*< private >*/
-	ReaderSettingsViewPrivate *priv;
 };
 
 struct _ReaderSettingsViewClass

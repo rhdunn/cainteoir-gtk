@@ -1,6 +1,6 @@
 /* A GTK+ wrapper around the cainteoir::document class.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -39,15 +39,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_DOCUMENT, CainteoirDocumentClass))
 
 typedef struct _CainteoirDocument        CainteoirDocument;
-typedef struct _CainteoirDocumentPrivate CainteoirDocumentPrivate;
 typedef struct _CainteoirDocumentClass   CainteoirDocumentClass;
 
 struct _CainteoirDocument
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirDocumentPrivate *priv;
 };
 
 struct _CainteoirDocumentClass

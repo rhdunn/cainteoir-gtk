@@ -1,6 +1,6 @@
 /* A GTK+ wrapper around the cainteoir::document class.
  *
- * Copyright (C) 2012-2014 Reece H. Dunn
+ * Copyright (C) 2012-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -37,6 +37,8 @@ namespace events = cainteoir::events;
 
 static constexpr int CHARACTERS_PER_WORD = 6;
 
+typedef struct _CainteoirDocumentPrivate CainteoirDocumentPrivate;
+
 struct _CainteoirDocumentPrivate
 {
 	std::shared_ptr<cainteoir::document> doc;
@@ -46,11 +48,14 @@ struct _CainteoirDocumentPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocument, cainteoir_document, G_TYPE_OBJECT)
 
+#define CAINTEOIR_DOCUMENT_PRIVATE(object) \
+	((CainteoirDocumentPrivate *)cainteoir_document_get_instance_private(CAINTEOIR_DOCUMENT(object)))
+
 static void
 cainteoir_document_finalize(GObject *object)
 {
-	CainteoirDocument *doc = CAINTEOIR_DOCUMENT(object);
-	doc->priv->~CainteoirDocumentPrivate();
+	CainteoirDocumentPrivate *priv = CAINTEOIR_DOCUMENT_PRIVATE(object);
+	priv->~CainteoirDocumentPrivate();
 
 	G_OBJECT_CLASS(cainteoir_document_parent_class)->finalize(object);
 }
@@ -65,8 +70,8 @@ cainteoir_document_class_init(CainteoirDocumentClass *klass)
 static void
 cainteoir_document_init(CainteoirDocument *doc)
 {
-	void * data = cainteoir_document_get_instance_private(doc);
-	doc->priv = new (data)CainteoirDocumentPrivate();
+	CainteoirDocumentPrivate *priv = CAINTEOIR_DOCUMENT_PRIVATE(doc);
+	new (priv)CainteoirDocumentPrivate();
 }
 
 CainteoirDocument *
@@ -75,16 +80,17 @@ cainteoir_document_new(const char *filename)
 	if (!filename || filename[0] == '\0') return nullptr;
 
 	CainteoirDocument *self = CAINTEOIR_DOCUMENT(g_object_new(CAINTEOIR_TYPE_DOCUMENT, nullptr));
+	CainteoirDocumentPrivate *priv = CAINTEOIR_DOCUMENT_PRIVATE(self);
 
 	try
 	{
-		self->priv->metadata = std::make_shared<rdf::graph>();
-		auto reader = cainteoir::createDocumentReader(filename, *self->priv->metadata, std::string());
+		priv->metadata = std::make_shared<rdf::graph>();
+		auto reader = cainteoir::createDocumentReader(filename, *priv->metadata, std::string());
 		if (!reader)
 			throw std::runtime_error("the document type is not supported");
 
-		self->priv->doc = std::make_shared<cainteoir::document>(reader, *self->priv->metadata);
-		self->priv->subject = rdf::uri(filename, std::string());
+		priv->doc = std::make_shared<cainteoir::document>(reader, *priv->metadata);
+		priv->subject = rdf::uri(filename, std::string());
 	}
 	catch (const std::exception &e)
 	{
@@ -99,32 +105,28 @@ cainteoir_document_new(const char *filename)
 size_t
 cainteoir_document_get_text_length(CainteoirDocument *doc)
 {
-	if (!doc) return 0;
-	return doc->priv->doc->text_length();
+	return CAINTEOIR_DOCUMENT_PRIVATE(doc)->doc->text_length();
 }
 
 size_t
 cainteoir_document_estimate_word_count(CainteoirDocument *doc)
 {
-	if (!doc) return 0;
-	return doc->priv->doc->text_length() / CHARACTERS_PER_WORD;
+	return CAINTEOIR_DOCUMENT_PRIVATE(doc)->doc->text_length() / CHARACTERS_PER_WORD;
 }
 
 double
 cainteoir_document_estimate_duration(CainteoirDocument *doc, double words_per_minute)
 {
-	if (!doc) return 0.0;
-	return ((double)doc->priv->doc->text_length() / CHARACTERS_PER_WORD / words_per_minute) * 60.0;
+	return ((double)CAINTEOIR_DOCUMENT_PRIVATE(doc)->doc->text_length() /
+	       CHARACTERS_PER_WORD / words_per_minute) * 60.0;
 }
 
 CainteoirMetadata *
 cainteoir_document_get_metadata(CainteoirDocument *doc)
 {
-	if (!doc) return nullptr;
-	return cainteoir_metadata_new(doc->priv->metadata, doc->priv->subject);
+	CainteoirDocumentPrivate *priv = CAINTEOIR_DOCUMENT_PRIVATE(doc);
+	return cainteoir_metadata_new(priv->metadata, priv->subject);
 }
-
-// private api ////////////////////////////////////////////////////////////////
 
 struct tag_block
 {
@@ -264,7 +266,7 @@ cainteoir_document_create_buffer(CainteoirDocument *doc)
 	std::list<std::string> anchor;
 	std::stack<tag_block> contexts;
 	bool need_linebreak = false;
-	for (auto &entry : doc->priv->doc->children())
+	for (auto &entry : CAINTEOIR_DOCUMENT_PRIVATE(doc)->doc->children())
 	{
 		if (entry.type & events::begin_context)
 		{
@@ -344,20 +346,17 @@ cainteoir_document_create_buffer(CainteoirDocument *doc)
 cainteoir::document *
 cainteoir_document_get_document(CainteoirDocument *doc)
 {
-	if (!doc) return nullptr;
-	return doc->priv->doc.get();
+	return CAINTEOIR_DOCUMENT_PRIVATE(doc)->doc.get();
 }
 
 cainteoir::rdf::graph *
 cainteoir_document_get_rdf_metadata(CainteoirDocument *doc)
 {
-	if (!doc) return nullptr;
-	return doc->priv->metadata.get();
+	return CAINTEOIR_DOCUMENT_PRIVATE(doc)->metadata.get();
 }
 
 cainteoir::rdf::uri *
 cainteoir_document_get_subject(CainteoirDocument *doc)
 {
-	if (!doc) return nullptr;
-	return &doc->priv->subject;
+	return &CAINTEOIR_DOCUMENT_PRIVATE(doc)->subject;
 }

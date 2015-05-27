@@ -40,15 +40,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_SPEECH_VOICE_VIEW, CainteoirSpeechVoiceViewClass))
 
 typedef struct _CainteoirSpeechVoiceView        CainteoirSpeechVoiceView;
-typedef struct _CainteoirSpeechVoiceViewPrivate CainteoirSpeechVoiceViewPrivate;
 typedef struct _CainteoirSpeechVoiceViewClass   CainteoirSpeechVoiceViewClass;
 
 struct _CainteoirSpeechVoiceView
 {
 	GtkTreeView widget;
-
-	/*< private >*/
-	CainteoirSpeechVoiceViewPrivate *priv;
 };
 
 struct _CainteoirSpeechVoiceViewClass

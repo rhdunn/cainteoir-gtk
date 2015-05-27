@@ -37,15 +37,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_TIMEBAR, CainteoirTimeBarClass))
 
 typedef struct _CainteoirTimeBar        CainteoirTimeBar;
-typedef struct _CainteoirTimeBarPrivate CainteoirTimeBarPrivate;
 typedef struct _CainteoirTimeBarClass   CainteoirTimeBarClass;
 
 struct _CainteoirTimeBar
 {
 	GtkBox widget;
-
-	/*< private >*/
-	CainteoirTimeBarPrivate *priv;
 };
 
 struct _CainteoirTimeBarClass

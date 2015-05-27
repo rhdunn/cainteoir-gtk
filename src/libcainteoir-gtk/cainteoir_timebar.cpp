@@ -26,6 +26,8 @@
 
 #include <math.h>
 
+typedef struct _CainteoirTimeBarPrivate CainteoirTimeBarPrivate;
+
 struct _CainteoirTimeBarPrivate
 {
 	GtkWidget *elapsed;
@@ -35,11 +37,12 @@ struct _CainteoirTimeBarPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirTimeBar, cainteoir_timebar, GTK_TYPE_BOX)
 
+#define CAINTEOIR_TIMEBAR_PRIVATE(object) \
+	((CainteoirTimeBarPrivate *)cainteoir_timebar_get_instance_private(CAINTEOIR_TIMEBAR(object)))
+
 static void
 cainteoir_timebar_finalize(GObject *object)
 {
-	CainteoirTimeBar *timebar = CAINTEOIR_TIMEBAR(object);
-
 	G_OBJECT_CLASS(cainteoir_timebar_parent_class)->finalize(object);
 }
 
@@ -53,22 +56,22 @@ cainteoir_timebar_class_init(CainteoirTimeBarClass *klass)
 static void
 cainteoir_timebar_init(CainteoirTimeBar *timebar)
 {
-	timebar->priv = (CainteoirTimeBarPrivate *)cainteoir_timebar_get_instance_private(timebar);
 }
 
 GtkWidget *
 cainteoir_timebar_new()
 {
 	CainteoirTimeBar *self = CAINTEOIR_TIMEBAR(g_object_new(CAINTEOIR_TYPE_TIMEBAR, nullptr));
-	self->priv->elapsed = gtk_label_new("00:00:00.0");
-	self->priv->total = gtk_label_new("00:00:00.0");
-	self->priv->progress = gtk_progress_bar_new();
+	CainteoirTimeBarPrivate *priv = CAINTEOIR_TIMEBAR_PRIVATE(self);
+	priv->elapsed = gtk_label_new("00:00:00.0");
+	priv->total = gtk_label_new("00:00:00.0");
+	priv->progress = gtk_progress_bar_new();
 
-	gtk_widget_set_valign(self->priv->progress, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(priv->progress, GTK_ALIGN_CENTER);
 
-	gtk_box_pack_start(GTK_BOX(self), self->priv->elapsed, FALSE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(self), self->priv->progress, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(self), self->priv->total, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(self), priv->elapsed, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(self), priv->progress, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(self), priv->total, FALSE, TRUE, 0);
 
 	return GTK_WIDGET(self);
 }
@@ -94,13 +97,15 @@ cainteoir_timebar_set_time(CainteoirTimeBar *timebar,
                            gdouble elapsed_time,
                            gdouble total_time)
 {
-	format_time(timebar->priv->elapsed, elapsed_time);
-	format_time(timebar->priv->total, total_time);
+	CainteoirTimeBarPrivate *priv = CAINTEOIR_TIMEBAR_PRIVATE(timebar);
+	format_time(priv->elapsed, elapsed_time);
+	format_time(priv->total, total_time);
 }
 
 void
 cainteoir_timebar_set_progress(CainteoirTimeBar *timebar,
                                gdouble progress)
 {
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(timebar->priv->progress), progress / 100.0);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(CAINTEOIR_TIMEBAR_PRIVATE(timebar)->progress),
+	                              progress / 100.0);
 }

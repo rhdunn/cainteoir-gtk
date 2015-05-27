@@ -37,9 +37,7 @@ namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
 
-typedef struct _CainteoirSpeechSynthesizersPrivate CainteoirSpeechSynthesizersPrivate;
-
-struct _CainteoirSpeechSynthesizersPrivate
+struct CainteoirSpeechSynthesizersPrivate
 {
 	rdf::graph metadata;
 	tts::engines tts;
@@ -49,14 +47,14 @@ struct _CainteoirSpeechSynthesizersPrivate
 	std::shared_ptr<cainteoir::audio> out;
 	gchar *device_name;
 
-	_CainteoirSpeechSynthesizersPrivate()
+	CainteoirSpeechSynthesizersPrivate()
 		: tts(metadata)
 		, narration(tts::media_overlays_mode::tts_only)
 		, device_name(nullptr)
 	{
 	}
 
-	~_CainteoirSpeechSynthesizersPrivate()
+	~CainteoirSpeechSynthesizersPrivate()
 	{
 		if (speech) speech->stop();
 

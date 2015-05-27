@@ -134,9 +134,7 @@ speech_parameter_setting_update(SpeechParameterSetting *setting,
 	}
 }
 
-typedef struct _ReaderSettingsViewPrivate ReaderSettingsViewPrivate;
-
-struct _ReaderSettingsViewPrivate
+struct ReaderSettingsViewPrivate
 {
 	CainteoirSettings *settings;
 	CainteoirSpeechSynthesizers *tts;
@@ -147,7 +145,7 @@ struct _ReaderSettingsViewPrivate
 	SpeechParameterSetting pitch_range;
 	SpeechParameterSetting word_gap;
 
-	~_ReaderSettingsViewPrivate()
+	~ReaderSettingsViewPrivate()
 	{
 		g_object_unref(G_OBJECT(settings));
 		g_object_unref(G_OBJECT(tts));

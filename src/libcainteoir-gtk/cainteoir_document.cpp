@@ -39,9 +39,7 @@ namespace events = cainteoir::events;
 
 static constexpr int CHARACTERS_PER_WORD = 6;
 
-typedef struct _CainteoirDocumentPrivate CainteoirDocumentPrivate;
-
-struct _CainteoirDocumentPrivate
+struct CainteoirDocumentPrivate
 {
 	std::shared_ptr<cainteoir::document> doc;
 	std::shared_ptr<rdf::graph> metadata;

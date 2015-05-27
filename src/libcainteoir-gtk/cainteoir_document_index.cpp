@@ -42,9 +42,7 @@ enum IndexColumns
 	INDEX_COUNT
 };
 
-typedef struct _CainteoirDocumentIndexPrivate CainteoirDocumentIndexPrivate;
-
-struct _CainteoirDocumentIndexPrivate
+struct CainteoirDocumentIndexPrivate
 {
 	GtkTreeStore *store;
 	GtkTreeSelection *selection;
@@ -53,7 +51,7 @@ struct _CainteoirDocumentIndexPrivate
 	const cainteoir::ref_entry *active;
 	GtkTreeIter active_iter;
 
-	_CainteoirDocumentIndexPrivate()
+	CainteoirDocumentIndexPrivate()
 		: active(nullptr)
 	{
 		store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);

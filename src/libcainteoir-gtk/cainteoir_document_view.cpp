@@ -28,20 +28,18 @@
 #include "cainteoir_document_private.h"
 #include "extensions/glib.h"
 
-typedef struct _CainteoirDocumentViewPrivate CainteoirDocumentViewPrivate;
-
-struct _CainteoirDocumentViewPrivate
+struct CainteoirDocumentViewPrivate
 {
 	GtkWidget *text_view;
 	CainteoirDocument *doc;
 
-	_CainteoirDocumentViewPrivate()
+	CainteoirDocumentViewPrivate()
 		: text_view(gtk_text_view_new())
 		, doc(nullptr)
 	{
 	}
 
-	~_CainteoirDocumentViewPrivate()
+	~CainteoirDocumentViewPrivate()
 	{
 		if (doc) g_object_unref(doc);
 	}

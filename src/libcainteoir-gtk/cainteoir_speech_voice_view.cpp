@@ -59,9 +59,7 @@ const char * columns[VLC_COUNT] = {
 	i18n("Channels"),
 };
 
-typedef struct _CainteoirSpeechVoiceViewPrivate CainteoirSpeechVoiceViewPrivate;
-
-struct _CainteoirSpeechVoiceViewPrivate
+struct CainteoirSpeechVoiceViewPrivate
 {
 	GtkTreeStore *store;
 
@@ -70,13 +68,13 @@ struct _CainteoirSpeechVoiceViewPrivate
 	cainteoir::languages languages;
 	cainteoir::language::tag filter_language;
 
-	_CainteoirSpeechVoiceViewPrivate()
+	CainteoirSpeechVoiceViewPrivate()
 		: filter_language({})
 		, tts(nullptr)
 	{
 	}
 
-	~_CainteoirSpeechVoiceViewPrivate()
+	~CainteoirSpeechVoiceViewPrivate()
 	{
 		if (tts) g_object_unref(tts);
 	}

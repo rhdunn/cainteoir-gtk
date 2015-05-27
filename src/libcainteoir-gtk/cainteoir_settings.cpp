@@ -31,20 +31,18 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-typedef struct _CainteoirSettingsPrivate CainteoirSettingsPrivate;
-
-struct _CainteoirSettingsPrivate
+struct CainteoirSettingsPrivate
 {
 	GKeyFile *settings;
 	gchar *filename;
 
-	_CainteoirSettingsPrivate()
+	CainteoirSettingsPrivate()
 		: settings(g_key_file_new())
 		, filename(nullptr)
 	{
 	}
 
-	~_CainteoirSettingsPrivate()
+	~CainteoirSettingsPrivate()
 	{
 		if (filename) g_free(filename);
 		g_key_file_free(settings);

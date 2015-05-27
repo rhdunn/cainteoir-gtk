@@ -31,9 +31,7 @@
 #include <cstdlib>
 #include <climits>
 
-typedef struct _CainteoirWaveformViewPrivate CainteoirWaveformViewPrivate;
-
-struct _CainteoirWaveformViewPrivate
+struct CainteoirWaveformViewPrivate
 {
 	CainteoirAudioDataS16 *data;
 	uint16_t window_size;
@@ -47,7 +45,7 @@ struct _CainteoirWaveformViewPrivate
 	guint hscroll_policy : 1;
 	guint vscroll_policy : 1;
 
-	_CainteoirWaveformViewPrivate()
+	CainteoirWaveformViewPrivate()
 		: data(nullptr)
 		, window_size(16)
 		, maximum_height(std::numeric_limits<uint16_t>::max())
@@ -60,7 +58,7 @@ struct _CainteoirWaveformViewPrivate
 	{
 	}
 
-	~_CainteoirWaveformViewPrivate()
+	~CainteoirWaveformViewPrivate()
 	{
 		if (data) g_object_unref(data);
 	}

@@ -27,9 +27,7 @@
 #include "cainteoir_speech_parameter_private.h"
 #include "extensions/glib.h"
 
-typedef struct _CainteoirSpeechParameterPrivate CainteoirSpeechParameterPrivate;
-
-struct _CainteoirSpeechParameterPrivate
+struct CainteoirSpeechParameterPrivate
 {
 	std::shared_ptr<cainteoir::tts::parameter> param;
 };

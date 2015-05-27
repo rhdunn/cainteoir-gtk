@@ -32,9 +32,7 @@ namespace css = cainteoir::css;
 
 typedef cainteoir::audio_data<short> audio_data_t;
 
-typedef struct _CainteoirAudioDataS16Private CainteoirAudioDataS16Private;
-
-struct _CainteoirAudioDataS16Private
+struct CainteoirAudioDataS16Private
 {
 	audio_data_t data;
 	uint16_t frequency;

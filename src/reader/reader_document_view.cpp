@@ -40,9 +40,7 @@ enum IndexTypeColumns
 	INDEX_TYPE_COUNT,
 };
 
-typedef struct _ReaderDocumentViewPrivate ReaderDocumentViewPrivate;
-
-struct _ReaderDocumentViewPrivate
+struct ReaderDocumentViewPrivate
 {
 	GtkWidget *doc_pane;
 	GtkWidget *index_type;
@@ -52,7 +50,7 @@ struct _ReaderDocumentViewPrivate
 
 	CainteoirSettings *settings;
 
-	~_ReaderDocumentViewPrivate()
+	~ReaderDocumentViewPrivate()
 	{
 		g_object_unref(G_OBJECT(settings));
 	}

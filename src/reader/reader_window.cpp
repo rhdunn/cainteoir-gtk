@@ -45,9 +45,7 @@
 #define HAMBURGER_MENU_ICON "view-list-symbolic"
 #endif
 
-typedef struct _ReaderWindowPrivate ReaderWindowPrivate;
-
-struct _ReaderWindowPrivate
+struct ReaderWindowPrivate
 {
 	GtkWidget *self;
 	GtkWidget *stack;
@@ -74,7 +72,7 @@ struct _ReaderWindowPrivate
 
 	std::stack<GtkWidget *> view_history;
 
-	_ReaderWindowPrivate()
+	ReaderWindowPrivate()
 		: settings(cainteoir_settings_new("settings.dat"))
 		, document_formats(cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS))
 		, audio_formats(cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS))
@@ -82,7 +80,7 @@ struct _ReaderWindowPrivate
 	{
 	}
 
-	~_ReaderWindowPrivate()
+	~ReaderWindowPrivate()
 	{
 		g_object_unref(G_OBJECT(settings));
 	}

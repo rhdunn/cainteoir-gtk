@@ -30,9 +30,7 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
-typedef struct _CainteoirMetadataPrivate CainteoirMetadataPrivate;
-
-struct _CainteoirMetadataPrivate
+struct CainteoirMetadataPrivate
 {
 	std::shared_ptr<rdf::graph> metadata;
 	rql::results data;

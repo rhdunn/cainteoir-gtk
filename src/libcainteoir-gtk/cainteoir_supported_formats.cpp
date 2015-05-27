@@ -31,9 +31,7 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
-typedef struct _CainteoirSupportedFormatsPrivate CainteoirSupportedFormatsPrivate;
-
-struct _CainteoirSupportedFormatsPrivate
+struct CainteoirSupportedFormatsPrivate
 {
 	rdf::graph metadata;
 	rql::results mimetypes;

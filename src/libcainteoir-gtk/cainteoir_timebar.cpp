@@ -28,9 +28,7 @@
 
 #include <math.h>
 
-typedef struct _CainteoirTimeBarPrivate CainteoirTimeBarPrivate;
-
-struct _CainteoirTimeBarPrivate
+struct CainteoirTimeBarPrivate
 {
 	GtkWidget *elapsed;
 	GtkWidget *total;

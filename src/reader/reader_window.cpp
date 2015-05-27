@@ -175,7 +175,7 @@ on_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, Cainteoir
 	gboolean maximized = event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
 	cainteoir_settings_set_boolean(settings, "window", "maximized", maximized);
 	cainteoir_settings_save(settings);
-	return TRUE;
+	return FALSE;
 }
 
 static gboolean

@@ -40,15 +40,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_DOCUMENT_INDEX, CainteoirDocumentIndexClass))
 
 typedef struct _CainteoirDocumentIndex        CainteoirDocumentIndex;
-typedef struct _CainteoirDocumentIndexPrivate CainteoirDocumentIndexPrivate;
 typedef struct _CainteoirDocumentIndexClass   CainteoirDocumentIndexClass;
 
 struct _CainteoirDocumentIndex
 {
 	GtkTreeView parent_instance;
-
-	/*< private >*/
-	CainteoirDocumentIndexPrivate *priv;
 };
 
 struct _CainteoirDocumentIndexClass

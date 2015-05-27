@@ -41,6 +41,8 @@ enum IndexColumns
 	INDEX_COUNT
 };
 
+typedef struct _CainteoirDocumentIndexPrivate CainteoirDocumentIndexPrivate;
+
 struct _CainteoirDocumentIndexPrivate
 {
 	GtkTreeStore *store;
@@ -53,11 +55,14 @@ struct _CainteoirDocumentIndexPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocumentIndex, cainteoir_document_index, GTK_TYPE_TREE_VIEW)
 
+#define CAINTEOIR_DOCUMENT_INDEX_PRIVATE(object) \
+	((CainteoirDocumentIndexPrivate *)cainteoir_document_index_get_instance_private(CAINTEOIR_DOCUMENT_INDEX(object)))
+
 static void
 cainteoir_document_index_finalize(GObject *object)
 {
-	CainteoirDocumentIndex *index = CAINTEOIR_DOCUMENT_INDEX(object);
-	index->priv->~CainteoirDocumentIndexPrivate();
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(object);
+	priv->~CainteoirDocumentIndexPrivate();
 
 	G_OBJECT_CLASS(cainteoir_document_index_parent_class)->finalize(object);
 }
@@ -72,10 +77,10 @@ cainteoir_document_index_class_init(CainteoirDocumentIndexClass *klass)
 static void
 cainteoir_document_index_init(CainteoirDocumentIndex *index)
 {
-	void * data = cainteoir_document_index_get_instance_private(index);
-	index->priv = new (data)CainteoirDocumentIndexPrivate();
-	index->priv->store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-	index->priv->active = nullptr;
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
+	new (priv)CainteoirDocumentIndexPrivate();
+	priv->store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	priv->active = nullptr;
 }
 
 static const rdf::uri &
@@ -155,8 +160,9 @@ GtkWidget *
 cainteoir_document_index_new(CainteoirDocumentView *view)
 {
 	CainteoirDocumentIndex *self = CAINTEOIR_DOCUMENT_INDEX(g_object_new(CAINTEOIR_TYPE_DOCUMENT_INDEX, nullptr));
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(self);
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(self), GTK_TREE_MODEL(self->priv->store));
+	gtk_tree_view_set_model(GTK_TREE_VIEW(self), GTK_TREE_MODEL(priv->store));
 	add_icon_column(GTK_TREE_VIEW(self), INDEX_GUTTER);
 	add_text_column(GTK_TREE_VIEW(self), INDEX_DISPLAY);
 
@@ -164,8 +170,8 @@ cainteoir_document_index_new(CainteoirDocumentView *view)
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(self), FALSE);
 	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(self), INDEX_TITLE);
 
-	self->priv->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self));
-	gtk_tree_selection_set_mode(self->priv->selection, GTK_SELECTION_MULTIPLE);
+	priv->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self));
+	gtk_tree_selection_set_mode(priv->selection, GTK_SELECTION_MULTIPLE);
 
 	g_signal_connect(GTK_TREE_VIEW(self), "cursor-changed", G_CALLBACK(on_cursor_changed), view);
 
@@ -177,27 +183,29 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
                                CainteoirDocument *doc,
                                const gchar *index_type)
 {
-	gtk_tree_store_clear(index->priv->store);
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
+
+	gtk_tree_store_clear(priv->store);
 	if (!index_type)
 		return;
 
 	rdf::graph &metadata = *cainteoir_document_get_rdf_metadata(doc);
 	rdf::uri &subject = *cainteoir_document_get_subject(doc);
-	index->priv->index = cainteoir::navigation(metadata, subject, rdf::href(index_type));
-	if (index->priv->index.empty())
+	priv->index = cainteoir::navigation(metadata, subject, rdf::href(index_type));
+	if (priv->index.empty())
 		return;
 
 	GtkTreeIter row;
-	int initial_depth = index->priv->index.front().depth;
-	for (const auto &entry : index->priv->index)
+	int initial_depth = priv->index.front().depth;
+	for (const auto &entry : priv->index)
 	{
 		std::ostringstream title;
 		for (const auto &i : cainteoir::range<int>(initial_depth, entry.depth))
 			title << "... ";
 		title << entry.title;
 
-		gtk_tree_store_append(index->priv->store, &row, nullptr);
-		gtk_tree_store_set(index->priv->store, &row,
+		gtk_tree_store_append(priv->store, &row, nullptr);
+		gtk_tree_store_set(priv->store, &row,
 			INDEX_ENTRY_PTR, &entry,
 			INDEX_GUTTER,    "",
 			INDEX_TITLE,     entry.title.c_str(),
@@ -210,38 +218,41 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
 gboolean
 cainteoir_document_index_is_empty(CainteoirDocumentIndex *index)
 {
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
 	GtkTreeIter iter;
-	return gtk_tree_model_get_iter_first(GTK_TREE_MODEL(index->priv->store), &iter) == FALSE ? TRUE : FALSE;
+	return gtk_tree_model_get_iter_first(GTK_TREE_MODEL(priv->store), &iter) == FALSE ? TRUE : FALSE;
 }
-
-// Private API ////////////////////////////////////////////////////////////////
 
 const std::vector<cainteoir::ref_entry> *
 cainteoir_document_index_get_listing(CainteoirDocumentIndex *index)
 {
-	return &index->priv->index;
+	return &CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index)->index;
 }
 
 void
 cainteoir_document_index_set_playing(CainteoirDocumentIndex *index,
                                      const cainteoir::ref_entry &entry)
 {
-	if (&entry == index->priv->active) return;
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
 
-	if (index->priv->active)
-		gtk_tree_store_set(index->priv->store, &index->priv->active_iter, INDEX_GUTTER, "", -1);
+	if (&entry == priv->active) return;
 
-	if (!find_ref_entry(GTK_TREE_MODEL(index->priv->store), index->priv->active_iter, &entry))
+	if (priv->active)
+		gtk_tree_store_set(priv->store, &priv->active_iter, INDEX_GUTTER, "", -1);
+
+	if (!find_ref_entry(GTK_TREE_MODEL(priv->store), priv->active_iter, &entry))
 		return;
 
-	gtk_tree_store_set(index->priv->store, &index->priv->active_iter, INDEX_GUTTER, "media-playback-start", -1);
-	index->priv->active = &entry;
+	gtk_tree_store_set(priv->store, &priv->active_iter, INDEX_GUTTER, "media-playback-start", -1);
+	priv->active = &entry;
 }
 
 cainteoir_document_index_selection
 cainteoir_document_index_get_selection(CainteoirDocumentIndex *index)
 {
-	GList *selected = gtk_tree_selection_get_selected_rows(index->priv->selection, nullptr);
+	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
+
+	GList *selected = gtk_tree_selection_get_selected_rows(priv->selection, nullptr);
 	rdf::uri from;
 	rdf::uri to;
 
@@ -250,11 +261,11 @@ cainteoir_document_index_get_selection(CainteoirDocumentIndex *index)
 	case 0: // read all ...
 		break;
 	case 1: // read from selected item ...
-		from = uri_from_selected_item(GTK_TREE_MODEL(index->priv->store), g_list_first(selected), false);
+		from = uri_from_selected_item(GTK_TREE_MODEL(priv->store), g_list_first(selected), false);
 		break;
 	default: // read selected range ...
-		from = uri_from_selected_item(GTK_TREE_MODEL(index->priv->store), g_list_first(selected), false);
-		to   = uri_from_selected_item(GTK_TREE_MODEL(index->priv->store), g_list_last(selected),  true);
+		from = uri_from_selected_item(GTK_TREE_MODEL(priv->store), g_list_first(selected), false);
+		to   = uri_from_selected_item(GTK_TREE_MODEL(priv->store), g_list_last(selected),  true);
 		break;
 	}
 

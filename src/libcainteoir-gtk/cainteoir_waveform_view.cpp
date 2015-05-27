@@ -99,9 +99,8 @@ cainteoir_waveform_view_value_changed(GtkAdjustment *adjustment, CainteoirWavefo
 }
 
 static void
-cainteoir_waveform_view_set_hadjustment_values(CainteoirWaveformView *view)
+cainteoir_waveform_view_set_hadjustment_values(CainteoirWaveformViewPrivate *priv)
 {
-	CainteoirWaveformViewPrivate *priv = CAINTEOIR_WAVEFORM_VIEW_PRIVATE(view);
 	if (!priv->data) return;
 
 	float duration = cainteoir_audio_data_s16_get_duration(priv->data);
@@ -132,7 +131,7 @@ cainteoir_waveform_view_set_hadjustment(CainteoirWaveformView *view, GtkAdjustme
 
 	g_signal_connect(adjustment, "value-changed", G_CALLBACK(cainteoir_waveform_view_value_changed), view);
 	priv->hadjustment = GTK_ADJUSTMENT(g_object_ref_sink(adjustment));
-	cainteoir_waveform_view_set_hadjustment_values(view);
+	cainteoir_waveform_view_set_hadjustment_values(priv);
 
 	g_object_notify(G_OBJECT(view), "hadjustment");
 }
@@ -295,7 +294,7 @@ cainteoir_waveform_view_set_s16_data(CainteoirWaveformView *view, CainteoirAudio
 	if (priv->data) g_object_unref(priv->data);
 	priv->data = CAINTEOIR_AUDIO_DATA_S16(g_object_ref(data));
 
-	cainteoir_waveform_view_set_hadjustment_values(view);
+	cainteoir_waveform_view_set_hadjustment_values(priv);
 }
 
 CainteoirAudioDataS16 *

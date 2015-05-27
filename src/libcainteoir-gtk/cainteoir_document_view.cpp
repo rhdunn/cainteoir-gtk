@@ -1,6 +1,6 @@
 /* Display a cainteoir_document object.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -27,6 +27,8 @@
 
 #include "cainteoir_document_private.h"
 
+typedef struct _CainteoirDocumentViewPrivate CainteoirDocumentViewPrivate;
+
 struct _CainteoirDocumentViewPrivate
 {
 	GtkWidget *text_view;
@@ -44,16 +46,17 @@ enum
 };
 
 G_DEFINE_TYPE_WITH_CODE(CainteoirDocumentView, cainteoir_document_view, GTK_TYPE_BIN,
+	G_ADD_PRIVATE(CainteoirDocumentView)
 	G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, nullptr))
 
-#define CAINTEOIR_DOCUMENT_VIEW_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), CAINTEOIR_TYPE_DOCUMENT_VIEW, CainteoirDocumentViewPrivate))
+#define CAINTEOIR_DOCUMENT_VIEW_PRIVATE(object) \
+	((CainteoirDocumentViewPrivate *)cainteoir_document_view_get_instance_private(CAINTEOIR_DOCUMENT_VIEW(object)))
 
 static void
 cainteoir_document_view_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
 {
-	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(object);
-	GtkScrollable *scroll = GTK_SCROLLABLE(view->priv->text_view);
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(object);
+	GtkScrollable *scroll = GTK_SCROLLABLE(priv->text_view);
 	switch (prop_id)
 	{
 	default:
@@ -78,8 +81,8 @@ cainteoir_document_view_set_property(GObject *object, guint prop_id, const GValu
 static void
 cainteoir_document_view_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
 {
-	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(object);
-	GtkScrollable *scroll = GTK_SCROLLABLE(view->priv->text_view);
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(object);
+	GtkScrollable *scroll = GTK_SCROLLABLE(priv->text_view);
 	switch (prop_id)
 	{
 	default:
@@ -104,8 +107,8 @@ cainteoir_document_view_get_property(GObject *object, guint prop_id, GValue *val
 static void
 cainteoir_document_view_finalize(GObject *object)
 {
-	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(object);
-	if (view->priv->doc) g_object_unref(view->priv->doc);
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(object);
+	if (priv->doc) g_object_unref(priv->doc);
 
 	G_OBJECT_CLASS(cainteoir_document_view_parent_class)->finalize(object);
 }
@@ -118,8 +121,6 @@ cainteoir_document_view_class_init(CainteoirDocumentViewClass *klass)
 	object->get_property = cainteoir_document_view_get_property;
 	object->finalize = cainteoir_document_view_finalize;
 
-	g_type_class_add_private(object, sizeof(CainteoirDocumentViewPrivate));
-
 	// GtkScrollable interface:
 	g_object_class_override_property(object, PROP_HADJUSTMENT,    "hadjustment");
 	g_object_class_override_property(object, PROP_VADJUSTMENT,    "vadjustment");
@@ -130,45 +131,45 @@ cainteoir_document_view_class_init(CainteoirDocumentViewClass *klass)
 static void
 cainteoir_document_view_init(CainteoirDocumentView *view)
 {
-	view->priv = CAINTEOIR_DOCUMENT_VIEW_GET_PRIVATE(view);
-	view->priv->text_view = gtk_text_view_new();
-	view->priv->doc = nullptr;
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view);
+	priv->text_view = gtk_text_view_new();
+	priv->doc = nullptr;
 }
 
 GtkWidget *
 cainteoir_document_view_new()
 {
 	CainteoirDocumentView *view = CAINTEOIR_DOCUMENT_VIEW(g_object_new(CAINTEOIR_TYPE_DOCUMENT_VIEW, nullptr));
-	gtk_container_add(GTK_CONTAINER(view), view->priv->text_view);
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(view->priv->text_view), FALSE);
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view->priv->text_view), GTK_WRAP_WORD_CHAR);
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view);
+	gtk_container_add(GTK_CONTAINER(view), priv->text_view);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(priv->text_view), FALSE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(priv->text_view), GTK_WRAP_WORD_CHAR);
 	return GTK_WIDGET(view);
 }
 
 void
 cainteoir_document_view_set_document(CainteoirDocumentView *view, CainteoirDocument *doc)
 {
-	g_return_if_fail(CAINTEOIR_DOCUMENT_VIEW(view));
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view);
 
-	if (view->priv->doc) g_object_unref(view->priv->doc);
-	view->priv->doc = CAINTEOIR_DOCUMENT(g_object_ref(doc));
+	if (priv->doc) g_object_unref(priv->doc);
+	priv->doc = CAINTEOIR_DOCUMENT(g_object_ref(doc));
 
 	GtkTextBuffer *buffer = cainteoir_document_create_buffer(doc);
-	gtk_text_view_set_buffer(GTK_TEXT_VIEW(view->priv->text_view), buffer);
+	gtk_text_view_set_buffer(GTK_TEXT_VIEW(priv->text_view), buffer);
 }
 
 CainteoirDocument *
 cainteoir_document_view_get_document(CainteoirDocumentView *view)
 {
-	g_return_val_if_fail(CAINTEOIR_DOCUMENT_VIEW(view), nullptr);
-
-	return view->priv->doc ? CAINTEOIR_DOCUMENT(g_object_ref(view->priv->doc)) : nullptr;
+	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view);
+	return priv->doc ? CAINTEOIR_DOCUMENT(g_object_ref(priv->doc)) : nullptr;
 }
 
 void
 cainteoir_document_view_scroll_to_anchor(CainteoirDocumentView *view, const gchar *anchor)
 {
-	GtkTextView *text_view = GTK_TEXT_VIEW(view->priv->text_view);
+	GtkTextView *text_view = GTK_TEXT_VIEW(CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view)->text_view);
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
 	GtkTextMark *mark = gtk_text_buffer_get_mark(buffer, anchor);
 

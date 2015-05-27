@@ -1,6 +1,6 @@
 /* Display a cainteoir_document object.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -39,15 +39,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_DOCUMENT_VIEW, CainteoirDocumentViewClass))
 
 typedef struct _CainteoirDocumentView        CainteoirDocumentView;
-typedef struct _CainteoirDocumentViewPrivate CainteoirDocumentViewPrivate;
 typedef struct _CainteoirDocumentViewClass   CainteoirDocumentViewClass;
 
 struct _CainteoirDocumentView
 {
 	GtkBin widget;
-
-	/*< private >*/
-	CainteoirDocumentViewPrivate *priv;
 };
 
 struct _CainteoirDocumentViewClass

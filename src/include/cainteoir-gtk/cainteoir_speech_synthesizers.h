@@ -41,15 +41,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_SPEECH_SYNTHESIZERS, CainteoirSpeechSynthesizersClass))
 
 typedef struct _CainteoirSpeechSynthesizers        CainteoirSpeechSynthesizers;
-typedef struct _CainteoirSpeechSynthesizersPrivate CainteoirSpeechSynthesizersPrivate;
 typedef struct _CainteoirSpeechSynthesizersClass   CainteoirSpeechSynthesizersClass;
 
 struct _CainteoirSpeechSynthesizers
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirSpeechSynthesizersPrivate *priv;
 };
 
 struct _CainteoirSpeechSynthesizersClass

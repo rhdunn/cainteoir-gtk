@@ -36,6 +36,8 @@ namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
 
+typedef struct _CainteoirSpeechSynthesizersPrivate CainteoirSpeechSynthesizersPrivate;
+
 struct _CainteoirSpeechSynthesizersPrivate
 {
 	rdf::graph metadata;
@@ -58,14 +60,18 @@ _CainteoirSpeechSynthesizersPrivate::_CainteoirSpeechSynthesizersPrivate()
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechSynthesizers, cainteoir_speech_synthesizers, G_TYPE_OBJECT)
 
+#define CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(object) \
+	((CainteoirSpeechSynthesizersPrivate *)cainteoir_speech_synthesizers_get_instance_private(CAINTEOIR_SPEECH_SYNTHESIZERS(object)))
+
 static void
 cainteoir_speech_synthesizers_finalize(GObject *object)
 {
-	CainteoirSpeechSynthesizers *synthesizers = CAINTEOIR_SPEECH_SYNTHESIZERS(object);
-	cainteoir_speech_synthesizers_stop(synthesizers);
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(object);
 
-	g_free(synthesizers->priv->device_name);
-	synthesizers->priv->~CainteoirSpeechSynthesizersPrivate();
+	if (priv->speech) priv->speech->stop();
+
+	g_free(priv->device_name);
+	priv->~CainteoirSpeechSynthesizersPrivate();
 
 	G_OBJECT_CLASS(cainteoir_speech_synthesizers_parent_class)->finalize(object);
 }
@@ -80,19 +86,19 @@ cainteoir_speech_synthesizers_class_init(CainteoirSpeechSynthesizersClass *klass
 static void
 cainteoir_speech_synthesizers_init(CainteoirSpeechSynthesizers *synthesizers)
 {
-	void * data = cainteoir_speech_synthesizers_get_instance_private(synthesizers);
-	synthesizers->priv = new (data)CainteoirSpeechSynthesizersPrivate();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	new (priv)CainteoirSpeechSynthesizersPrivate();
 }
 
 static void
-cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizers *synthesizers,
+cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizersPrivate *priv,
                                     CainteoirDocument *document,
                                     CainteoirDocumentIndex *index)
 {
 	auto doc = cainteoir_document_get_document(document);
 	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(index));
 	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(index));
-	synthesizers->priv->speech = synthesizers->priv->tts.speak(synthesizers->priv->out, listing, doc->children(sel), synthesizers->priv->narration);
+	priv->speech = priv->tts.speak(priv->out, listing, doc->children(sel), priv->narration);
 }
 
 CainteoirSpeechSynthesizers *
@@ -105,28 +111,29 @@ gboolean
 cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers *synthesizers,
                                                     const gchar *lang)
 {
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
 	auto language = cainteoir::language::make_lang(lang);
 
 	// Does the current voice support this language? ...
 
-	std::string current = rql::select_value<std::string>(synthesizers->priv->metadata,
-	                      rql::subject == synthesizers->priv->tts.voice() && rql::predicate == rdf::dc("language"));
+	std::string current = rql::select_value<std::string>(priv->metadata,
+	                      rql::subject == priv->tts.voice() && rql::predicate == rdf::dc("language"));
 
 	if (cainteoir::language::make_lang(current) == language)
 		return TRUE;
 
 	// The current voice does not support this language, so search the available voices ...
 
-	for (auto &voice : rql::select(synthesizers->priv->metadata,
+	for (auto &voice : rql::select(priv->metadata,
 	                               rql::predicate == rdf::rdf("type") && rql::object == rdf::tts("Voice")))
 	{
 		const rdf::uri &uri = rql::subject(voice);
 
-		std::string lang = rql::select_value<std::string>(synthesizers->priv->metadata,
+		std::string lang = rql::select_value<std::string>(priv->metadata,
 		                   rql::subject == uri && rql::predicate == rdf::dc("language"));
 
 		if (cainteoir::language::make_lang(lang) == language &&
-		    synthesizers->priv->tts.select_voice(synthesizers->priv->metadata, uri))
+		    priv->tts.select_voice(priv->metadata, uri))
 			return TRUE;
 	}
 	return FALSE;
@@ -135,7 +142,7 @@ cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers 
 CainteoirNarration
 cainteoir_speech_synthesizers_get_narration(CainteoirSpeechSynthesizers *synthesizers)
 {
-	switch (synthesizers->priv->narration)
+	switch (CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->narration)
 	{
 	case tts::media_overlays_mode::tts_only:               return CAINTEOIR_NARRATION_TTS_ONLY;
 	case tts::media_overlays_mode::media_overlays_only:    return CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY;
@@ -148,16 +155,17 @@ void
 cainteoir_speech_synthesizers_set_narration(CainteoirSpeechSynthesizers *synthesizers,
                                             CainteoirNarration narration)
 {
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
 	switch (narration)
 	{
 	case CAINTEOIR_NARRATION_TTS_ONLY:
-		synthesizers->priv->narration = tts::media_overlays_mode::tts_only;
+		priv->narration = tts::media_overlays_mode::tts_only;
 		break;
 	case CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY:
-		synthesizers->priv->narration = tts::media_overlays_mode::media_overlays_only;
+		priv->narration = tts::media_overlays_mode::media_overlays_only;
 		break;
 	case CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS:
-		synthesizers->priv->narration = tts::media_overlays_mode::tts_and_media_overlays;
+		priv->narration = tts::media_overlays_mode::tts_and_media_overlays;
 		break;
 	}
 }
@@ -173,17 +181,18 @@ cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
 
 	try
 	{
-		g_free(synthesizers->priv->device_name);
-		synthesizers->priv->device_name = g_strdup(device_name);
+		CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+		g_free(priv->device_name);
+		priv->device_name = g_strdup(device_name);
 
-		synthesizers->priv->out = cainteoir::open_audio_device(
-			synthesizers->priv->device_name,
+		priv->out = cainteoir::open_audio_device(
+			priv->device_name,
 			*cainteoir_document_get_rdf_metadata(doc),
 			*cainteoir_document_get_subject(doc),
-			synthesizers->priv->metadata,
-			synthesizers->priv->tts.voice());
+			priv->metadata,
+			priv->tts.voice());
 
-		cainteoir_speech_synthesizers_speak(synthesizers, doc, index);
+		cainteoir_speech_synthesizers_speak(priv, doc, index);
 	}
 	catch (const std::exception &e)
 	{
@@ -204,19 +213,20 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
 
 	try
 	{
-		g_free(synthesizers->priv->device_name);
-		synthesizers->priv->device_name = g_strdup(filename);
+		CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+		g_free(priv->device_name);
+		priv->device_name = g_strdup(filename);
 
-		synthesizers->priv->out = cainteoir::create_audio_file(
-			synthesizers->priv->device_name,
+		priv->out = cainteoir::create_audio_file(
+			priv->device_name,
 			type,
 			quality,
 			*cainteoir_document_get_rdf_metadata(doc),
 			*cainteoir_document_get_subject(doc),
-			synthesizers->priv->metadata,
-			synthesizers->priv->tts.voice());
+			priv->metadata,
+			priv->tts.voice());
 
-		cainteoir_speech_synthesizers_speak(synthesizers, doc, index);
+		cainteoir_speech_synthesizers_speak(priv, doc, index);
 	}
 	catch (const std::exception &e)
 	{
@@ -227,43 +237,49 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
 gboolean
 cainteoir_speech_synthesizers_is_speaking(CainteoirSpeechSynthesizers *synthesizers)
 {
-	if (!synthesizers->priv->speech) return FALSE;
-	return synthesizers->priv->speech->is_speaking();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	if (!priv->speech) return FALSE;
+	return priv->speech->is_speaking();
 }
 
 void
 cainteoir_speech_synthesizers_stop(CainteoirSpeechSynthesizers *synthesizers)
 {
-	if (!synthesizers->priv->speech) return;
-	synthesizers->priv->speech->stop();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	if (!priv->speech) return;
+	priv->speech->stop();
 }
 
 gdouble
 cainteoir_speech_synthesizers_get_elapsed_time(CainteoirSpeechSynthesizers *synthesizers)
 {
-	if (!synthesizers->priv->speech) return 0.0;
-	return synthesizers->priv->speech->elapsedTime();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	if (!priv->speech) return 0.0;
+	return priv->speech->elapsedTime();
 }
 
 gdouble
 cainteoir_speech_synthesizers_get_total_time(CainteoirSpeechSynthesizers *synthesizers)
 {
-	if (!synthesizers->priv->speech) return 0.0;
-	return synthesizers->priv->speech->totalTime();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	if (!priv->speech) return 0.0;
+	return priv->speech->totalTime();
 }
 
 gdouble
 cainteoir_speech_synthesizers_get_percentage_complete(CainteoirSpeechSynthesizers *synthesizers)
 {
-	if (!synthesizers->priv->speech) return 0.0;
-	return synthesizers->priv->speech->completed();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	if (!priv->speech) return 0.0;
+	return priv->speech->completed();
 }
 
 size_t
 cainteoir_speech_synthesizers_get_position(CainteoirSpeechSynthesizers *synthesizers)
 {
-	if (!synthesizers->priv->speech) return 0;
-	return synthesizers->priv->speech->position();
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	if (!priv->speech) return 0;
+	return priv->speech->position();
 }
 
 CainteoirSpeechParameter *
@@ -280,11 +296,11 @@ cainteoir_speech_synthesizers_get_parameter(CainteoirSpeechSynthesizers *synthes
 	case CAINTEOIR_SPEECH_WORD_GAP:    type = tts::parameter::word_gap;    break;
 	default:                           return nullptr;
 	}
-	return cainteoir_speech_parameter_new(synthesizers->priv->tts.parameter(type));
+	return cainteoir_speech_parameter_new(CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->tts.parameter(type));
 }
 
 rdf::graph *
 cainteoir_speech_synthesizers_get_metadata(CainteoirSpeechSynthesizers *synthesizers)
 {
-	return &synthesizers->priv->metadata;
+	return &CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->metadata;
 }

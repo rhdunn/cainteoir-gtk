@@ -37,15 +37,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_SPEECH_PARAMETER, CainteoirSpeechParameterClass))
 
 typedef struct _CainteoirSpeechParameter        CainteoirSpeechParameter;
-typedef struct _CainteoirSpeechParameterPrivate CainteoirSpeechParameterPrivate;
 typedef struct _CainteoirSpeechParameterClass   CainteoirSpeechParameterClass;
 
 struct _CainteoirSpeechParameter
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirSpeechParameterPrivate *priv;
 };
 
 struct _CainteoirSpeechParameterClass

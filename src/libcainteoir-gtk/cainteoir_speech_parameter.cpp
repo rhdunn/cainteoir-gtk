@@ -26,6 +26,8 @@
 
 #include "cainteoir_speech_parameter_private.h"
 
+typedef struct _CainteoirSpeechParameterPrivate CainteoirSpeechParameterPrivate;
+
 struct _CainteoirSpeechParameterPrivate
 {
 	std::shared_ptr<cainteoir::tts::parameter> param;
@@ -33,11 +35,14 @@ struct _CainteoirSpeechParameterPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechParameter, cainteoir_speech_parameter, G_TYPE_OBJECT)
 
+#define CAINTEOIR_SPEECH_PARAMETER_PRIVATE(object) \
+	((CainteoirSpeechParameterPrivate *)cainteoir_speech_parameter_get_instance_private(CAINTEOIR_SPEECH_PARAMETER(object)))
+
 static void
 cainteoir_speech_parameter_finalize(GObject *object)
 {
-	CainteoirSpeechParameter *param = CAINTEOIR_SPEECH_PARAMETER(object);
-	param->priv->~CainteoirSpeechParameterPrivate();
+	CainteoirSpeechParameterPrivate *priv = CAINTEOIR_SPEECH_PARAMETER_PRIVATE(object);
+	priv->~CainteoirSpeechParameterPrivate();
 
 	G_OBJECT_CLASS(cainteoir_speech_parameter_parent_class)->finalize(object);
 }
@@ -52,57 +57,58 @@ cainteoir_speech_parameter_class_init(CainteoirSpeechParameterClass *klass)
 static void
 cainteoir_speech_parameter_init(CainteoirSpeechParameter *param)
 {
-	void * data = cainteoir_speech_parameter_get_instance_private(param);
-	param->priv = new (data)CainteoirSpeechParameterPrivate();
+	CainteoirSpeechParameterPrivate *priv = CAINTEOIR_SPEECH_PARAMETER_PRIVATE(param);
+	new (priv)CainteoirSpeechParameterPrivate();
 }
 
 CainteoirSpeechParameter *
 cainteoir_speech_parameter_new(const std::shared_ptr<cainteoir::tts::parameter> &parameter)
 {
 	CainteoirSpeechParameter *self = CAINTEOIR_SPEECH_PARAMETER(g_object_new(CAINTEOIR_TYPE_SPEECH_PARAMETER, nullptr));
-	self->priv->param = parameter;
+	CainteoirSpeechParameterPrivate *priv = CAINTEOIR_SPEECH_PARAMETER_PRIVATE(self);
+	priv->param = parameter;
 	return self;
 }
 
 const gchar *
 cainteoir_speech_parameter_get_name(CainteoirSpeechParameter *parameter)
 {
-	return parameter->priv->param->name();
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->name();
 }
 
 const gchar *
 cainteoir_speech_parameter_get_units(CainteoirSpeechParameter *parameter)
 {
-	return parameter->priv->param->units();
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->units();
 }
 
 gint
 cainteoir_speech_parameter_get_minimum(CainteoirSpeechParameter *parameter)
 {
-	return parameter->priv->param->minimum();
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->minimum();
 }
 
 gint
 cainteoir_speech_parameter_get_maximum(CainteoirSpeechParameter *parameter)
 {
-	return parameter->priv->param->maximum();
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->maximum();
 }
 
 gint
 cainteoir_speech_parameter_get_default(CainteoirSpeechParameter *parameter)
 {
-	return parameter->priv->param->default_value();
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->default_value();
 }
 
 gint
 cainteoir_speech_parameter_get_value(CainteoirSpeechParameter *parameter)
 {
-	return parameter->priv->param->value();
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->value();
 }
 
 gboolean
 cainteoir_speech_parameter_set_value(CainteoirSpeechParameter *parameter,
                                      gint value)
 {
-	return parameter->priv->param->set_value(value);
+	return CAINTEOIR_SPEECH_PARAMETER_PRIVATE(parameter)->param->set_value(value);
 }

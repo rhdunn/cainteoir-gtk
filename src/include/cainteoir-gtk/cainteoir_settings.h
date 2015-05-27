@@ -37,15 +37,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_SETTINGS, CainteoirSettingsClass))
 
 typedef struct _CainteoirSettings                CainteoirSettings;
-typedef struct _CainteoirSettingsPrivate         CainteoirSettingsPrivate;
 typedef struct _CainteoirSettingsClass           CainteoirSettingsClass;
 
 struct _CainteoirSettings
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirSettingsPrivate *priv;
 };
 
 struct _CainteoirSettingsClass

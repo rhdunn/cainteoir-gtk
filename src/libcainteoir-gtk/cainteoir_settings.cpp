@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+typedef struct _CainteoirSettingsPrivate CainteoirSettingsPrivate;
+
 struct _CainteoirSettingsPrivate
 {
 	GKeyFile *settings;
@@ -37,12 +39,15 @@ struct _CainteoirSettingsPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSettings, cainteoir_settings, G_TYPE_OBJECT)
 
+#define CAINTEOIR_SETTINGS_PRIVATE(object) \
+	((CainteoirSettingsPrivate *)cainteoir_settings_get_instance_private(CAINTEOIR_SETTINGS(object)))
+
 static void
 cainteoir_settings_finalize(GObject *object)
 {
-	CainteoirSettings *doc = CAINTEOIR_SETTINGS(object);
-	if (doc->priv->settings) g_key_file_free(doc->priv->settings);
-	if (doc->priv->filename) g_free(doc->priv->filename);
+	CainteoirSettingsPrivate *priv = CAINTEOIR_SETTINGS_PRIVATE(object);
+	if (priv->settings) g_key_file_free(priv->settings);
+	if (priv->filename) g_free(priv->filename);
 
 	G_OBJECT_CLASS(cainteoir_settings_parent_class)->finalize(object);
 }
@@ -55,35 +60,36 @@ cainteoir_settings_class_init(CainteoirSettingsClass *klass)
 }
 
 static void
-cainteoir_settings_init(CainteoirSettings *doc)
+cainteoir_settings_init(CainteoirSettings *settings)
 {
-	doc->priv = (CainteoirSettingsPrivate *)cainteoir_settings_get_instance_private(doc);
-	doc->priv->settings = g_key_file_new();
-	doc->priv->filename = nullptr;
+	CainteoirSettingsPrivate *priv = CAINTEOIR_SETTINGS_PRIVATE(settings);
+	priv->settings = g_key_file_new();
+	priv->filename = nullptr;
 }
 
 CainteoirSettings *
 cainteoir_settings_new(const gchar *filename)
 {
 	CainteoirSettings *settings = CAINTEOIR_SETTINGS(g_object_new(CAINTEOIR_TYPE_SETTINGS, nullptr));
+	CainteoirSettingsPrivate *priv = CAINTEOIR_SETTINGS_PRIVATE(settings);
 
 	gchar *root = g_strdup_printf("%s/.cainteoir", getenv("HOME"));
 	mkdir(root, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IROTH);
-	settings->priv->filename = g_strdup_printf("%s/%s", root, filename ? filename : "settings.dat");
+	priv->filename = g_strdup_printf("%s/%s", root, filename ? filename : "settings.dat");
 	g_free(root);
 
-	if (!g_key_file_load_from_file(settings->priv->settings, settings->priv->filename, G_KEY_FILE_NONE, nullptr))
+	if (!g_key_file_load_from_file(priv->settings, priv->filename, G_KEY_FILE_NONE, nullptr))
 	{
 		// On error try parsing the old settings format ...
 
-		std::ifstream is(settings->priv->filename);
+		std::ifstream is(priv->filename);
 		std::string group;
 		std::string key;
 		std::string value;
 		while (std::getline(is, group, '.') && std::getline(is, key, '=') && std::getline(is, value))
 		{
 			if (key == "tts_fallback") key = "tts-fallback";
-			g_key_file_set_value(settings->priv->settings, group.c_str(), key.c_str(), value.c_str());
+			g_key_file_set_value(priv->settings, group.c_str(), key.c_str(), value.c_str());
 		}
 	}
 
@@ -93,11 +99,12 @@ cainteoir_settings_new(const gchar *filename)
 void
 cainteoir_settings_save(CainteoirSettings *settings)
 {
+	CainteoirSettingsPrivate *priv = CAINTEOIR_SETTINGS_PRIVATE(settings);
 	gsize length = 0;
-	gchar *data = g_key_file_to_data(settings->priv->settings, &length, nullptr);
+	gchar *data = g_key_file_to_data(priv->settings, &length, nullptr);
 	if (data)
 	{
-		FILE *out = fopen(settings->priv->filename, "wb");
+		FILE *out = fopen(priv->filename, "wb");
 		if (out)
 		{
 			fwrite(data, 1, length, out);
@@ -114,7 +121,7 @@ cainteoir_settings_get_string(CainteoirSettings *settings,
                               const gchar *default_value)
 {
 	GError *error = nullptr;
-	gchar *ret = g_key_file_get_string(settings->priv->settings, group, key, &error);
+	gchar *ret = g_key_file_get_string(CAINTEOIR_SETTINGS_PRIVATE(settings)->settings, group, key, &error);
 	if (error)
 	{
 		g_error_free(error);
@@ -129,7 +136,7 @@ cainteoir_settings_set_string(CainteoirSettings *settings,
                               const gchar *key,
                               const gchar *value)
 {
-	g_key_file_set_string(settings->priv->settings, group, key, value);
+	g_key_file_set_string(CAINTEOIR_SETTINGS_PRIVATE(settings)->settings, group, key, value);
 }
 
 gboolean
@@ -139,7 +146,7 @@ cainteoir_settings_get_boolean(CainteoirSettings *settings,
                                gboolean default_value)
 {
 	GError *error = nullptr;
-	gboolean ret = g_key_file_get_boolean(settings->priv->settings, group, key, &error);
+	gboolean ret = g_key_file_get_boolean(CAINTEOIR_SETTINGS_PRIVATE(settings)->settings, group, key, &error);
 	if (error)
 	{
 		g_error_free(error);
@@ -154,7 +161,7 @@ cainteoir_settings_set_boolean(CainteoirSettings *settings,
                                const gchar *key,
                                gboolean value)
 {
-	g_key_file_set_boolean(settings->priv->settings, group, key, value);
+	g_key_file_set_boolean(CAINTEOIR_SETTINGS_PRIVATE(settings)->settings, group, key, value);
 }
 
 gint
@@ -164,7 +171,7 @@ cainteoir_settings_get_integer(CainteoirSettings *settings,
                                gint default_value)
 {
 	GError *error = nullptr;
-	gint ret = g_key_file_get_integer(settings->priv->settings, group, key, &error);
+	gint ret = g_key_file_get_integer(CAINTEOIR_SETTINGS_PRIVATE(settings)->settings, group, key, &error);
 	if (error)
 	{
 		g_error_free(error);
@@ -179,5 +186,5 @@ cainteoir_settings_set_integer(CainteoirSettings *settings,
                                const gchar *key,
                                gint value)
 {
-	g_key_file_set_integer(settings->priv->settings, group, key, value);
+	g_key_file_set_integer(CAINTEOIR_SETTINGS_PRIVATE(settings)->settings, group, key, value);
 }

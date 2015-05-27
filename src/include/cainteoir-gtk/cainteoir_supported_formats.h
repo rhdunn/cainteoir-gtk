@@ -37,15 +37,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_SUPPORTED_FORMATS, CainteoirSupportedFormatsClass))
 
 typedef struct _CainteoirSupportedFormats        CainteoirSupportedFormats;
-typedef struct _CainteoirSupportedFormatsPrivate CainteoirSupportedFormatsPrivate;
 typedef struct _CainteoirSupportedFormatsClass   CainteoirSupportedFormatsClass;
 
 struct _CainteoirSupportedFormats
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirSupportedFormatsPrivate *priv;
 };
 
 struct _CainteoirSupportedFormatsClass

@@ -29,6 +29,8 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
+typedef struct _CainteoirSupportedFormatsPrivate CainteoirSupportedFormatsPrivate;
+
 struct _CainteoirSupportedFormatsPrivate
 {
 	rdf::graph metadata;
@@ -38,11 +40,14 @@ struct _CainteoirSupportedFormatsPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSupportedFormats, cainteoir_supported_formats, G_TYPE_OBJECT)
 
+#define CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(object) \
+	((CainteoirSupportedFormatsPrivate *)cainteoir_supported_formats_get_instance_private(CAINTEOIR_SUPPORTED_FORMATS(object)))
+
 static void
 cainteoir_supported_formats_finalize(GObject *object)
 {
-	CainteoirSupportedFormats *doc = CAINTEOIR_SUPPORTED_FORMATS(object);
-	doc->priv->~CainteoirSupportedFormatsPrivate();
+	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(object);
+	priv->~CainteoirSupportedFormatsPrivate();
 
 	G_OBJECT_CLASS(cainteoir_supported_formats_parent_class)->finalize(object);
 }
@@ -55,48 +60,50 @@ cainteoir_supported_formats_class_init(CainteoirSupportedFormatsClass *klass)
 }
 
 static void
-cainteoir_supported_formats_init(CainteoirSupportedFormats *doc)
+cainteoir_supported_formats_init(CainteoirSupportedFormats *formats)
 {
-	void * data = cainteoir_supported_formats_get_instance_private(doc);
-	doc->priv = new (data)CainteoirSupportedFormatsPrivate();
+	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats);
+	new (priv)CainteoirSupportedFormatsPrivate();
 }
 
 CainteoirSupportedFormats *
 cainteoir_supported_formats_new(CainteoirFormatType type)
 {
 	CainteoirSupportedFormats *formats = CAINTEOIR_SUPPORTED_FORMATS(g_object_new(CAINTEOIR_TYPE_SUPPORTED_FORMATS, nullptr));
+	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats);
 	switch (type)
 	{
 	case CAINTEOIR_DOCUMENT_FORMATS:
-		cainteoir::supportedDocumentFormats(formats->priv->metadata, cainteoir::text_support);
-		formats->priv->format = rdf::tts("DocumentFormat");
+		cainteoir::supportedDocumentFormats(priv->metadata, cainteoir::text_support);
+		priv->format = rdf::tts("DocumentFormat");
 		break;
 	case CAINTEOIR_AUDIO_FORMATS:
-		cainteoir::supported_audio_formats(formats->priv->metadata);
-		formats->priv->format = rdf::tts("AudioFormat");
+		cainteoir::supported_audio_formats(priv->metadata);
+		priv->format = rdf::tts("AudioFormat");
 		break;
 	case CAINTEOIR_METADATA_FORMATS:
-		cainteoir::supportedDocumentFormats(formats->priv->metadata, cainteoir::metadata_support);
-		formats->priv->format = rdf::tts("DocumentFormat");
+		cainteoir::supportedDocumentFormats(priv->metadata, cainteoir::metadata_support);
+		priv->format = rdf::tts("DocumentFormat");
 		break;
 	default:
 		fprintf(stderr, "error: unknown cainteoir format type\n");
 		g_object_unref(formats);
 		return nullptr;
 	}
-	formats->priv->mimetypes = rql::select(formats->priv->metadata, rql::predicate == rdf::tts("mimetype"));
+	priv->mimetypes = rql::select(priv->metadata, rql::predicate == rdf::tts("mimetype"));
 	return formats;
 }
 
 GtkRecentFilter *
 cainteoir_supported_formats_create_recent_filter(CainteoirSupportedFormats *formats)
 {
+	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats);
 	GtkRecentFilter *filter = gtk_recent_filter_new();
 
-	rdf::graph &metadata = formats->priv->metadata;
+	rdf::graph &metadata = priv->metadata;
 	for (auto &format : rql::select(metadata,
 	                                rql::predicate == rdf::rdf("type") &&
-	                                rql::object    == formats->priv->format))
+	                                rql::object    == priv->format))
 	{
 		for (auto &mimetype : rql::select(metadata,
 		                                  rql::predicate == rdf::tts("mimetype") &&
@@ -110,10 +117,11 @@ cainteoir_supported_formats_create_recent_filter(CainteoirSupportedFormats *form
 void
 cainteoir_supported_formats_add_file_filters(CainteoirSupportedFormats *formats, GtkFileChooser *chooser, const gchar *active_mimetype)
 {
-	rdf::graph &metadata = formats->priv->metadata;
+	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats);
+	rdf::graph &metadata = priv->metadata;
 	for (auto &format : rql::select(metadata,
 	                                rql::predicate == rdf::rdf("type") &&
-	                                rql::object    == formats->priv->format))
+	                                rql::object    == priv->format))
 	{
 		rql::results data = rql::select(metadata, rql::subject == rql::subject(format));
 
@@ -138,7 +146,7 @@ cainteoir_supported_formats_add_file_filters(CainteoirSupportedFormats *formats,
 gboolean
 cainteoir_supported_formats_is_mimetype_supported(CainteoirSupportedFormats *formats, const gchar *mimetype)
 {
-	for (auto &mime : formats->priv->mimetypes)
+	for (auto &mime : CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats)->mimetypes)
 	{
 		if (rql::value(mime) == mimetype)
 			return TRUE;
@@ -152,12 +160,13 @@ cainteoir_supported_formats_file_info(CainteoirSupportedFormats *formats,
                                       gchar **type,
                                       gchar **mimetype)
 {
+	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats);
 	const char *extpos = strrchr(filename, '.');
 	if (!extpos)
 		return FALSE;
 
 	std::string ext = '*' + std::string(extpos);
-	for (auto &filetype : rql::select(formats->priv->metadata, rql::predicate == rdf::tts("extension")))
+	for (auto &filetype : rql::select(priv->metadata, rql::predicate == rdf::tts("extension")))
 	{
 		if (rql::value(filetype) == ext)
 		{
@@ -165,14 +174,14 @@ cainteoir_supported_formats_file_info(CainteoirSupportedFormats *formats,
 
 			if (type)
 			{
-				auto match = rql::select_value<std::string>(formats->priv->metadata,
+				auto match = rql::select_value<std::string>(priv->metadata,
 				             rql::subject == uri && rql::predicate == rdf::tts("name"));
 				*type = g_strdup(match.c_str());
 			}
 
 			if (mimetype)
 			{
-				auto match = rql::select_value<std::string>(formats->priv->metadata,
+				auto match = rql::select_value<std::string>(priv->metadata,
 				             rql::subject == uri && rql::predicate == rdf::tts("mimetype"));
 				*mimetype = g_strdup(match.c_str());
 			}

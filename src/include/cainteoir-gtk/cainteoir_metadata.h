@@ -37,15 +37,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_METADATA, CainteoirMetadataClass))
 
 typedef struct _CainteoirMetadata        CainteoirMetadata;
-typedef struct _CainteoirMetadataPrivate CainteoirMetadataPrivate;
 typedef struct _CainteoirMetadataClass   CainteoirMetadataClass;
 
 struct _CainteoirMetadata
 {
 	GObject parent_instance;
-
-	/*< private >*/
-	CainteoirMetadataPrivate *priv;
 };
 
 struct _CainteoirMetadataClass

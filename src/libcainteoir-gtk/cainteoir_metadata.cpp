@@ -29,6 +29,8 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
+typedef struct _CainteoirMetadataPrivate CainteoirMetadataPrivate;
+
 struct _CainteoirMetadataPrivate
 {
 	std::shared_ptr<rdf::graph> metadata;
@@ -37,11 +39,14 @@ struct _CainteoirMetadataPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirMetadata, cainteoir_metadata, G_TYPE_OBJECT)
 
+#define CAINTEOIR_METADATA_PRIVATE(object) \
+	((CainteoirMetadataPrivate *)cainteoir_metadata_get_instance_private(CAINTEOIR_METADATA(object)))
+
 static void
 cainteoir_metadata_finalize(GObject *object)
 {
-	CainteoirMetadata *metadata = CAINTEOIR_METADATA(object);
-	metadata->priv->~CainteoirMetadataPrivate();
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(object);
+	priv->~CainteoirMetadataPrivate();
 
 	G_OBJECT_CLASS(cainteoir_metadata_parent_class)->finalize(object);
 }
@@ -54,10 +59,10 @@ cainteoir_metadata_class_init(CainteoirMetadataClass *klass)
 }
 
 static void
-cainteoir_metadata_init(CainteoirMetadata *doc)
+cainteoir_metadata_init(CainteoirMetadata *metadata)
 {
-	void * data = cainteoir_metadata_get_instance_private(doc);
-	doc->priv = new (data)CainteoirMetadataPrivate();
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(metadata);
+	new (priv)CainteoirMetadataPrivate();
 }
 
 CainteoirMetadata *
@@ -65,8 +70,9 @@ cainteoir_metadata_new(const std::shared_ptr<rdf::graph> &metadata,
                        const rdf::uri &subject)
 {
 	CainteoirMetadata *self = CAINTEOIR_METADATA(g_object_new(CAINTEOIR_TYPE_METADATA, nullptr));
-	self->priv->metadata = metadata;
-	self->priv->data = rql::select(*self->priv->metadata, rql::subject == subject);
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(self);
+	priv->metadata = metadata;
+	priv->data = rql::select(*priv->metadata, rql::subject == subject);
 	return self;
 }
 
@@ -74,8 +80,9 @@ gchar *
 cainteoir_metadata_get_string(CainteoirMetadata *metadata,
                               const gchar *predicate)
 {
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(metadata);
 	rdf::uri selector = rdf::href(predicate);
-	for (auto &query : metadata->priv->data)
+	for (auto &query : priv->data)
 	{
 		if (rql::predicate(query) == selector)
 		{
@@ -84,7 +91,7 @@ cainteoir_metadata_get_string(CainteoirMetadata *metadata,
 				return g_strdup(rql::value(query).c_str());
 			else
 			{
-				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				for (auto &data : rql::select(*priv->metadata, rql::subject == object))
 				{
 					if (rql::predicate(data) == rdf::rdf("value"))
 						return g_strdup(rql::value(data).c_str());
@@ -99,9 +106,10 @@ GArray *
 cainteoir_metadata_get_strings(CainteoirMetadata *metadata,
                                const gchar *predicate)
 {
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(metadata);
 	GArray *items = g_array_new(FALSE, TRUE, sizeof(gchar *));
 	rdf::uri selector = rdf::href(predicate);
-	for (auto &query : metadata->priv->data)
+	for (auto &query : priv->data)
 	{
 		if (rql::predicate(query) == selector)
 		{
@@ -113,7 +121,7 @@ cainteoir_metadata_get_strings(CainteoirMetadata *metadata,
 			}
 			else
 			{
-				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				for (auto &data : rql::select(*priv->metadata, rql::subject == object))
 				{
 					if (rql::predicate(data) == rdf::rdf("value"))
 					{
@@ -133,9 +141,10 @@ cainteoir_metadata_get_string_by_context(CainteoirMetadata *metadata,
                                          const gchar *context_predicate,
                                          const gchar *context_value)
 {
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(metadata);
 	rdf::uri selector = rdf::href(predicate);
 	rdf::uri context  = rdf::href(context_predicate);
-	for (auto &query : metadata->priv->data)
+	for (auto &query : priv->data)
 	{
 		if (rql::predicate(query) == selector)
 		{
@@ -145,7 +154,7 @@ cainteoir_metadata_get_string_by_context(CainteoirMetadata *metadata,
 				std::string type;
 				std::string value;
 
-				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				for (auto &data : rql::select(*priv->metadata, rql::subject == object))
 				{
 					if (rql::predicate(data) == rdf::rdf("value"))
 						value = rql::value(data);
@@ -167,10 +176,11 @@ cainteoir_metadata_get_strings_by_context(CainteoirMetadata *metadata,
                                           const gchar *context_predicate,
                                           const gchar *context_value)
 {
+	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(metadata);
 	GArray *items = g_array_new(FALSE, TRUE, sizeof(gchar *));
 	rdf::uri selector = rdf::href(predicate);
 	rdf::uri context  = rdf::href(context_predicate);
-	for (auto &query : metadata->priv->data)
+	for (auto &query : priv->data)
 	{
 		if (rql::predicate(query) == selector)
 		{
@@ -180,7 +190,7 @@ cainteoir_metadata_get_strings_by_context(CainteoirMetadata *metadata,
 				std::string type;
 				std::string value;
 
-				for (auto &data : rql::select(*metadata->priv->metadata, rql::subject == object))
+				for (auto &data : rql::select(*priv->metadata, rql::subject == object))
 				{
 					if (rql::predicate(data) == rdf::rdf("value"))
 						value = rql::value(data);

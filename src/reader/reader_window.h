@@ -37,15 +37,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), READER_TYPE_WINDOW, ReaderWindowClass))
 
 typedef struct _ReaderWindow        ReaderWindow;
-typedef struct _ReaderWindowPrivate ReaderWindowPrivate;
 typedef struct _ReaderWindowClass   ReaderWindowClass;
 
 struct _ReaderWindow
 {
 	GtkWindow parent_instance;
-
-	/*< private >*/
-	ReaderWindowPrivate *priv;
 };
 
 struct _ReaderWindowClass

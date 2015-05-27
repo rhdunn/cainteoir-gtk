@@ -1,6 +1,6 @@
 /* Audio Waveform Viewer.
  *
- * Copyright (C) 2014 Reece H. Dunn
+ * Copyright (C) 2014-2015 Reece H. Dunn
  *
  * This file is part of cainteoir-gtk.
  *
@@ -41,15 +41,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), CAINTEOIR_TYPE_WAVEFORM_VIEW, CainteoirWaveformViewClass))
 
 typedef struct _CainteoirWaveformView        CainteoirWaveformView;
-typedef struct _CainteoirWaveformViewPrivate CainteoirWaveformViewPrivate;
 typedef struct _CainteoirWaveformViewClass   CainteoirWaveformViewClass;
 
 struct _CainteoirWaveformView
 {
 	GtkDrawingArea widget;
-
-	/*< private >*/
-	CainteoirWaveformViewPrivate *priv;
 };
 
 struct _CainteoirWaveformViewClass

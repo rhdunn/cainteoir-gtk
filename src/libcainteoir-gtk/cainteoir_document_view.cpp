@@ -26,6 +26,7 @@
 #include <cainteoir-gtk/cainteoir_document.h>
 
 #include "cainteoir_document_private.h"
+#include "extensions/glib.h"
 
 typedef struct _CainteoirDocumentViewPrivate CainteoirDocumentViewPrivate;
 
@@ -33,6 +34,17 @@ struct _CainteoirDocumentViewPrivate
 {
 	GtkWidget *text_view;
 	CainteoirDocument *doc;
+
+	_CainteoirDocumentViewPrivate()
+		: text_view(gtk_text_view_new())
+		, doc(nullptr)
+	{
+	}
+
+	~_CainteoirDocumentViewPrivate()
+	{
+		if (doc) g_object_unref(doc);
+	}
 };
 
 enum
@@ -51,6 +63,8 @@ G_DEFINE_TYPE_WITH_CODE(CainteoirDocumentView, cainteoir_document_view, GTK_TYPE
 
 #define CAINTEOIR_DOCUMENT_VIEW_PRIVATE(object) \
 	((CainteoirDocumentViewPrivate *)cainteoir_document_view_get_instance_private(CAINTEOIR_DOCUMENT_VIEW(object)))
+
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirDocumentView, cainteoir_document_view, CAINTEOIR_DOCUMENT_VIEW)
 
 static void
 cainteoir_document_view_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
@@ -105,15 +119,6 @@ cainteoir_document_view_get_property(GObject *object, guint prop_id, GValue *val
 }
 
 static void
-cainteoir_document_view_finalize(GObject *object)
-{
-	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(object);
-	if (priv->doc) g_object_unref(priv->doc);
-
-	G_OBJECT_CLASS(cainteoir_document_view_parent_class)->finalize(object);
-}
-
-static void
 cainteoir_document_view_class_init(CainteoirDocumentViewClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
@@ -126,14 +131,6 @@ cainteoir_document_view_class_init(CainteoirDocumentViewClass *klass)
 	g_object_class_override_property(object, PROP_VADJUSTMENT,    "vadjustment");
 	g_object_class_override_property(object, PROP_HSCROLL_POLICY, "hscroll-policy");
 	g_object_class_override_property(object, PROP_VSCROLL_POLICY, "vscroll-policy");
-}
-
-static void
-cainteoir_document_view_init(CainteoirDocumentView *view)
-{
-	CainteoirDocumentViewPrivate *priv = CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view);
-	priv->text_view = gtk_text_view_new();
-	priv->doc = nullptr;
 }
 
 GtkWidget *

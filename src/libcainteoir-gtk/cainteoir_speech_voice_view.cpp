@@ -29,6 +29,7 @@
 #include <cainteoir-gtk/cainteoir_metadata.h>
 
 #include "cainteoir_speech_synthesizers_private.h"
+#include "extensions/glib.h"
 
 #include <cainteoir/locale.hpp>
 
@@ -69,42 +70,30 @@ struct _CainteoirSpeechVoiceViewPrivate
 	cainteoir::languages languages;
 	cainteoir::language::tag filter_language;
 
-	_CainteoirSpeechVoiceViewPrivate();
-};
+	_CainteoirSpeechVoiceViewPrivate()
+		: filter_language({})
+		, tts(nullptr)
+	{
+	}
 
-_CainteoirSpeechVoiceViewPrivate::_CainteoirSpeechVoiceViewPrivate()
-	: filter_language({})
-	, tts(nullptr)
-{
-}
+	~_CainteoirSpeechVoiceViewPrivate()
+	{
+		if (tts) g_object_unref(tts);
+	}
+};
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechVoiceView, cainteoir_speech_voice_view, GTK_TYPE_TREE_VIEW)
 
 #define CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(object) \
 	((CainteoirSpeechVoiceViewPrivate *)cainteoir_speech_voice_view_get_instance_private(CAINTEOIR_SPEECH_VOICE_VIEW(object)))
 
-static void
-cainteoir_speech_voice_view_finalize(GObject *object)
-{
-	CainteoirSpeechVoiceViewPrivate *priv = CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(object);
-	if (priv->tts) g_object_unref(priv->tts);
-	priv->~CainteoirSpeechVoiceViewPrivate();
-
-	G_OBJECT_CLASS(cainteoir_speech_voice_view_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirSpeechVoiceView, cainteoir_speech_voice_view, CAINTEOIR_SPEECH_VOICE_VIEW)
 
 static void
 cainteoir_speech_voice_view_class_init(CainteoirSpeechVoiceViewClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_speech_voice_view_finalize;
-}
-
-static void
-cainteoir_speech_voice_view_init(CainteoirSpeechVoiceView *view)
-{
-	CainteoirSpeechVoiceViewPrivate *priv = CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view);
-	new (priv)CainteoirSpeechVoiceViewPrivate();
 }
 
 static void

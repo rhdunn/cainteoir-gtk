@@ -35,6 +35,8 @@
 #include <cainteoir-gtk/cainteoir_document.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
+#include "extensions/glib.h"
+
 #include <stack>
 
 #if GTK_CHECK_VERSION(3, 14, 0)
@@ -71,6 +73,19 @@ struct _ReaderWindowPrivate
 	CainteoirSpeechSynthesizers *tts;
 
 	std::stack<GtkWidget *> view_history;
+
+	_ReaderWindowPrivate()
+		: settings(cainteoir_settings_new("settings.dat"))
+		, document_formats(cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS))
+		, audio_formats(cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS))
+		, tts(cainteoir_speech_synthesizers_new())
+	{
+	}
+
+	~_ReaderWindowPrivate()
+	{
+		g_object_unref(G_OBJECT(settings));
+	}
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_WINDOW)
@@ -78,32 +93,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_WINDOW)
 #define READER_WINDOW_PRIVATE(object) \
 	((ReaderWindowPrivate *)reader_window_get_instance_private(READER_WINDOW(object)))
 
-static void
-reader_window_finalize(GObject *object)
-{
-	ReaderWindowPrivate *priv = READER_WINDOW_PRIVATE(object);
-	g_object_unref(G_OBJECT(priv->settings));
-	priv->~ReaderWindowPrivate();
-
-	G_OBJECT_CLASS(reader_window_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(ReaderWindow, reader_window, READER_WINDOW)
 
 static void
 reader_window_class_init(ReaderWindowClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = reader_window_finalize;
-}
-
-static void
-reader_window_init(ReaderWindow *reader)
-{
-	ReaderWindowPrivate *priv = READER_WINDOW_PRIVATE(reader);
-	new (priv)ReaderWindowPrivate();
-	priv->settings = cainteoir_settings_new("settings.dat");
-	priv->document_formats = cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS);
-	priv->audio_formats = cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS);
-	priv->tts = cainteoir_speech_synthesizers_new();
 }
 
 static gchar *

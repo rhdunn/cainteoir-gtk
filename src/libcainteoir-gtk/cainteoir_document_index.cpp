@@ -28,6 +28,7 @@
 
 #include "cainteoir_document_private.h"
 #include "cainteoir_document_index_private.h"
+#include "extensions/glib.h"
 
 namespace rdf = cainteoir::rdf;
 
@@ -51,6 +52,12 @@ struct _CainteoirDocumentIndexPrivate
 	std::vector<cainteoir::ref_entry> index;
 	const cainteoir::ref_entry *active;
 	GtkTreeIter active_iter;
+
+	_CainteoirDocumentIndexPrivate()
+		: active(nullptr)
+	{
+		store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	}
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocumentIndex, cainteoir_document_index, GTK_TYPE_TREE_VIEW)
@@ -58,29 +65,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocumentIndex, cainteoir_document_index, GTK
 #define CAINTEOIR_DOCUMENT_INDEX_PRIVATE(object) \
 	((CainteoirDocumentIndexPrivate *)cainteoir_document_index_get_instance_private(CAINTEOIR_DOCUMENT_INDEX(object)))
 
-static void
-cainteoir_document_index_finalize(GObject *object)
-{
-	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(object);
-	priv->~CainteoirDocumentIndexPrivate();
-
-	G_OBJECT_CLASS(cainteoir_document_index_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirDocumentIndex, cainteoir_document_index, CAINTEOIR_DOCUMENT_INDEX)
 
 static void
 cainteoir_document_index_class_init(CainteoirDocumentIndexClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_document_index_finalize;
-}
-
-static void
-cainteoir_document_index_init(CainteoirDocumentIndex *index)
-{
-	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
-	new (priv)CainteoirDocumentIndexPrivate();
-	priv->store = gtk_tree_store_new(INDEX_COUNT, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-	priv->active = nullptr;
 }
 
 static const rdf::uri &

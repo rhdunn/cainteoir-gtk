@@ -31,6 +31,7 @@
 #include "cainteoir_document_index_private.h"
 #include "cainteoir_speech_parameter_private.h"
 #include "cainteoir_speech_synthesizers_private.h"
+#include "extensions/glib.h"
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
@@ -48,46 +49,33 @@ struct _CainteoirSpeechSynthesizersPrivate
 	std::shared_ptr<cainteoir::audio> out;
 	gchar *device_name;
 
-	_CainteoirSpeechSynthesizersPrivate();
-};
+	_CainteoirSpeechSynthesizersPrivate()
+		: tts(metadata)
+		, narration(tts::media_overlays_mode::tts_only)
+		, device_name(nullptr)
+	{
+	}
 
-_CainteoirSpeechSynthesizersPrivate::_CainteoirSpeechSynthesizersPrivate()
-	: tts(metadata)
-	, narration(tts::media_overlays_mode::tts_only)
-	, device_name(nullptr)
-{
-}
+	~_CainteoirSpeechSynthesizersPrivate()
+	{
+		if (speech) speech->stop();
+
+		g_free(device_name);
+	}
+};
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechSynthesizers, cainteoir_speech_synthesizers, G_TYPE_OBJECT)
 
 #define CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(object) \
 	((CainteoirSpeechSynthesizersPrivate *)cainteoir_speech_synthesizers_get_instance_private(CAINTEOIR_SPEECH_SYNTHESIZERS(object)))
 
-static void
-cainteoir_speech_synthesizers_finalize(GObject *object)
-{
-	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(object);
-
-	if (priv->speech) priv->speech->stop();
-
-	g_free(priv->device_name);
-	priv->~CainteoirSpeechSynthesizersPrivate();
-
-	G_OBJECT_CLASS(cainteoir_speech_synthesizers_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirSpeechSynthesizers, cainteoir_speech_synthesizers, CAINTEOIR_SPEECH_SYNTHESIZERS)
 
 static void
 cainteoir_speech_synthesizers_class_init(CainteoirSpeechSynthesizersClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_speech_synthesizers_finalize;
-}
-
-static void
-cainteoir_speech_synthesizers_init(CainteoirSpeechSynthesizers *synthesizers)
-{
-	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
-	new (priv)CainteoirSpeechSynthesizersPrivate();
 }
 
 static void

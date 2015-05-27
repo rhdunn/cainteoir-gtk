@@ -31,6 +31,8 @@
 #include <cainteoir-gtk/cainteoir_metadata.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
+#include "extensions/glib.h"
+
 enum IndexTypeColumns
 {
 	INDEX_TYPE_LABEL,
@@ -49,6 +51,11 @@ struct _ReaderDocumentViewPrivate
 	GtkWidget *view;
 
 	CainteoirSettings *settings;
+
+	~_ReaderDocumentViewPrivate()
+	{
+		g_object_unref(G_OBJECT(settings));
+	}
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderDocumentView, reader_document_view, GTK_TYPE_BOX)
@@ -56,25 +63,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(ReaderDocumentView, reader_document_view, GTK_TYPE_BO
 #define READER_DOCUMENT_VIEW_PRIVATE(object) \
 	((ReaderDocumentViewPrivate *)reader_document_view_get_instance_private(READER_DOCUMENT_VIEW(object)))
 
-static void
-reader_document_view_finalize(GObject *object)
-{
-	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(object);
-	g_object_unref(G_OBJECT(priv->settings));
-
-	G_OBJECT_CLASS(reader_document_view_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(ReaderDocumentView, reader_document_view, READER_DOCUMENT_VIEW)
 
 static void
 reader_document_view_class_init(ReaderDocumentViewClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = reader_document_view_finalize;
-}
-
-static void
-reader_document_view_init(ReaderDocumentView *view)
-{
 }
 
 static void

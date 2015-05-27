@@ -25,6 +25,8 @@
 #include <cainteoir-gtk/cainteoir_waveform_view.h>
 #include <cainteoir-gtk/cainteoir_audio_data_s16.h>
 
+#include "extensions/glib.h"
+
 #include <algorithm>
 #include <cstdlib>
 #include <climits>
@@ -44,6 +46,24 @@ struct _CainteoirWaveformViewPrivate
 
 	guint hscroll_policy : 1;
 	guint vscroll_policy : 1;
+
+	_CainteoirWaveformViewPrivate()
+		: data(nullptr)
+		, window_size(16)
+		, maximum_height(std::numeric_limits<uint16_t>::max())
+		, view_duration(0)
+		, view_offset(0)
+		, hadjustment(nullptr)
+		, vadjustment(nullptr)
+		, hscroll_policy(0)
+		, vscroll_policy(0)
+	{
+	}
+
+	~_CainteoirWaveformViewPrivate()
+	{
+		if (data) g_object_unref(data);
+	}
 };
 
 enum
@@ -62,6 +82,8 @@ G_DEFINE_TYPE_WITH_CODE(CainteoirWaveformView, cainteoir_waveform_view, GTK_TYPE
 
 #define CAINTEOIR_WAVEFORM_VIEW_PRIVATE(object) \
 	((CainteoirWaveformViewPrivate *)cainteoir_waveform_view_get_instance_private(CAINTEOIR_WAVEFORM_VIEW(object)))
+
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirWaveformView, cainteoir_waveform_view, CAINTEOIR_WAVEFORM_VIEW)
 
 static void
 cainteoir_waveform_view_value_changed(GtkAdjustment *adjustment, CainteoirWaveformView *view)
@@ -245,15 +267,6 @@ cainteoir_waveform_view_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 }
 
 static void
-cainteoir_waveform_view_finalize(GObject *object)
-{
-	CainteoirWaveformViewPrivate *priv = CAINTEOIR_WAVEFORM_VIEW_PRIVATE(object);
-	if (priv->data) g_object_unref(priv->data);
-
-	G_OBJECT_CLASS(cainteoir_waveform_view_parent_class)->finalize(object);
-}
-
-static void
 cainteoir_waveform_view_class_init(CainteoirWaveformViewClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
@@ -268,27 +281,12 @@ cainteoir_waveform_view_class_init(CainteoirWaveformViewClass *klass)
 	g_object_class_override_property(object, PROP_VSCROLL_POLICY, "vscroll-policy");
 }
 
-static void
-cainteoir_waveform_view_init(CainteoirWaveformView *view)
-{
-	CainteoirWaveformViewPrivate *priv = CAINTEOIR_WAVEFORM_VIEW_PRIVATE(view);
-	priv->data = nullptr;
-	priv->window_size = 16;
-	priv->maximum_height = std::numeric_limits<uint16_t>::max();
-	priv->view_duration = 0;
-	priv->view_offset = 0;
-	priv->hadjustment = nullptr;
-	priv->vadjustment = nullptr;
-	priv->hscroll_policy = 0;
-	priv->vscroll_policy = 0;
-
-	g_signal_connect(G_OBJECT(view), "draw", G_CALLBACK(cainteoir_waveform_view_draw), nullptr);
-}
-
 GtkWidget *
 cainteoir_waveform_view_new()
 {
-	return (GtkWidget *)g_object_new(CAINTEOIR_TYPE_WAVEFORM_VIEW, nullptr);
+	CainteoirWaveformView *self = CAINTEOIR_WAVEFORM_VIEW(g_object_new(CAINTEOIR_TYPE_WAVEFORM_VIEW, nullptr));
+	g_signal_connect(G_OBJECT(self), "draw", G_CALLBACK(cainteoir_waveform_view_draw), nullptr);
+	return GTK_WIDGET(self);
 }
 
 void

@@ -24,6 +24,8 @@
 
 #include <cainteoir-gtk/cainteoir_settings.h>
 
+#include "extensions/glib.h"
+
 #include <cstdlib>
 #include <fstream>
 #include <sys/stat.h>
@@ -35,6 +37,18 @@ struct _CainteoirSettingsPrivate
 {
 	GKeyFile *settings;
 	gchar *filename;
+
+	_CainteoirSettingsPrivate()
+		: settings(g_key_file_new())
+		, filename(nullptr)
+	{
+	}
+
+	~_CainteoirSettingsPrivate()
+	{
+		if (filename) g_free(filename);
+		g_key_file_free(settings);
+	}
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSettings, cainteoir_settings, G_TYPE_OBJECT)
@@ -42,29 +56,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSettings, cainteoir_settings, G_TYPE_OBJECT)
 #define CAINTEOIR_SETTINGS_PRIVATE(object) \
 	((CainteoirSettingsPrivate *)cainteoir_settings_get_instance_private(CAINTEOIR_SETTINGS(object)))
 
-static void
-cainteoir_settings_finalize(GObject *object)
-{
-	CainteoirSettingsPrivate *priv = CAINTEOIR_SETTINGS_PRIVATE(object);
-	if (priv->settings) g_key_file_free(priv->settings);
-	if (priv->filename) g_free(priv->filename);
-
-	G_OBJECT_CLASS(cainteoir_settings_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirSettings, cainteoir_settings, CAINTEOIR_SETTINGS)
 
 static void
 cainteoir_settings_class_init(CainteoirSettingsClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_settings_finalize;
-}
-
-static void
-cainteoir_settings_init(CainteoirSettings *settings)
-{
-	CainteoirSettingsPrivate *priv = CAINTEOIR_SETTINGS_PRIVATE(settings);
-	priv->settings = g_key_file_new();
-	priv->filename = nullptr;
 }
 
 CainteoirSettings *

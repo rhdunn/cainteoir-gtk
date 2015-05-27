@@ -24,6 +24,8 @@
 
 #include <cainteoir-gtk/cainteoir_timebar.h>
 
+#include "extensions/glib.h"
+
 #include <math.h>
 
 typedef struct _CainteoirTimeBarPrivate CainteoirTimeBarPrivate;
@@ -40,22 +42,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirTimeBar, cainteoir_timebar, GTK_TYPE_BOX)
 #define CAINTEOIR_TIMEBAR_PRIVATE(object) \
 	((CainteoirTimeBarPrivate *)cainteoir_timebar_get_instance_private(CAINTEOIR_TIMEBAR(object)))
 
-static void
-cainteoir_timebar_finalize(GObject *object)
-{
-	G_OBJECT_CLASS(cainteoir_timebar_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirTimeBar, cainteoir_timebar, CAINTEOIR_TIMEBAR)
 
 static void
 cainteoir_timebar_class_init(CainteoirTimeBarClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_timebar_finalize;
-}
-
-static void
-cainteoir_timebar_init(CainteoirTimeBar *timebar)
-{
 }
 
 GtkWidget *

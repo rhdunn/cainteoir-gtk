@@ -30,6 +30,8 @@
 
 #include <stack>
 
+#include "extensions/glib.h"
+
 namespace rdf    = cainteoir::rdf;
 namespace rql    = cainteoir::rdf::query;
 namespace css    = cainteoir::css;
@@ -51,27 +53,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirDocument, cainteoir_document, G_TYPE_OBJECT)
 #define CAINTEOIR_DOCUMENT_PRIVATE(object) \
 	((CainteoirDocumentPrivate *)cainteoir_document_get_instance_private(CAINTEOIR_DOCUMENT(object)))
 
-static void
-cainteoir_document_finalize(GObject *object)
-{
-	CainteoirDocumentPrivate *priv = CAINTEOIR_DOCUMENT_PRIVATE(object);
-	priv->~CainteoirDocumentPrivate();
-
-	G_OBJECT_CLASS(cainteoir_document_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirDocument, cainteoir_document, CAINTEOIR_DOCUMENT)
 
 static void
 cainteoir_document_class_init(CainteoirDocumentClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_document_finalize;
-}
-
-static void
-cainteoir_document_init(CainteoirDocument *doc)
-{
-	CainteoirDocumentPrivate *priv = CAINTEOIR_DOCUMENT_PRIVATE(doc);
-	new (priv)CainteoirDocumentPrivate();
 }
 
 CainteoirDocument *

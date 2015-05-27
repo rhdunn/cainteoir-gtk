@@ -29,6 +29,8 @@
 #include <cainteoir-gtk/cainteoir_speech_parameter.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
+#include "extensions/glib.h"
+
 struct SpeechParameterSetting
 {
 	GtkWidget *label;
@@ -41,6 +43,11 @@ struct SpeechParameterSetting
 
 	CainteoirSettings *settings;
 	CainteoirSpeechParameter *parameter;
+
+	~SpeechParameterSetting()
+	{
+		if (parameter) g_object_unref(G_OBJECT(parameter));
+	}
 };
 
 static void
@@ -139,6 +146,12 @@ struct _ReaderSettingsViewPrivate
 	SpeechParameterSetting pitch;
 	SpeechParameterSetting pitch_range;
 	SpeechParameterSetting word_gap;
+
+	~_ReaderSettingsViewPrivate()
+	{
+		g_object_unref(G_OBJECT(settings));
+		g_object_unref(G_OBJECT(tts));
+	}
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderSettingsView, reader_settings_view, GTK_TYPE_BIN)
@@ -146,31 +159,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(ReaderSettingsView, reader_settings_view, GTK_TYPE_BI
 #define READER_SETTINGS_VIEW_PRIVATE(object) \
 	((ReaderSettingsViewPrivate *)reader_settings_view_get_instance_private(READER_SETTINGS_VIEW(object)))
 
-static void
-reader_settings_view_finalize(GObject *object)
-{
-	ReaderSettingsViewPrivate *priv = READER_SETTINGS_VIEW_PRIVATE(object);
-	if (priv->rate.parameter)        g_object_unref(G_OBJECT(priv->rate.parameter));
-	if (priv->volume.parameter)      g_object_unref(G_OBJECT(priv->volume.parameter));
-	if (priv->pitch.parameter)       g_object_unref(G_OBJECT(priv->pitch.parameter));
-	if (priv->pitch_range.parameter) g_object_unref(G_OBJECT(priv->pitch_range.parameter));
-	if (priv->word_gap.parameter)    g_object_unref(G_OBJECT(priv->word_gap.parameter));
-	g_object_unref(G_OBJECT(priv->settings));
-	g_object_unref(G_OBJECT(priv->tts));
-
-	G_OBJECT_CLASS(reader_settings_view_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(ReaderSettingsView, reader_settings_view, READER_SETTINGS_VIEW)
 
 static void
 reader_settings_view_class_init(ReaderSettingsViewClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = reader_settings_view_finalize;
-}
-
-static void
-reader_settings_view_init(ReaderSettingsView *view)
-{
 }
 
 static void

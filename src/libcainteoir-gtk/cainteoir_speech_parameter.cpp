@@ -25,6 +25,7 @@
 #include <cainteoir-gtk/cainteoir_speech_parameter.h>
 
 #include "cainteoir_speech_parameter_private.h"
+#include "extensions/glib.h"
 
 typedef struct _CainteoirSpeechParameterPrivate CainteoirSpeechParameterPrivate;
 
@@ -38,27 +39,14 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechParameter, cainteoir_speech_parameter,
 #define CAINTEOIR_SPEECH_PARAMETER_PRIVATE(object) \
 	((CainteoirSpeechParameterPrivate *)cainteoir_speech_parameter_get_instance_private(CAINTEOIR_SPEECH_PARAMETER(object)))
 
-static void
-cainteoir_speech_parameter_finalize(GObject *object)
-{
-	CainteoirSpeechParameterPrivate *priv = CAINTEOIR_SPEECH_PARAMETER_PRIVATE(object);
-	priv->~CainteoirSpeechParameterPrivate();
 
-	G_OBJECT_CLASS(cainteoir_speech_parameter_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirSpeechParameter, cainteoir_speech_parameter, CAINTEOIR_SPEECH_PARAMETER)
 
 static void
 cainteoir_speech_parameter_class_init(CainteoirSpeechParameterClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_speech_parameter_finalize;
-}
-
-static void
-cainteoir_speech_parameter_init(CainteoirSpeechParameter *param)
-{
-	CainteoirSpeechParameterPrivate *priv = CAINTEOIR_SPEECH_PARAMETER_PRIVATE(param);
-	new (priv)CainteoirSpeechParameterPrivate();
 }
 
 CainteoirSpeechParameter *

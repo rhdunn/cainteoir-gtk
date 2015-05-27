@@ -25,6 +25,7 @@
 #include <cainteoir-gtk/cainteoir_metadata.h>
 
 #include "cainteoir_metadata_private.h"
+#include "extensions/glib.h"
 
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
@@ -42,27 +43,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirMetadata, cainteoir_metadata, G_TYPE_OBJECT)
 #define CAINTEOIR_METADATA_PRIVATE(object) \
 	((CainteoirMetadataPrivate *)cainteoir_metadata_get_instance_private(CAINTEOIR_METADATA(object)))
 
-static void
-cainteoir_metadata_finalize(GObject *object)
-{
-	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(object);
-	priv->~CainteoirMetadataPrivate();
-
-	G_OBJECT_CLASS(cainteoir_metadata_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirMetadata, cainteoir_metadata, CAINTEOIR_METADATA)
 
 static void
 cainteoir_metadata_class_init(CainteoirMetadataClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_metadata_finalize;
-}
-
-static void
-cainteoir_metadata_init(CainteoirMetadata *metadata)
-{
-	CainteoirMetadataPrivate *priv = CAINTEOIR_METADATA_PRIVATE(metadata);
-	new (priv)CainteoirMetadataPrivate();
 }
 
 CainteoirMetadata *

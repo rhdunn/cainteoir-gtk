@@ -25,6 +25,8 @@
 #include <cainteoir-gtk/cainteoir_audio_data_s16.h>
 #include <cainteoir/sigproc.hpp>
 
+#include "extensions/glib.h"
+
 namespace rdf = cainteoir::rdf;
 namespace css = cainteoir::css;
 
@@ -43,27 +45,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirAudioDataS16, cainteoir_audio_data_s16, G_TY
 #define CAINTEOIR_AUDIO_DATA_S16_PRIVATE(object) \
 	((CainteoirAudioDataS16Private *)cainteoir_audio_data_s16_get_instance_private(CAINTEOIR_AUDIO_DATA_S16(object)))
 
-static void
-cainteoir_audio_data_s16_finalize(GObject *object)
-{
-	CainteoirAudioDataS16Private *priv = CAINTEOIR_AUDIO_DATA_S16_PRIVATE(object);
-	(&priv->data)->~audio_data_t();
-
-	G_OBJECT_CLASS(cainteoir_audio_data_s16_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirAudioDataS16, cainteoir_audio_data_s16, CAINTEOIR_AUDIO_DATA_S16)
 
 static void
 cainteoir_audio_data_s16_class_init(CainteoirAudioDataS16Class *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_audio_data_s16_finalize;
-}
-
-static void
-cainteoir_audio_data_s16_init(CainteoirAudioDataS16 *audio)
-{
-	CainteoirAudioDataS16Private *priv = CAINTEOIR_AUDIO_DATA_S16_PRIVATE(audio);
-	new (&priv->data) audio_data_t();
 }
 
 CainteoirAudioDataS16 *

@@ -26,6 +26,8 @@
 #include <cainteoir/document.hpp>
 #include <cainteoir/audio.hpp>
 
+#include "extensions/glib.h"
+
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 
@@ -43,27 +45,13 @@ G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSupportedFormats, cainteoir_supported_format
 #define CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(object) \
 	((CainteoirSupportedFormatsPrivate *)cainteoir_supported_formats_get_instance_private(CAINTEOIR_SUPPORTED_FORMATS(object)))
 
-static void
-cainteoir_supported_formats_finalize(GObject *object)
-{
-	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(object);
-	priv->~CainteoirSupportedFormatsPrivate();
-
-	G_OBJECT_CLASS(cainteoir_supported_formats_parent_class)->finalize(object);
-}
+GXT_DEFINE_TYPE_CONSTRUCTION(CainteoirSupportedFormats, cainteoir_supported_formats, CAINTEOIR_SUPPORTED_FORMATS)
 
 static void
 cainteoir_supported_formats_class_init(CainteoirSupportedFormatsClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_supported_formats_finalize;
-}
-
-static void
-cainteoir_supported_formats_init(CainteoirSupportedFormats *formats)
-{
-	CainteoirSupportedFormatsPrivate *priv = CAINTEOIR_SUPPORTED_FORMATS_PRIVATE(formats);
-	new (priv)CainteoirSupportedFormatsPrivate();
 }
 
 CainteoirSupportedFormats *

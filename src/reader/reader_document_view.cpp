@@ -38,6 +38,8 @@ enum IndexTypeColumns
 	INDEX_TYPE_COUNT,
 };
 
+typedef struct _ReaderDocumentViewPrivate ReaderDocumentViewPrivate;
+
 struct _ReaderDocumentViewPrivate
 {
 	GtkWidget *doc_pane;
@@ -51,11 +53,14 @@ struct _ReaderDocumentViewPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(ReaderDocumentView, reader_document_view, GTK_TYPE_BOX)
 
+#define READER_DOCUMENT_VIEW_PRIVATE(object) \
+	((ReaderDocumentViewPrivate *)reader_document_view_get_instance_private(READER_DOCUMENT_VIEW(object)))
+
 static void
 reader_document_view_finalize(GObject *object)
 {
-	ReaderDocumentView *view = READER_DOCUMENT_VIEW(object);
-	g_object_unref(G_OBJECT(view->priv->settings));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(object);
+	g_object_unref(G_OBJECT(priv->settings));
 
 	G_OBJECT_CLASS(reader_document_view_parent_class)->finalize(object);
 }
@@ -70,21 +75,20 @@ reader_document_view_class_init(ReaderDocumentViewClass *klass)
 static void
 reader_document_view_init(ReaderDocumentView *view)
 {
-	view->priv = (ReaderDocumentViewPrivate *)reader_document_view_get_instance_private(view);
 }
 
 static void
 on_document_view_show(GtkWidget *widget, gpointer data)
 {
-	ReaderDocumentView *view = (ReaderDocumentView *)data;
+	ReaderDocumentViewPrivate *priv = (ReaderDocumentViewPrivate *)data;
 
-	gtk_paned_set_position(GTK_PANED(view->priv->doc_pane),
-	                       cainteoir_settings_get_integer(view->priv->settings, "index", "position", INDEX_PANE_WIDTH));
+	gtk_paned_set_position(GTK_PANED(priv->doc_pane),
+	                       cainteoir_settings_get_integer(priv->settings, "index", "position", INDEX_PANE_WIDTH));
 
-	if (cainteoir_settings_get_boolean(view->priv->settings, "index", "visible", TRUE))
-		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(view->priv->doc_pane)));
+	if (cainteoir_settings_get_boolean(priv->settings, "index", "visible", TRUE))
+		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(priv->doc_pane)));
 	else
-		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(view->priv->doc_pane)));
+		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(priv->doc_pane)));
 }
 
 static GtkWidget *
@@ -155,13 +159,13 @@ create_index_type_combo(void)
 static void
 on_index_type_changed(GtkWidget *widget, gpointer data)
 {
-	ReaderDocumentView *view = (ReaderDocumentView *)data;
+	ReaderDocumentViewPrivate *priv = (ReaderDocumentViewPrivate *)data;
 
-	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(view->priv->view));
+	CainteoirDocument *doc = cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(priv->view));
 	if (doc)
 	{
-		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(view->priv->index), doc,
-		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(view->priv->index_type)));
+		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(priv->index), doc,
+		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(priv->index_type)));
 		g_object_unref(G_OBJECT(doc));
 	}
 }
@@ -170,46 +174,47 @@ GtkWidget *
 reader_document_view_new(CainteoirSettings *settings)
 {
 	ReaderDocumentView *view = READER_DOCUMENT_VIEW(g_object_new(READER_TYPE_DOCUMENT_VIEW, nullptr));
-	view->priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
 
-	view->priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_widget_set_hexpand(view->priv->doc_pane, TRUE);
-	gtk_container_add(GTK_CONTAINER(view), view->priv->doc_pane);
+	priv->doc_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_set_hexpand(priv->doc_pane, TRUE);
+	gtk_container_add(GTK_CONTAINER(view), priv->doc_pane);
 
 	GtkWidget *view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(view_scroll, DOCUMENT_PANE_WIDTH, -1);
-	gtk_paned_pack2(GTK_PANED(view->priv->doc_pane), view_scroll, TRUE, FALSE);
+	gtk_paned_pack2(GTK_PANED(priv->doc_pane), view_scroll, TRUE, FALSE);
 
-	view->priv->view  = cainteoir_document_view_new();
-	gtk_container_add(GTK_CONTAINER(view_scroll), view->priv->view);
+	priv->view  = cainteoir_document_view_new();
+	gtk_container_add(GTK_CONTAINER(view_scroll), priv->view);
 
 	GtkWidget *index_pane = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	gtk_widget_set_size_request(index_pane, INDEX_PANE_WIDTH, -1);
-	gtk_paned_pack1(GTK_PANED(view->priv->doc_pane), index_pane, TRUE, FALSE);
+	gtk_paned_pack1(GTK_PANED(priv->doc_pane), index_pane, TRUE, FALSE);
 
 	GtkWidget *index_pane_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	gtk_box_pack_start(GTK_BOX(index_pane), index_pane_header, FALSE, FALSE, 0);
 
-	view->priv->index_type = create_index_type_combo();
-	gtk_box_pack_start(GTK_BOX(index_pane_header), view->priv->index_type, TRUE, TRUE, 0);
-	g_signal_connect(view->priv->index_type, "changed", G_CALLBACK(on_index_type_changed), view);
+	priv->index_type = create_index_type_combo();
+	gtk_box_pack_start(GTK_BOX(index_pane_header), priv->index_type, TRUE, TRUE, 0);
+	g_signal_connect(priv->index_type, "changed", G_CALLBACK(on_index_type_changed), priv);
 
-	view->priv->index_pane_close = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_SMALL_TOOLBAR);
-	gtk_style_context_add_class(gtk_widget_get_style_context(view->priv->index_pane_close), "close-pane");
-	gtk_button_set_always_show_image(GTK_BUTTON(view->priv->index_pane_close), TRUE);
-	gtk_button_set_relief(GTK_BUTTON(view->priv->index_pane_close), GTK_RELIEF_NONE);
-	gtk_box_pack_start(GTK_BOX(index_pane_header), view->priv->index_pane_close, FALSE, FALSE, 0);
+	priv->index_pane_close = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_style_context_add_class(gtk_widget_get_style_context(priv->index_pane_close), "close-pane");
+	gtk_button_set_always_show_image(GTK_BUTTON(priv->index_pane_close), TRUE);
+	gtk_button_set_relief(GTK_BUTTON(priv->index_pane_close), GTK_RELIEF_NONE);
+	gtk_box_pack_start(GTK_BOX(index_pane_header), priv->index_pane_close, FALSE, FALSE, 0);
 
 	GtkWidget *index_scroll = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_box_pack_start(GTK_BOX(index_pane), index_scroll, TRUE, TRUE, 0);
 
-	view->priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(view->priv->view));
-	gtk_container_add(GTK_CONTAINER(index_scroll), view->priv->index);
+	priv->index = cainteoir_document_index_new(CAINTEOIR_DOCUMENT_VIEW(priv->view));
+	gtk_container_add(GTK_CONTAINER(index_scroll), priv->index);
 
-	g_signal_connect(view, "show", G_CALLBACK(on_document_view_show), view);
+	g_signal_connect(view, "show", G_CALLBACK(on_document_view_show), priv);
 
-	gchar *active_index = cainteoir_settings_get_string(view->priv->settings, "index", "type", CAINTEOIR_INDEXTYPE_TOC);
-	gtk_combo_box_set_active_id(GTK_COMBO_BOX(view->priv->index_type), active_index);
+	gchar *active_index = cainteoir_settings_get_string(priv->settings, "index", "type", CAINTEOIR_INDEXTYPE_TOC);
+	gtk_combo_box_set_active_id(GTK_COMBO_BOX(priv->index_type), active_index);
 	g_free(active_index);
 
 	return GTK_WIDGET(view);
@@ -219,27 +224,29 @@ void
 reader_document_view_set_index_pane_close_action_name(ReaderDocumentView *view,
                                                       const gchar *action_name)
 {
-	gtk_actionable_set_action_name(GTK_ACTIONABLE(view->priv->index_pane_close), action_name);
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(priv->index_pane_close), action_name);
 }
 
 gboolean
 reader_document_view_load_document(ReaderDocumentView *view,
                                    const gchar *filename)
 {
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
 	CainteoirDocument *doc = cainteoir_document_new(filename);
 	if (doc)
 	{
-		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(view->priv->view), doc);
+		cainteoir_document_view_set_document(CAINTEOIR_DOCUMENT_VIEW(priv->view), doc);
 
 		CainteoirMetadata *metadata = cainteoir_document_get_metadata(doc);
 		gchar *mimetype = cainteoir_metadata_get_string(metadata, CAINTEOIR_METADATA_MIMETYPE);
 
-		cainteoir_settings_set_string(view->priv->settings, "document", "filename", filename);
-		cainteoir_settings_set_string(view->priv->settings, "document", "mimetype", mimetype);
-		cainteoir_settings_save(view->priv->settings);
+		cainteoir_settings_set_string(priv->settings, "document", "filename", filename);
+		cainteoir_settings_set_string(priv->settings, "document", "mimetype", mimetype);
+		cainteoir_settings_save(priv->settings);
 
-		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(view->priv->index), doc,
-		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(view->priv->index_type)));
+		cainteoir_document_index_build(CAINTEOIR_DOCUMENT_INDEX(priv->index), doc,
+		                               gtk_combo_box_get_active_id(GTK_COMBO_BOX(priv->index_type)));
 
 		if (mimetype) g_free(mimetype);
 		g_object_unref(metadata);
@@ -252,53 +259,61 @@ reader_document_view_load_document(ReaderDocumentView *view,
 CainteoirDocument *
 reader_document_view_get_document(ReaderDocumentView *view)
 {
-	return cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(view->priv->view));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	return cainteoir_document_view_get_document(CAINTEOIR_DOCUMENT_VIEW(priv->view));
 }
 
 CainteoirDocumentIndex *
 reader_document_view_get_document_index(ReaderDocumentView *view)
 {
-	return CAINTEOIR_DOCUMENT_INDEX(g_object_ref(G_OBJECT(view->priv->index)));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	return CAINTEOIR_DOCUMENT_INDEX(g_object_ref(G_OBJECT(priv->index)));
 }
 
 const gchar *
 reader_document_view_get_index_type(ReaderDocumentView *view)
 {
-	return gtk_combo_box_get_active_id(GTK_COMBO_BOX(view->priv->index_type));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	return gtk_combo_box_get_active_id(GTK_COMBO_BOX(priv->index_type));
 }
 
 void
 reader_document_view_set_index_type(ReaderDocumentView *view,
                                     const gchar *index_type)
 {
-	gtk_combo_box_set_active_id(GTK_COMBO_BOX(view->priv->index_type), index_type);
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	gtk_combo_box_set_active_id(GTK_COMBO_BOX(priv->index_type), index_type);
 }
 
 gint
 reader_document_view_get_index_pane_position(ReaderDocumentView *view)
 {
-	return gtk_paned_get_position(GTK_PANED(view->priv->doc_pane));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	return gtk_paned_get_position(GTK_PANED(priv->doc_pane));
 }
 
 void
 reader_document_view_set_index_pane_position(ReaderDocumentView *view,
                                              gint position)
 {
-	gtk_paned_set_position(GTK_PANED(view->priv->doc_pane), position);
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	gtk_paned_set_position(GTK_PANED(priv->doc_pane), position);
 }
 
 gboolean
 reader_document_view_get_index_pane_visible(ReaderDocumentView *view)
 {
-	return gtk_widget_get_visible(gtk_paned_get_child1(GTK_PANED(view->priv->doc_pane)));
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
+	return gtk_widget_get_visible(gtk_paned_get_child1(GTK_PANED(priv->doc_pane)));
 }
 
 void
 reader_document_view_set_index_pane_visible(ReaderDocumentView *view,
                                             gboolean visible)
 {
+	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
 	if (visible)
-		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(view->priv->doc_pane)));
+		gtk_widget_show(gtk_paned_get_child1(GTK_PANED(priv->doc_pane)));
 	else
-		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(view->priv->doc_pane)));
+		gtk_widget_hide(gtk_paned_get_child1(GTK_PANED(priv->doc_pane)));
 }

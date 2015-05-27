@@ -41,15 +41,11 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((obj), READER_TYPE_DOCUMENT_VIEW, ReaderDocumentViewClass))
 
 typedef struct _ReaderDocumentView        ReaderDocumentView;
-typedef struct _ReaderDocumentViewPrivate ReaderDocumentViewPrivate;
 typedef struct _ReaderDocumentViewClass   ReaderDocumentViewClass;
 
 struct _ReaderDocumentView
 {
 	GtkBin parent_instance;
-
-	/*< private >*/
-	ReaderDocumentViewPrivate *priv;
 };
 
 struct _ReaderDocumentViewClass

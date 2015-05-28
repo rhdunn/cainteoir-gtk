@@ -59,9 +59,31 @@ const char * columns[VLC_COUNT] = {
 	i18n("Channels"),
 };
 
+struct VoiceListSelection
+{
+	const gchar *voice;
+	GtkTreeSelection *selection;
+};
+
+static gboolean
+voice_list_selection_select_voice(GtkTreeModel *model,
+                                  GtkTreePath *path,
+                                  GtkTreeIter *iter,
+                                  VoiceListSelection *select)
+{
+	gchar *voice = nullptr;
+	gtk_tree_model_get(model, iter, VLC_URI, &voice, -1);
+	gboolean ret = !strcmp(select->voice, voice);
+	if (ret)
+		gtk_tree_selection_select_iter(select->selection, iter);
+	g_free(voice);
+	return ret;
+}
+
 struct CainteoirSpeechVoiceViewPrivate
 {
 	GtkTreeStore *store;
+	GtkTreeSelection *selection;
 
 	CainteoirSpeechSynthesizers *tts;
 
@@ -175,6 +197,7 @@ cainteoir_speech_voice_view_new(CainteoirSpeechSynthesizers *synthesizers)
 		gtk_tree_view_column_set_sort_column_id(column, i);
 	}
 
+	priv->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 	refresh_view(view);
 
 	return GTK_WIDGET(view);
@@ -209,4 +232,31 @@ cainteoir_speech_voice_view_set_filter_language_from_document(CainteoirSpeechVoi
 		g_free(language);
 		g_object_unref(G_OBJECT(metadata));
 	}
+}
+
+gchar *
+cainteoir_speech_voice_view_get_voice(CainteoirSpeechVoiceView *view)
+{
+	CainteoirSpeechVoiceViewPrivate *priv = CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view);
+	GtkTreeIter row;
+	if (gtk_tree_selection_get_selected(priv->selection, nullptr, &row))
+	{
+		gchar *voice = nullptr;
+		gtk_tree_model_get(GTK_TREE_MODEL(priv->store), &row, VLC_URI, &voice, -1);
+		return voice;
+	}
+	return nullptr;
+}
+
+void
+cainteoir_speech_voice_view_set_voice(CainteoirSpeechVoiceView *view,
+                                      const gchar *voice)
+{
+	if (!voice) return;
+
+	CainteoirSpeechVoiceViewPrivate *priv = CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view);
+	VoiceListSelection select = { voice, priv->selection };
+	gtk_tree_model_foreach(GTK_TREE_MODEL(priv->store),
+	                       (GtkTreeModelForeachFunc)voice_list_selection_select_voice,
+	                       &select);
 }

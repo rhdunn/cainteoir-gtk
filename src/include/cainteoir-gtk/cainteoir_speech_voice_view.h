@@ -68,6 +68,11 @@ void                                   cainteoir_speech_voice_view_set_filter_la
 void                                   cainteoir_speech_voice_view_set_filter_language_from_document(CainteoirSpeechVoiceView *view,
                                                                                                      CainteoirDocument *document);
 
+gchar *                                cainteoir_speech_voice_view_get_voice(CainteoirSpeechVoiceView *view);
+
+void                                   cainteoir_speech_voice_view_set_voice(CainteoirSpeechVoiceView *view,
+                                                                             const gchar *voice);
+
 G_END_DECLS
 
 #endif

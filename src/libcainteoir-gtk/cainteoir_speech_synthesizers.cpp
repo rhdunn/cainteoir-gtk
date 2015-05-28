@@ -94,6 +94,14 @@ cainteoir_speech_synthesizers_new()
 }
 
 gboolean
+cainteoir_speech_synthesizers_set_voice(CainteoirSpeechSynthesizers *synthesizers,
+                                        const gchar *voice)
+{
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	return priv->tts.select_voice(priv->metadata, rdf::href(voice));
+}
+
+gboolean
 cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers *synthesizers,
                                                     const gchar *lang)
 {
@@ -123,6 +131,13 @@ cainteoir_speech_synthesizers_set_voice_by_language(CainteoirSpeechSynthesizers 
 			return TRUE;
 	}
 	return FALSE;
+}
+
+gchar *
+cainteoir_speech_synthesizers_get_voice(CainteoirSpeechSynthesizers *synthesizers)
+{
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	return g_strdup(priv->tts.voice().str().c_str());
 }
 
 CainteoirNarration

@@ -498,12 +498,6 @@ reader_window_new(const gchar *filename)
 	if (cainteoir_settings_get_boolean(priv->settings, "window", "maximized", FALSE))
 		gtk_window_maximize(GTK_WINDOW(reader));
 
-	gchar *voice = cainteoir_settings_get_string(priv->settings, "voice", "name", nullptr);
-	if (!voice)
-		voice = cainteoir_speech_synthesizers_get_voice(priv->tts);
-	cainteoir_speech_voice_view_set_voice(CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), voice);
-	g_free(voice);
-
 	if (filename)
 		reader_window_load_document(reader, filename);
 	else
@@ -515,6 +509,12 @@ reader_window_new(const gchar *filename)
 			g_free(prev_filename);
 		}
 	}
+
+	gchar *voice = cainteoir_settings_get_string(priv->settings, "voice", "name", nullptr);
+	if (!voice)
+		voice = cainteoir_speech_synthesizers_get_voice(priv->tts);
+	cainteoir_speech_voice_view_set_voice(CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), voice);
+	g_free(voice);
 
 	return GTK_WIDGET(reader);
 }

@@ -122,6 +122,8 @@ refresh_view(CainteoirSpeechVoiceView *view)
 	CainteoirSpeechVoiceViewPrivate *priv = CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view);
 	rdf::graph &metadata = *cainteoir_speech_synthesizers_get_metadata(priv->tts);
 
+	gchar *voice = cainteoir_speech_voice_view_get_voice(view);
+
 	gtk_tree_store_clear(priv->store);
 	for (auto &voice : rql::select(metadata,
 	                               rql::predicate == rdf::rdf("type") && rql::object == rdf::tts("Voice")))
@@ -174,6 +176,12 @@ refresh_view(CainteoirSpeechVoiceView *view)
 				                   VLC_CHANNELS, rql::value(statement) == "1" ? i18n("mono") : i18n("stereo"),
 				                   -1);
 		}
+	}
+
+	if (voice)
+	{
+		cainteoir_speech_voice_view_set_voice(view, voice);
+		g_free(voice);
 	}
 }
 

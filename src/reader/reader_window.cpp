@@ -440,15 +440,15 @@ reader_window_new(const gchar *filename)
 	gtk_stack_add_titled(GTK_STACK(priv->stack), priv->view, "document", i18n("Document"));
 	reader_document_view_set_index_pane_close_action_name(READER_DOCUMENT_VIEW(priv->view), "cainteoir.side-pane");
 
-	priv->settings_view = reader_settings_view_new(priv->settings, priv->tts);
-	gtk_stack_add_titled(GTK_STACK(priv->stack), priv->settings_view, "settings", i18n("Settings"));
-
 	GtkWidget *scroll = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_stack_add_titled(GTK_STACK(priv->stack), scroll, "voices", i18n("Voices"));
 
 	priv->voice_view = cainteoir_speech_voice_view_new(priv->tts);
 	g_signal_connect(priv->voice_view, "voice-changed", G_CALLBACK(on_voice_changed), priv);
 	gtk_container_add(GTK_CONTAINER(scroll), priv->voice_view);
+
+	priv->settings_view = reader_settings_view_new(priv->settings, priv->tts, CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view));
+	gtk_stack_add_titled(GTK_STACK(priv->stack), priv->settings_view, "settings", i18n("Settings"));
 
 	GtkWidget *bottombar = gtk_toolbar_new();
 	gtk_widget_set_size_request(bottombar, -1, 45);
@@ -526,6 +526,10 @@ reader_window_load_document(ReaderWindow *reader,
 	ReaderWindowPrivate *priv = READER_WINDOW_PRIVATE(reader);
 	if (reader_document_view_load_document(READER_DOCUMENT_VIEW(priv->view), filename))
 	{
+		CainteoirDocument *doc = reader_document_view_get_document(READER_DOCUMENT_VIEW(priv->view));
+		cainteoir_speech_voice_view_set_filter_language_from_document(CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), doc);
+		g_object_unref(G_OBJECT(doc));
+
 		reset_timebar(priv);
 		return TRUE;
 	}

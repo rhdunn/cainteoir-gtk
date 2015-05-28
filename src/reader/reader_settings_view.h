@@ -23,6 +23,7 @@
 
 typedef struct _CainteoirSettings           CainteoirSettings;
 typedef struct _CainteoirSpeechSynthesizers CainteoirSpeechSynthesizers;
+typedef struct _CainteoirSpeechVoiceView    CainteoirSpeechVoiceView;
 
 G_BEGIN_DECLS
 
@@ -61,7 +62,8 @@ struct _ReaderSettingsViewClass
 GType                                  reader_settings_view_get_type(void) G_GNUC_CONST;
 
 GtkWidget *                            reader_settings_view_new(CainteoirSettings *settings,
-                                                                CainteoirSpeechSynthesizers *synthesizers);
+                                                                CainteoirSpeechSynthesizers *synthesizers,
+                                                                CainteoirSpeechVoiceView *voice_view);
 
 void                                   reader_settings_view_update_speech_parameters(ReaderSettingsView *view);
 

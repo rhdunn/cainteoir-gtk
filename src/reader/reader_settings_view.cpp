@@ -22,10 +22,12 @@
 #include "i18n.h"
 
 #include <gtk/gtk.h>
+#include <string.h>
 
 #include "reader_settings_view.h"
 
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
+#include <cainteoir-gtk/cainteoir_speech_voice_view.h>
 #include <cainteoir-gtk/cainteoir_speech_parameter.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
@@ -139,6 +141,7 @@ struct ReaderSettingsViewPrivate
 {
 	CainteoirSettings *settings;
 	CainteoirSpeechSynthesizers *tts;
+	CainteoirSpeechVoiceView *voice_view;
 
 	SpeechParameterSetting rate;
 	SpeechParameterSetting volume;
@@ -150,6 +153,7 @@ struct ReaderSettingsViewPrivate
 	{
 		g_object_unref(G_OBJECT(settings));
 		g_object_unref(G_OBJECT(tts));
+		g_object_unref(G_OBJECT(voice_view));
 	}
 };
 
@@ -201,14 +205,28 @@ on_tts_fallback_active(GtkWidget *tts_fallback, GdkEvent *event, ReaderSettingsV
 	update_narration_mode(priv);
 }
 
+static void
+on_filter_voices_by_doclang_active(GtkWidget *filter_voices_by_doclang, GdkEvent *event, ReaderSettingsViewPrivate *priv)
+{
+	gboolean active = gtk_switch_get_active(GTK_SWITCH(filter_voices_by_doclang));
+
+	cainteoir_speech_voice_view_set_filter(priv->voice_view,
+	                                       active ? CAINTEOIR_VOICE_FILTER_BY_LANGUAGE : CAINTEOIR_VOICE_FILTER_ALL);
+
+	cainteoir_settings_set_string(priv->settings, "voicelist", "filter", active ? "language" : "all");
+	cainteoir_settings_save(priv->settings);
+}
+
 GtkWidget *
 reader_settings_view_new(CainteoirSettings *settings,
-                         CainteoirSpeechSynthesizers *synthesizers)
+                         CainteoirSpeechSynthesizers *synthesizers,
+                         CainteoirSpeechVoiceView *voice_view)
 {
 	ReaderSettingsView *view = READER_SETTINGS_VIEW(g_object_new(READER_TYPE_SETTINGS_VIEW, nullptr));
 	ReaderSettingsViewPrivate *priv = READER_SETTINGS_VIEW_PRIVATE(view);
 	priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
 	priv->tts = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_ref(G_OBJECT(synthesizers)));
+	priv->voice_view = CAINTEOIR_SPEECH_VOICE_VIEW(g_object_ref(G_OBJECT(voice_view)));
 
 #if GTK_CHECK_VERSION(3, 12, 0)
 	gtk_widget_set_margin_start(GTK_WIDGET(view), 5);
@@ -258,6 +276,22 @@ reader_settings_view_new(CainteoirSettings *settings,
 	gtk_switch_set_active(GTK_SWITCH(tts_fallback),
 	                      cainteoir_settings_get_boolean(priv->settings, "narration", "tts-fallback", FALSE));
 	g_signal_connect(tts_fallback, "notify::active", G_CALLBACK(on_tts_fallback_active), priv);
+
+	GtkWidget *filter_voices_by_doclang_label = gtk_label_new(i18n("Filter voices by document language"));
+	gtk_widget_set_hexpand(filter_voices_by_doclang_label, TRUE);
+	gtk_widget_set_halign(filter_voices_by_doclang_label, GTK_ALIGN_START);
+	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang_label, 0, 2, 1, 1);
+
+	GtkWidget *filter_voices_by_doclang = gtk_switch_new();
+	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang, 1, 2, 1, 1);
+	g_signal_connect(filter_voices_by_doclang, "notify::active", G_CALLBACK(on_filter_voices_by_doclang_active), priv);
+
+	gchar *filter = cainteoir_settings_get_string(priv->settings, "voicelist", "filter", FALSE);
+	if (filter)
+	{
+		gtk_switch_set_active(GTK_SWITCH(filter_voices_by_doclang), !strcmp(filter, "language"));
+		g_free(filter);
+	}
 
 	update_narration_mode(priv);
 	reader_settings_view_update_speech_parameters(view);

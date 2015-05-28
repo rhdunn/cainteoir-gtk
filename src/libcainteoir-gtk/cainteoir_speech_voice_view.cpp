@@ -80,10 +80,19 @@ voice_list_selection_select_voice(GtkTreeModel *model,
 	return ret;
 }
 
+enum
+{
+	VOICE_CHANGED,
+	LAST_SIGNAL
+};
+
+static guint view_signals[LAST_SIGNAL] = { 0 };
+
 struct CainteoirSpeechVoiceViewPrivate
 {
 	GtkTreeStore *store;
 	GtkTreeSelection *selection;
+	gulong signal;
 
 	CainteoirSpeechSynthesizers *tts;
 
@@ -92,6 +101,7 @@ struct CainteoirSpeechVoiceViewPrivate
 
 	CainteoirSpeechVoiceViewPrivate()
 		: filter_language({})
+		, signal((gulong)-1)
 		, tts(nullptr)
 	{
 	}
@@ -114,6 +124,32 @@ cainteoir_speech_voice_view_class_init(CainteoirSpeechVoiceViewClass *klass)
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_speech_voice_view_finalize;
+
+	view_signals[VOICE_CHANGED] =
+		g_signal_new("voice-changed",
+		             G_TYPE_FROM_CLASS(object),
+		             G_SIGNAL_RUN_LAST,
+		             0,
+		             NULL,
+		             NULL,
+		             g_cclosure_marshal_VOID__POINTER,
+		             G_TYPE_NONE,
+		             1,
+		             G_TYPE_STRING);
+}
+
+static void
+on_voice_selection_changed(GtkTreeSelection *selection, CainteoirSpeechVoiceView *view)
+{
+	CainteoirSpeechVoiceViewPrivate *priv = CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view);
+	GtkTreeIter row;
+	if (gtk_tree_selection_get_selected(priv->selection, nullptr, &row))
+	{
+		gchar *voice = nullptr;
+		gtk_tree_model_get(GTK_TREE_MODEL(priv->store), &row, VLC_URI, &voice, -1);
+		g_signal_emit(view, view_signals[VOICE_CHANGED], 0, voice);
+		g_free(voice);
+	}
 }
 
 static void
@@ -123,6 +159,7 @@ refresh_view(CainteoirSpeechVoiceView *view)
 	rdf::graph &metadata = *cainteoir_speech_synthesizers_get_metadata(priv->tts);
 
 	gchar *voice = cainteoir_speech_voice_view_get_voice(view);
+	if (priv->signal != (gulong)-1) g_signal_handler_disconnect(priv->selection, priv->signal);
 
 	gtk_tree_store_clear(priv->store);
 	for (auto &voice : rql::select(metadata,
@@ -183,6 +220,8 @@ refresh_view(CainteoirSpeechVoiceView *view)
 		cainteoir_speech_voice_view_set_voice(view, voice);
 		g_free(voice);
 	}
+
+	priv->signal = g_signal_connect(priv->selection, "changed", G_CALLBACK(on_voice_selection_changed), view);
 }
 
 GtkWidget *

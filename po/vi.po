@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # ppanhh <ppanhh@gmail.com>, 2013
 # msclrhd <msclrhd@gmail.com>, 2013
@@ -9,166 +9,209 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Cainteoir Text-to-Speech\n"
 "Report-Msgid-Bugs-To: msclrhd@gmail.com\n"
-"POT-Creation-Date: 2013-05-05 15:34+0100\n"
+"POT-Creation-Date: 2015-05-28 14:40+0100\n"
 "PO-Revision-Date: 2013-07-11 10:44+0000\n"
 "Last-Translator: msclrhd <msclrhd@gmail.com>\n"
-"Language-Team: Vietnamese (http://www.transifex.com/projects/p/cainteoir-text-to-speech/language/vi/)\n"
+"Language-Team: Vietnamese (http://www.transifex.com/projects/p/cainteoir-"
+"text-to-speech/language/vi/)\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: ../src/cainteoir.cpp:226
-msgid "Recent Documents"
-msgstr "Tài liệu gần đây"
+#: ../src/editor/main.cpp:47 ../src/editor/main.cpp:50
+#, fuzzy
+msgid "Cainteoir Text-to-Speech Editor"
+msgstr "Cainteoir Text-to-Speech"
 
-#: ../src/cainteoir.cpp:266 ../ui/cainteoir-gtk.ui.h:3
-msgid "Document"
-msgstr "Tà&i liệu"
-
-#: ../src/cainteoir.cpp:267 ../src/voice_selection.cpp:43
-#: ../ui/cainteoir-gtk.ui.h:6
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:53
 msgid "Voice"
 msgstr "Giọng nói"
 
-#: ../src/cainteoir.cpp:268 ../src/voice_selection.cpp:44
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:54
 msgid "Engine"
 msgstr "Loại giọng"
 
-#: ../src/cainteoir.cpp:314
-msgid "Title"
-msgstr "Tiêu đề"
-
-#: ../src/cainteoir.cpp:315
-msgid "Author"
-msgstr "Tác giả"
-
-#: ../src/cainteoir.cpp:316
-msgid "Publisher"
-msgstr "Người phát hành"
-
-#: ../src/cainteoir.cpp:317
-msgid "Description"
-msgstr "Mô tả"
-
-#: ../src/cainteoir.cpp:318 ../src/cainteoir.cpp:322
-#: ../src/voice_selection.cpp:45
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:55
 msgid "Language"
 msgstr "Ngôn ngữ"
 
-#: ../src/cainteoir.cpp:319
-msgid "Length"
-msgstr "Thời lượng"
-
-#: ../src/cainteoir.cpp:321 ../src/cainteoir.cpp:324
-msgid "Name"
-msgstr "Tên"
-
-#: ../src/cainteoir.cpp:325
-msgid "Version"
-msgstr "Phiên bản"
-
-#: ../src/cainteoir.cpp:397 ../src/cainteoir.cpp:611
-msgid "Open Document"
-msgstr "Mở tài liệu"
-
-#: ../src/cainteoir.cpp:432
-msgid "reading"
-msgstr "Đang đọc"
-
-#: ../src/cainteoir.cpp:444 ../src/cainteoir.cpp:483
-msgid "Record Document"
-msgstr "Ghi âm tài liệu"
-
-#: ../src/cainteoir.cpp:476
-msgid "recording"
-msgstr "đang ghi"
-
-#: ../src/cainteoir.cpp:484
-msgid "Unable to record the document"
-msgstr "Không thể ghi âm tài liệu"
-
-#: ../src/cainteoir.cpp:485
-msgid "Unsupported file type."
-msgstr "Không hỗ trợ định dạng tập tin"
-
-#: ../src/cainteoir.cpp:518 ../ui/cainteoir-gtk.ui.h:1
-msgid "Cainteoir Text-to-Speech"
-msgstr "Cainteoir Text-to-Speech"
-
-#: ../src/cainteoir.cpp:519
-msgid "Error speaking the document"
-msgstr "Lỗi khi phát âm tài liệu"
-
-#: ../src/cainteoir.cpp:551
-msgid "Document type is not supported"
-msgstr "Loại tài liệu không được hỗ trợ"
-
-#: ../src/cainteoir.cpp:589
-msgid " words (approx.)"
-msgstr "từ (tối thiểu.)"
-
-#: ../src/cainteoir.cpp:612
-msgid "Unable to open the document"
-msgstr "Không thể mở tài liệu"
-
-#: ../src/voice_selection.cpp:46
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:56
 msgid "Region"
 msgstr "Vùng miền"
 
-#: ../src/voice_selection.cpp:47
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:57
 msgid "Gender"
 msgstr "Giới tính"
 
-#: ../src/voice_selection.cpp:48
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:58
 msgid "Frequency (Hz)"
 msgstr "Tần số (Hz)"
 
-#: ../src/voice_selection.cpp:49
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:59
 msgid "Channels"
 msgstr "Kênh"
 
-#: ../src/voice_selection.cpp:223
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:207
 msgid "male"
 msgstr "nam "
 
-#: ../src/voice_selection.cpp:225
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:209
 msgid "female"
 msgstr "nữ "
 
-#: ../src/voice_selection.cpp:230
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:215
 msgid "mono"
 msgstr "nguồn đơn"
 
-#: ../src/voice_selection.cpp:230
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:215
 msgid "stereo"
 msgstr "âm lập thể"
 
-#: ../src/voice_selection.cpp:244
-msgid "Voices"
-msgstr "Giọng nói"
+#: ../src/reader/reader_document_view.cpp:93
+msgid "Index"
+msgstr ""
 
-#: ../src/voice_selection.cpp:248
+#: ../src/reader/reader_document_view.cpp:99
+msgid "Index (Abridged)"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:105
+msgid "Landmarks"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:111
+msgid "Pages"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:117
+msgid "Illustrations"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:123
+msgid "Tables"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:129
+msgid "Audio"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:135
+msgid "Video"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:95
+msgid "Reset"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:258
+msgid "Narration"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:269
+msgid "Text-to-Speech fallback"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:280
+#, fuzzy
+msgid "Filter voices by document language"
+msgstr "Lọc giọng nói bằng ngôn ngữ của tài liệu."
+
+#: ../src/reader/reader_window.cpp:113
+msgid "_Cancel"
+msgstr ""
+
+#: ../src/reader/reader_window.cpp:249
+msgid "Open Document"
+msgstr "Mở tài liệu"
+
+#: ../src/reader/reader_window.cpp:251
+msgid "_Open"
+msgstr ""
+
+#: ../src/reader/reader_window.cpp:295
+msgid "Record Document"
+msgstr "Ghi âm tài liệu"
+
+#: ../src/reader/reader_window.cpp:297
+#, fuzzy
+msgid "_Record"
+msgstr "đang ghi"
+
+#: ../src/reader/reader_window.cpp:398
+msgid "Side Pane"
+msgstr ""
+
+#: ../src/reader/reader_window.cpp:400 ../src/reader/reader_window.cpp:440
+msgid "Document"
+msgstr "Tà&i liệu"
+
+#: ../src/reader/reader_window.cpp:404 ../src/reader/reader_window.cpp:451
 msgid "Settings"
 msgstr "Thiết lập"
 
-#: ../src/voice_selection.cpp:250
-msgid "Filter voices by the document's language."
-msgstr "Lọc giọng nói bằng ngôn ngữ của tài liệu."
+#: ../src/reader/reader_window.cpp:408 ../src/reader/reader_window.cpp:444
+msgid "Voices"
+msgstr "Giọng nói"
 
-#: ../src/voice_selection.cpp:272
-msgid "_Apply"
-msgstr "_Áp dụng"
+#: ../src/reader/reader_window.cpp:423 ../src/reader/reader_window.cpp:426
+msgid "Cainteoir Text-to-Speech"
+msgstr "Cainteoir Text-to-Speech"
 
-#: ../ui/cainteoir-gtk.ui.h:2
-msgid "00:00:00"
-msgstr "00:00:00"
+#~ msgid "Recent Documents"
+#~ msgstr "Tài liệu gần đây"
 
-#: ../ui/cainteoir-gtk.ui.h:4
-msgid "Info"
-msgstr "Thông tin"
+#~ msgid "Title"
+#~ msgstr "Tiêu đề"
 
-#: ../ui/cainteoir-gtk.ui.h:5
-msgid "Library"
-msgstr "Thư viện"
+#~ msgid "Author"
+#~ msgstr "Tác giả"
+
+#~ msgid "Publisher"
+#~ msgstr "Người phát hành"
+
+#~ msgid "Description"
+#~ msgstr "Mô tả"
+
+#~ msgid "Length"
+#~ msgstr "Thời lượng"
+
+#~ msgid "Name"
+#~ msgstr "Tên"
+
+#~ msgid "Version"
+#~ msgstr "Phiên bản"
+
+#~ msgid "reading"
+#~ msgstr "Đang đọc"
+
+#~ msgid "Unable to record the document"
+#~ msgstr "Không thể ghi âm tài liệu"
+
+#~ msgid "Unsupported file type."
+#~ msgstr "Không hỗ trợ định dạng tập tin"
+
+#~ msgid "Error speaking the document"
+#~ msgstr "Lỗi khi phát âm tài liệu"
+
+#~ msgid "Document type is not supported"
+#~ msgstr "Loại tài liệu không được hỗ trợ"
+
+#~ msgid " words (approx.)"
+#~ msgstr "từ (tối thiểu.)"
+
+#~ msgid "Unable to open the document"
+#~ msgstr "Không thể mở tài liệu"
+
+#~ msgid "_Apply"
+#~ msgstr "_Áp dụng"
+
+#~ msgid "00:00:00"
+#~ msgstr "00:00:00"
+
+#~ msgid "Info"
+#~ msgstr "Thông tin"
+
+#~ msgid "Library"
+#~ msgstr "Thư viện"

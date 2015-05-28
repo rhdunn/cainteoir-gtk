@@ -1,173 +1,216 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # jmontane <joan@montane.cat>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: Cainteoir Text-to-Speech\n"
 "Report-Msgid-Bugs-To: msclrhd@gmail.com\n"
-"POT-Creation-Date: 2013-05-05 15:34+0100\n"
+"POT-Creation-Date: 2015-05-28 14:40+0100\n"
 "PO-Revision-Date: 2013-08-14 20:02+0000\n"
 "Last-Translator: jmontane <joan@montane.cat>\n"
-"Language-Team: Catalan (http://www.transifex.com/projects/p/cainteoir-text-to-speech/language/ca/)\n"
+"Language-Team: Catalan (http://www.transifex.com/projects/p/cainteoir-text-"
+"to-speech/language/ca/)\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ca\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/cainteoir.cpp:226
-msgid "Recent Documents"
-msgstr "Documents recents"
+#: ../src/editor/main.cpp:47 ../src/editor/main.cpp:50
+#, fuzzy
+msgid "Cainteoir Text-to-Speech Editor"
+msgstr "Cainteoir Text-to-Speech"
 
-#: ../src/cainteoir.cpp:266 ../ui/cainteoir-gtk.ui.h:3
-msgid "Document"
-msgstr "Document"
-
-#: ../src/cainteoir.cpp:267 ../src/voice_selection.cpp:43
-#: ../ui/cainteoir-gtk.ui.h:6
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:53
 msgid "Voice"
 msgstr "Veu"
 
-#: ../src/cainteoir.cpp:268 ../src/voice_selection.cpp:44
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:54
 msgid "Engine"
 msgstr "Motor"
 
-#: ../src/cainteoir.cpp:314
-msgid "Title"
-msgstr "Títol"
-
-#: ../src/cainteoir.cpp:315
-msgid "Author"
-msgstr "Autor"
-
-#: ../src/cainteoir.cpp:316
-msgid "Publisher"
-msgstr "Editor"
-
-#: ../src/cainteoir.cpp:317
-msgid "Description"
-msgstr "Descripció"
-
-#: ../src/cainteoir.cpp:318 ../src/cainteoir.cpp:322
-#: ../src/voice_selection.cpp:45
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:55
 msgid "Language"
 msgstr "Llengua"
 
-#: ../src/cainteoir.cpp:319
-msgid "Length"
-msgstr "Longitud"
-
-#: ../src/cainteoir.cpp:321 ../src/cainteoir.cpp:324
-msgid "Name"
-msgstr "Nom"
-
-#: ../src/cainteoir.cpp:325
-msgid "Version"
-msgstr "Versió"
-
-#: ../src/cainteoir.cpp:397 ../src/cainteoir.cpp:611
-msgid "Open Document"
-msgstr "Obre un document"
-
-#: ../src/cainteoir.cpp:432
-msgid "reading"
-msgstr "s'està llegint"
-
-#: ../src/cainteoir.cpp:444 ../src/cainteoir.cpp:483
-msgid "Record Document"
-msgstr "Enregistra un document"
-
-#: ../src/cainteoir.cpp:476
-msgid "recording"
-msgstr "enregistrant"
-
-#: ../src/cainteoir.cpp:484
-msgid "Unable to record the document"
-msgstr "No es pot enregistrar el document"
-
-#: ../src/cainteoir.cpp:485
-msgid "Unsupported file type."
-msgstr "Tipus de fitxer no suportat."
-
-#: ../src/cainteoir.cpp:518 ../ui/cainteoir-gtk.ui.h:1
-msgid "Cainteoir Text-to-Speech"
-msgstr "Cainteoir Text-to-Speech"
-
-#: ../src/cainteoir.cpp:519
-msgid "Error speaking the document"
-msgstr "S'ha produït un error en llegir el document."
-
-#: ../src/cainteoir.cpp:551
-msgid "Document type is not supported"
-msgstr "El tipus de document no és suportat"
-
-#: ../src/cainteoir.cpp:589
-msgid " words (approx.)"
-msgstr "paraules (aprox.)"
-
-#: ../src/cainteoir.cpp:612
-msgid "Unable to open the document"
-msgstr "No s'ha pogut obrir el document"
-
-#: ../src/voice_selection.cpp:46
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:56
 msgid "Region"
 msgstr "Regió"
 
-#: ../src/voice_selection.cpp:47
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:57
 msgid "Gender"
 msgstr "Gènere"
 
-#: ../src/voice_selection.cpp:48
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:58
 msgid "Frequency (Hz)"
 msgstr "Freqüència (Hz)"
 
-#: ../src/voice_selection.cpp:49
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:59
 msgid "Channels"
 msgstr "Canals"
 
-#: ../src/voice_selection.cpp:223
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:207
 msgid "male"
 msgstr "home"
 
-#: ../src/voice_selection.cpp:225
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:209
 msgid "female"
 msgstr "dona"
 
-#: ../src/voice_selection.cpp:230
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:215
 msgid "mono"
 msgstr "mono"
 
-#: ../src/voice_selection.cpp:230
+#: ../src/libcainteoir-gtk/cainteoir_speech_voice_view.cpp:215
 msgid "stereo"
 msgstr "estèreo"
 
-#: ../src/voice_selection.cpp:244
-msgid "Voices"
-msgstr "Veus"
+#: ../src/reader/reader_document_view.cpp:93
+msgid "Index"
+msgstr ""
 
-#: ../src/voice_selection.cpp:248
+#: ../src/reader/reader_document_view.cpp:99
+msgid "Index (Abridged)"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:105
+msgid "Landmarks"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:111
+msgid "Pages"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:117
+msgid "Illustrations"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:123
+msgid "Tables"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:129
+msgid "Audio"
+msgstr ""
+
+#: ../src/reader/reader_document_view.cpp:135
+msgid "Video"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:95
+msgid "Reset"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:258
+msgid "Narration"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:269
+msgid "Text-to-Speech fallback"
+msgstr ""
+
+#: ../src/reader/reader_settings_view.cpp:280
+#, fuzzy
+msgid "Filter voices by document language"
+msgstr "Filtra les veus segons la llengua del document."
+
+#: ../src/reader/reader_window.cpp:113
+msgid "_Cancel"
+msgstr ""
+
+#: ../src/reader/reader_window.cpp:249
+msgid "Open Document"
+msgstr "Obre un document"
+
+#: ../src/reader/reader_window.cpp:251
+msgid "_Open"
+msgstr ""
+
+#: ../src/reader/reader_window.cpp:295
+msgid "Record Document"
+msgstr "Enregistra un document"
+
+#: ../src/reader/reader_window.cpp:297
+#, fuzzy
+msgid "_Record"
+msgstr "enregistrant"
+
+#: ../src/reader/reader_window.cpp:398
+msgid "Side Pane"
+msgstr ""
+
+#: ../src/reader/reader_window.cpp:400 ../src/reader/reader_window.cpp:440
+msgid "Document"
+msgstr "Document"
+
+#: ../src/reader/reader_window.cpp:404 ../src/reader/reader_window.cpp:451
 msgid "Settings"
 msgstr "Configuració"
 
-#: ../src/voice_selection.cpp:250
-msgid "Filter voices by the document's language."
-msgstr "Filtra les veus segons la llengua del document."
+#: ../src/reader/reader_window.cpp:408 ../src/reader/reader_window.cpp:444
+msgid "Voices"
+msgstr "Veus"
 
-#: ../src/voice_selection.cpp:272
-msgid "_Apply"
-msgstr "_Aplica"
+#: ../src/reader/reader_window.cpp:423 ../src/reader/reader_window.cpp:426
+msgid "Cainteoir Text-to-Speech"
+msgstr "Cainteoir Text-to-Speech"
 
-#: ../ui/cainteoir-gtk.ui.h:2
-msgid "00:00:00"
-msgstr "00:00:00"
+#~ msgid "Recent Documents"
+#~ msgstr "Documents recents"
 
-#: ../ui/cainteoir-gtk.ui.h:4
-msgid "Info"
-msgstr "Informació"
+#~ msgid "Title"
+#~ msgstr "Títol"
 
-#: ../ui/cainteoir-gtk.ui.h:5
-msgid "Library"
-msgstr "Biblioteca"
+#~ msgid "Author"
+#~ msgstr "Autor"
+
+#~ msgid "Publisher"
+#~ msgstr "Editor"
+
+#~ msgid "Description"
+#~ msgstr "Descripció"
+
+#~ msgid "Length"
+#~ msgstr "Longitud"
+
+#~ msgid "Name"
+#~ msgstr "Nom"
+
+#~ msgid "Version"
+#~ msgstr "Versió"
+
+#~ msgid "reading"
+#~ msgstr "s'està llegint"
+
+#~ msgid "Unable to record the document"
+#~ msgstr "No es pot enregistrar el document"
+
+#~ msgid "Unsupported file type."
+#~ msgstr "Tipus de fitxer no suportat."
+
+#~ msgid "Error speaking the document"
+#~ msgstr "S'ha produït un error en llegir el document."
+
+#~ msgid "Document type is not supported"
+#~ msgstr "El tipus de document no és suportat"
+
+#~ msgid " words (approx.)"
+#~ msgstr "paraules (aprox.)"
+
+#~ msgid "Unable to open the document"
+#~ msgstr "No s'ha pogut obrir el document"
+
+#~ msgid "_Apply"
+#~ msgstr "_Aplica"
+
+#~ msgid "00:00:00"
+#~ msgstr "00:00:00"
+
+#~ msgid "Info"
+#~ msgstr "Informació"
+
+#~ msgid "Library"
+#~ msgstr "Biblioteca"

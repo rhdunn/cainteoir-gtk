@@ -58,9 +58,20 @@ struct _CainteoirSpeechVoiceViewClass
 	void (*_reserved4)(void);
 };
 
+enum CainteoirVoiceFilter
+{
+	CAINTEOIR_VOICE_FILTER_ALL,
+	CAINTEOIR_VOICE_FILTER_BY_LANGUAGE,
+};
+
 GType                                  cainteoir_speech_voice_view_get_type(void) G_GNUC_CONST;
 
 GtkWidget *                            cainteoir_speech_voice_view_new(CainteoirSpeechSynthesizers *synthesizers);
+
+CainteoirVoiceFilter                   cainteoir_speech_voice_view_get_filter(CainteoirSpeechVoiceView *view);
+
+void                                   cainteoir_speech_voice_view_set_filter(CainteoirSpeechVoiceView *view,
+                                                                              CainteoirVoiceFilter filter);
 
 void                                   cainteoir_speech_voice_view_set_filter_language(CainteoirSpeechVoiceView *view,
                                                                                        const gchar *language);

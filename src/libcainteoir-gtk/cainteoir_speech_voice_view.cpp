@@ -98,11 +98,13 @@ struct CainteoirSpeechVoiceViewPrivate
 
 	cainteoir::languages languages;
 	cainteoir::language::tag filter_language;
+	CainteoirVoiceFilter filter;
 
 	CainteoirSpeechVoiceViewPrivate()
 		: filter_language({})
 		, signal((gulong)-1)
 		, tts(nullptr)
+		, filter(CAINTEOIR_VOICE_FILTER_ALL)
 	{
 	}
 
@@ -167,7 +169,7 @@ refresh_view(CainteoirSpeechVoiceView *view)
 	{
 		rql::results statements = rql::select(metadata, rql::subject == rql::subject(voice));
 
-		if (!priv->filter_language.lang.empty())
+		if (priv->filter == CAINTEOIR_VOICE_FILTER_BY_LANGUAGE)
 		{
 			std::string lang = rql::select_value<std::string>(statements,
 			                   rql::predicate == rdf::dc("language"));
@@ -250,6 +252,20 @@ cainteoir_speech_voice_view_new(CainteoirSpeechSynthesizers *synthesizers)
 	return GTK_WIDGET(view);
 }
 
+CainteoirVoiceFilter
+cainteoir_speech_voice_view_get_filter(CainteoirSpeechVoiceView *view)
+{
+	return CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view)->filter;
+}
+
+void
+cainteoir_speech_voice_view_set_filter(CainteoirSpeechVoiceView *view,
+                                       CainteoirVoiceFilter filter)
+{
+	CAINTEOIR_SPEECH_VOICE_VIEW_PRIVATE(view)->filter = filter;
+	refresh_view(view);
+}
+
 void
 cainteoir_speech_voice_view_set_filter_language(CainteoirSpeechVoiceView *view,
                                                 const gchar *language)
@@ -260,7 +276,8 @@ cainteoir_speech_voice_view_set_filter_language(CainteoirSpeechVoiceView *view,
 	else
 		priv->filter_language = {{}};
 
-	refresh_view(view);
+	if (priv->filter == CAINTEOIR_VOICE_FILTER_BY_LANGUAGE)
+		refresh_view(view);
 }
 
 void

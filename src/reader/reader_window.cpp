@@ -169,6 +169,16 @@ on_speak(ReaderWindowPrivate *priv)
 	g_timeout_add(100, (GSourceFunc)on_speaking_timer, priv);
 }
 
+static void
+on_voice_changed(CainteoirSpeechVoiceView *view, const gchar *voice, ReaderWindowPrivate *priv)
+{
+	if (cainteoir_speech_synthesizers_set_voice(priv->tts, voice))
+	{
+		cainteoir_settings_set_string(priv->settings, "voice", "name", voice);
+		cainteoir_settings_save(priv->settings);
+	}
+}
+
 static gboolean
 on_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, CainteoirSettings *settings)
 {
@@ -437,6 +447,7 @@ reader_window_new(const gchar *filename)
 	gtk_stack_add_titled(GTK_STACK(priv->stack), scroll, "voices", i18n("Voices"));
 
 	priv->voice_view = cainteoir_speech_voice_view_new(priv->tts);
+	g_signal_connect(priv->voice_view, "voice-changed", G_CALLBACK(on_voice_changed), priv);
 	gtk_container_add(GTK_CONTAINER(scroll), priv->voice_view);
 
 	GtkWidget *bottombar = gtk_toolbar_new();
@@ -486,6 +497,12 @@ reader_window_new(const gchar *filename)
 	                cainteoir_settings_get_integer(priv->settings, "window", "top",  0));
 	if (cainteoir_settings_get_boolean(priv->settings, "window", "maximized", FALSE))
 		gtk_window_maximize(GTK_WINDOW(reader));
+
+	gchar *voice = cainteoir_settings_get_string(priv->settings, "voice", "name", nullptr);
+	if (!voice)
+		voice = cainteoir_speech_synthesizers_get_voice(priv->tts);
+	cainteoir_speech_voice_view_set_voice(CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), voice);
+	g_free(voice);
 
 	if (filename)
 		reader_window_load_document(reader, filename);

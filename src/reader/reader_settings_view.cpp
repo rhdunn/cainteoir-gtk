@@ -53,8 +53,11 @@ struct SpeechParameterSetting
 static void
 on_speech_parameter_changed(GtkRange *range, SpeechParameterSetting *setting)
 {
-	cainteoir_settings_set_integer(setting->settings, "voice", setting->key,
-	                               gtk_range_get_value(GTK_RANGE(setting->value)));
+	guint value = gtk_range_get_value(GTK_RANGE(setting->value));
+
+	cainteoir_speech_parameter_set_value(setting->parameter, value);
+
+	cainteoir_settings_set_integer(setting->settings, "voice", setting->key, value);
 	cainteoir_settings_save(setting->settings);
 }
 
@@ -117,6 +120,8 @@ speech_parameter_setting_update(SpeechParameterSetting *setting,
 		gint value = cainteoir_settings_get_integer(setting->settings, "voice", setting->key,
 		                                            cainteoir_speech_parameter_get_default(setting->parameter));
 		gtk_range_set_value(GTK_RANGE(setting->value), value);
+
+		cainteoir_speech_parameter_set_value(setting->parameter, value);
 
 		gtk_label_set_label(GTK_LABEL(setting->units), cainteoir_speech_parameter_get_units(setting->parameter));
 

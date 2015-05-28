@@ -8,14 +8,12 @@ CAINTEOIR_LIBS   = -lcainteoir
 AM_LDFLAGS  = \
 	${CAINTEOIR_LIBS} \
 	${GTK_LIBS} \
-	${SIGCXX_LIBS} \
 	${LTLIBINTL}
 
 AM_CXXFLAGS = \
 	-Isrc -Isrc/include \
 	${CAINTEOIR_CFLAGS}  \
 	${GTK_CFLAGS}  \
-	${SIGCXX_CFLAGS}  \
 	-DDATADIR='"$(datadir)"' -DLOCALEDIR=\"$(localedir)\"
 
 ACLOCAL_AMFLAGS = -I m4
@@ -148,34 +146,6 @@ src_libcainteoir_gtk_libcainteoir_gtk_la_SOURCES = \
 desktopdir = $(datadir)/applications
 desktop_DATA = src/cainteoir-gtk.desktop
 
-uidir = ${datadir}/cainteoir-gtk/ui
-ui_DATA = data/ui/cainteoir-gtk.ui
-
-bin_PROGRAMS += src/cainteoir-gtk
-
-src_cainteoir_gtk_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
-src_cainteoir_gtk_SOURCES = \
-	src/i18n.h \
-	src/compatibility.hpp \
-	src/compatibility.cpp \
-	src/settings.hpp \
-	src/settings.cpp \
-	src/settings_view.hpp \
-	src/settings_view.cpp \
-	src/voice_selection.hpp \
-	src/voice_selection.cpp \
-	src/metadata.hpp \
-	src/metadata.cpp \
-	src/timebar.hpp \
-	src/timebar.cpp \
-	src/navbar.hpp \
-	src/navbar.cpp \
-	src/library.hpp \
-	src/library.cpp \
-	src/cainteoir.hpp \
-	src/cainteoir.cpp \
-	src/main.cpp
-
 bin_PROGRAMS += src/cainteoir-editor
 
 src_cainteoir_editor_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
@@ -183,10 +153,10 @@ src_cainteoir_editor_SOURCES = \
 	src/i18n.h \
 	src/editor/main.cpp
 
-bin_PROGRAMS += src/cainteoir-reader
+bin_PROGRAMS += src/cainteoir-gtk
 
-src_cainteoir_reader_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
-src_cainteoir_reader_SOURCES = \
+src_cainteoir_gtk_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
+src_cainteoir_gtk_SOURCES = \
 	src/i18n.h \
 	src/reader/reader_document_view.h \
 	src/reader/reader_document_view.cpp \

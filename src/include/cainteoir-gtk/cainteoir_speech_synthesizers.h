@@ -101,7 +101,7 @@ void                                   cainteoir_speech_synthesizers_record(Cain
                                                                             CainteoirDocument *doc,
                                                                             CainteoirDocumentIndex *index,
                                                                             const gchar *filename,
-                                                                            const gchar *type,
+                                                                            const gchar *mimetype,
                                                                             gfloat quality);
 
 gboolean                               cainteoir_speech_synthesizers_is_speaking(CainteoirSpeechSynthesizers *synthesizers);

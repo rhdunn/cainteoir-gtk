@@ -206,7 +206,7 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
                                      CainteoirDocument *doc,
                                      CainteoirDocumentIndex *index,
                                      const gchar *filename,
-                                     const gchar *type,
+                                     const gchar *mimetype,
                                      gfloat quality)
 {
 	if (cainteoir_speech_synthesizers_is_speaking(synthesizers))
@@ -218,12 +218,16 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
 		g_free(priv->device_name);
 		priv->device_name = g_strdup(filename);
 
-		if (!strcmp(type, "wav"))
+		if (!strcmp(mimetype, "audio/x-wav") ||
+		    !strcmp(mimetype, "audio/vnd.wave") ||
+		    !strcmp(mimetype, "audio/wav"))
 			priv->out = cainteoir::create_wav_file(
 				priv->device_name,
 				priv->metadata,
 				priv->tts.voice());
-		else if (!strcmp(type, "ogg"))
+		else if (!strcmp(mimetype, "audio/x-vorbis+ogg") ||
+		         !strcmp(mimetype, "audio/vorbis") ||
+		         !strcmp(mimetype, "audio/x-vorbis"))
 		{
 			auto comments = cainteoir::vorbis_comments(
 				*cainteoir_document_get_rdf_metadata(doc),

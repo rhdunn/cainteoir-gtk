@@ -305,9 +305,8 @@ on_record_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate
 	if (!filename)
 		return;
 
-	gchar *type = nullptr;
 	gchar *mimetype = nullptr;
-	if (cainteoir_supported_formats_file_info(priv->audio_formats, filename, &type, &mimetype))
+	if (cainteoir_supported_formats_file_info(priv->audio_formats, filename, nullptr, &mimetype))
 	{
 		CainteoirDocument *doc = reader_document_view_get_document(READER_DOCUMENT_VIEW(priv->view));
 		CainteoirDocumentIndex *index = reader_document_view_get_document_index(READER_DOCUMENT_VIEW(priv->view));
@@ -316,10 +315,9 @@ on_record_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPrivate
 		cainteoir_settings_set_string(priv->settings, "recording", "mimetype", mimetype);
 		cainteoir_settings_save(priv->settings);
 
-		cainteoir_speech_synthesizers_record(priv->tts, doc, index, filename, type, 0.3);
+		cainteoir_speech_synthesizers_record(priv->tts, doc, index, filename, mimetype, 0.3);
 		on_speak(priv);
 
-		g_free(type);
 		g_free(mimetype);
 		g_object_unref(G_OBJECT(index));
 		g_object_unref(G_OBJECT(doc));

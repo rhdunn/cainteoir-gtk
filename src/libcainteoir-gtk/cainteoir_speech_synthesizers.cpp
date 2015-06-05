@@ -218,16 +218,26 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
 		g_free(priv->device_name);
 		priv->device_name = g_strdup(filename);
 
-		priv->out = cainteoir::create_audio_file(
-			priv->device_name,
-			type,
-			quality,
-			*cainteoir_document_get_rdf_metadata(doc),
-			*cainteoir_document_get_subject(doc),
-			priv->metadata,
-			priv->tts.voice());
+		if (!strcmp(type, "wav"))
+			priv->out = cainteoir::create_wav_file(
+				priv->device_name,
+				priv->metadata,
+				priv->tts.voice());
+		else if (!strcmp(type, "ogg"))
+		{
+			auto comments = cainteoir::vorbis_comments(
+				*cainteoir_document_get_rdf_metadata(doc),
+				*cainteoir_document_get_subject(doc));
+			priv->out = cainteoir::create_ogg_file(
+				priv->device_name,
+				comments,
+				quality,
+				priv->metadata,
+				priv->tts.voice());
+		}
 
-		cainteoir_speech_synthesizers_speak(priv, doc, index);
+		if (priv->out)
+			cainteoir_speech_synthesizers_speak(priv, doc, index);
 	}
 	catch (const std::exception &e)
 	{

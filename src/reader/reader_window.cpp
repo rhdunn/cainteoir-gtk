@@ -33,6 +33,7 @@
 #include <cainteoir-gtk/cainteoir_speech_parameter.h>
 #include <cainteoir-gtk/cainteoir_timebar.h>
 #include <cainteoir-gtk/cainteoir_document.h>
+#include <cainteoir-gtk/cainteoir_metadata.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
 
 #include "extensions/glib.h"
@@ -48,6 +49,7 @@
 struct ReaderWindowPrivate
 {
 	GtkWidget *self;
+	GtkWidget *header;
 	GtkWidget *stack;
 	GtkWidget *previous;
 	GtkWidget *view;
@@ -336,6 +338,11 @@ on_previous_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPriva
 
 	gtk_stack_set_visible_child(GTK_STACK(priv->stack), view);
 
+	gchar *title = nullptr;
+	gtk_container_child_get(GTK_CONTAINER(priv->stack), view, "title", &title, nullptr);
+	gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), title);
+	g_free(title);
+
 	if (priv->view_history.empty())
 		gtk_widget_hide(priv->previous);
 }
@@ -346,11 +353,17 @@ on_view_change_action(GSimpleAction *action, GVariant *parameter, ReaderWindowPr
 	GtkWidget *current = gtk_stack_get_visible_child(GTK_STACK(priv->stack));
 	gtk_stack_set_visible_child_name(GTK_STACK(priv->stack), g_variant_get_string(parameter, nullptr));
 
-	if (current != gtk_stack_get_visible_child(GTK_STACK(priv->stack)))
+	GtkWidget *next = gtk_stack_get_visible_child(GTK_STACK(priv->stack));
+	if (current != next)
 	{
 		priv->view_history.push(current);
 
 		gtk_widget_show(priv->previous);
+
+		gchar *title = nullptr;
+		gtk_container_child_get(GTK_CONTAINER(priv->stack), next, "title", &title, nullptr);
+		gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), title);
+		g_free(title);
 	}
 }
 
@@ -420,10 +433,10 @@ reader_window_new(const gchar *filename)
 	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));
 
-	GtkWidget *header = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(header), i18n("Cainteoir Text-to-Speech"));
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
-	gtk_window_set_titlebar(GTK_WINDOW(reader), header);
+	priv->header = gtk_header_bar_new();
+	gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), i18n("Cainteoir Text-to-Speech"));
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(priv->header), TRUE);
+	gtk_window_set_titlebar(GTK_WINDOW(reader), priv->header);
 
 	priv->actions = create_action_group(priv);
 	gtk_widget_insert_action_group(GTK_WIDGET(reader), "cainteoir", G_ACTION_GROUP(priv->actions));
@@ -475,13 +488,13 @@ reader_window_new(const gchar *filename)
 
 	priv->previous = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(priv->previous), gtk_image_new_from_icon_name("go-previous-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR));
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(header), priv->previous);
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(priv->header), priv->previous);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(priv->previous), "cainteoir.view-previous");
 
 	GtkWidget *menu_button = gtk_menu_button_new();
 	gtk_button_set_image(GTK_BUTTON(menu_button), gtk_image_new_from_icon_name(HAMBURGER_MENU_ICON, GTK_ICON_SIZE_SMALL_TOOLBAR));
 	gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), create_main_menu());
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(priv->header), menu_button);
 
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), priv);
@@ -525,7 +538,18 @@ reader_window_load_document(ReaderWindow *reader,
 	if (reader_document_view_load_document(READER_DOCUMENT_VIEW(priv->view), filename))
 	{
 		CainteoirDocument *doc = reader_document_view_get_document(READER_DOCUMENT_VIEW(priv->view));
+		CainteoirMetadata *metadata = cainteoir_document_get_metadata(doc);
+		gchar *title = cainteoir_metadata_get_string(metadata, CAINTEOIR_METADATA_TITLE);
+
 		cainteoir_speech_voice_view_set_filter_language_from_document(CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), doc);
+
+		gtk_container_child_set(GTK_CONTAINER(priv->stack), priv->view, "title", title, nullptr);
+		GtkWidget *active = gtk_stack_get_visible_child(GTK_STACK(priv->stack));
+		if (!active || active == priv->view)
+			gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), title);
+
+		if (title) g_free(title);
+		g_object_unref(G_OBJECT(metadata));
 		g_object_unref(G_OBJECT(doc));
 
 		reset_timebar(priv);

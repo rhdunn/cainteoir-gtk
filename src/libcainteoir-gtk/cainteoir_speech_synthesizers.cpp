@@ -229,7 +229,8 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
 		         !strcmp(mimetype, "audio/vorbis") ||
 		         !strcmp(mimetype, "audio/x-vorbis"))
 		{
-			auto comments = cainteoir::vorbis_comments(
+			std::list<cainteoir::vorbis_comment> comments;
+			cainteoir::add_document_metadata(comments,
 				*cainteoir_document_get_rdf_metadata(doc),
 				*cainteoir_document_get_subject(doc));
 			priv->out = cainteoir::create_ogg_file(

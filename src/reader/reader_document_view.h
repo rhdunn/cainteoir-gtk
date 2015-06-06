@@ -91,6 +91,10 @@ gboolean                               reader_document_view_get_index_pane_visib
 void                                   reader_document_view_set_index_pane_visible(ReaderDocumentView *view,
                                                                                    gboolean visible);
 
+void                                   reader_document_view_select_text(ReaderDocumentView *view,
+                                                                        gint start_pos,
+                                                                        gint end_pos);
+
 G_END_DECLS
 
 #endif

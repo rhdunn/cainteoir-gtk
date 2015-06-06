@@ -68,8 +68,6 @@ reader_application_startup(GApplication *application)
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 
-	load_theme(nullptr, "gtk3-common.css");
-
 	gchar *theme_name = nullptr;
 	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, nullptr);
 	load_theme(theme_name, "gtk3.css");

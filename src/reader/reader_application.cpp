@@ -26,8 +26,8 @@
 #include "reader_application.h"
 #include "reader_window.h"
 
-#include <cainteoir/buffer.hpp>
 #include <locale.h>
+#include <stdlib.h>
 
 #include "extensions/glib.h"
 
@@ -54,29 +54,23 @@ G_DEFINE_TYPE_WITH_PRIVATE(ReaderApplication, reader_application, GTK_TYPE_APPLI
 GXT_DEFINE_TYPE_CONSTRUCTION(ReaderApplication, reader_application, READER_APPLICATION)
 
 static void
-load_theme(ReaderApplicationPrivate *priv,
-           const gchar *theme_name,
-           const gchar *theme_file)
+on_theme_changed(GtkSettings *settings,
+                 GParamSpec *param,
+                 ReaderApplicationPrivate *priv)
 {
-	try
-	{
-		const gchar *data_dir = getenv("CAINTEOIR_GTK_DATA_DIR");
-		if (!data_dir)
-			data_dir = DATADIR "/" PACKAGE;
+	gchar *theme_name = nullptr;
+	g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
 
-		gchar *path = nullptr;
-		if (theme_name)
-			path = g_strdup_printf("%s/themes/%s/%s", data_dir, theme_name, theme_file);
-		else
-			path = g_strdup_printf("%s/themes/%s", data_dir, theme_file);
-		auto theme = cainteoir::make_file_buffer(path);
-		g_free(path);
+	const gchar *data_dir = getenv("CAINTEOIR_GTK_DATA_DIR");
+	if (!data_dir)
+		data_dir = DATADIR "/" PACKAGE;
 
-		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(priv->theme), theme->begin(), theme->size(), nullptr);
-	}
-	catch (const std::exception &e)
-	{
-	}
+	gchar *path = g_strdup_printf("%s/themes/%s/gtk3.css", data_dir, theme_name);
+
+	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(priv->theme), path, nullptr);
+
+	g_free(path);
+	g_free(theme_name);
 }
 
 static void
@@ -92,10 +86,9 @@ reader_application_startup(GApplication *application)
 	GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
 	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(priv->theme), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-	gchar *theme_name = nullptr;
-	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, nullptr);
-	load_theme(priv, theme_name, "gtk3.css");
-	g_free(theme_name);
+	GtkSettings *settings = gtk_settings_get_default();
+	g_signal_connect(settings, "notify::gtk-theme-name", G_CALLBACK(on_theme_changed), priv);
+	on_theme_changed(settings, nullptr, priv);
 }
 
 static void

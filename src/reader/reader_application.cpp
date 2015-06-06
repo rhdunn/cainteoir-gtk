@@ -29,10 +29,34 @@
 #include <cainteoir/buffer.hpp>
 #include <locale.h>
 
-G_DEFINE_TYPE(ReaderApplication, reader_application, GTK_TYPE_APPLICATION)
+#include "extensions/glib.h"
+
+struct ReaderApplicationPrivate
+{
+	GtkCssProvider *theme;
+
+	ReaderApplicationPrivate()
+		: theme(gtk_css_provider_new())
+	{
+	}
+
+	~ReaderApplicationPrivate()
+	{
+		if (theme) g_object_unref(theme);
+	}
+};
+
+G_DEFINE_TYPE_WITH_PRIVATE(ReaderApplication, reader_application, GTK_TYPE_APPLICATION)
+
+#define READER_APPLICATION_PRIVATE(object) \
+	((ReaderApplicationPrivate *)reader_application_get_instance_private(READER_APPLICATION(object)))
+
+GXT_DEFINE_TYPE_CONSTRUCTION(ReaderApplication, reader_application, READER_APPLICATION)
 
 static void
-load_theme(const gchar *theme_name, const gchar *theme_file)
+load_theme(ReaderApplicationPrivate *priv,
+           const gchar *theme_name,
+           const gchar *theme_file)
 {
 	try
 	{
@@ -48,11 +72,7 @@ load_theme(const gchar *theme_name, const gchar *theme_file)
 		auto theme = cainteoir::make_file_buffer(path);
 		g_free(path);
 
-		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
-
-		GtkCssProvider *provider = gtk_css_provider_new();
-		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER (provider), theme->begin(), theme->size(), nullptr);
+		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(priv->theme), theme->begin(), theme->size(), nullptr);
 	}
 	catch (const std::exception &e)
 	{
@@ -63,14 +83,18 @@ static void
 reader_application_startup(GApplication *application)
 {
 	G_APPLICATION_CLASS(reader_application_parent_class)->startup(application);
+	ReaderApplicationPrivate *priv = READER_APPLICATION_PRIVATE(application);
 
 	setlocale(LC_MESSAGES, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 
+	GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
+	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(priv->theme), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
 	gchar *theme_name = nullptr;
 	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, nullptr);
-	load_theme(theme_name, "gtk3.css");
+	load_theme(priv, theme_name, "gtk3.css");
 	g_free(theme_name);
 }
 
@@ -107,14 +131,10 @@ reader_application_activate(GApplication *application)
 static void
 reader_application_class_init(ReaderApplicationClass *klass)
 {
+	G_OBJECT_CLASS(klass)->finalize = reader_application_finalize;
 	G_APPLICATION_CLASS(klass)->startup = reader_application_startup;
 	G_APPLICATION_CLASS(klass)->activate = reader_application_activate;
 	G_APPLICATION_CLASS(klass)->open = reader_application_open;
-}
-
-static void
-reader_application_init(ReaderApplication *application)
-{
 }
 
 GApplication *

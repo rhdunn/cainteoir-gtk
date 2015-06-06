@@ -144,31 +144,30 @@ reset_timebar(ReaderWindowPrivate *priv)
 	g_object_unref(G_OBJECT(doc));
 }
 
-static gboolean
-on_speaking_timer(ReaderWindowPrivate *priv)
+static void
+on_speaking(CainteoirSpeechSynthesizers *synthesizers,
+            gboolean is_speaking,
+            ReaderWindowPrivate *priv)
 {
-	if (cainteoir_speech_synthesizers_is_speaking(priv->tts))
+	if (is_speaking)
 	{
 		cainteoir_timebar_set_time(CAINTEOIR_TIMEBAR(priv->timebar),
 		                           cainteoir_speech_synthesizers_get_elapsed_time(priv->tts),
 		                           cainteoir_speech_synthesizers_get_total_time(priv->tts));
 		cainteoir_timebar_set_progress(CAINTEOIR_TIMEBAR(priv->timebar),
 		                               cainteoir_speech_synthesizers_get_percentage_complete(priv->tts));
-		return TRUE;
 	}
-
-	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(priv->play_stop), "media-playback-start-symbolic");
-	reset_timebar(priv);
-
-	return FALSE;
+	else
+	{
+		gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(priv->play_stop), "media-playback-start-symbolic");
+		reset_timebar(priv);
+	}
 }
 
 static void
 on_speak(ReaderWindowPrivate *priv)
 {
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(priv->play_stop), "media-playback-stop-symbolic");
-
-	g_timeout_add(100, (GSourceFunc)on_speaking_timer, priv);
 }
 
 static void
@@ -503,6 +502,7 @@ reader_window_new(GtkApplication *application,
 	g_signal_connect(reader, "window-state-event", G_CALLBACK(on_window_state_changed), priv->settings);
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), priv);
 	g_signal_connect(reader, "show", G_CALLBACK(on_window_show), priv);
+	g_signal_connect(priv->tts, "speaking", G_CALLBACK(on_speaking), priv);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(priv->settings, "window", "width",  700),

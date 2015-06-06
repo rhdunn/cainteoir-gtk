@@ -37,8 +37,18 @@ namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
 
+enum
+{
+	SPEAKING,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 struct CainteoirSpeechSynthesizersPrivate
 {
+	CainteoirSpeechSynthesizers *self;
+
 	rdf::graph metadata;
 	tts::engines tts;
 	tts::media_overlays_mode narration;
@@ -74,6 +84,31 @@ cainteoir_speech_synthesizers_class_init(CainteoirSpeechSynthesizersClass *klass
 {
 	GObjectClass *object = G_OBJECT_CLASS(klass);
 	object->finalize = cainteoir_speech_synthesizers_finalize;
+
+	signals[SPEAKING] =
+		g_signal_new("speaking",
+		             G_TYPE_FROM_CLASS(object),
+		             G_SIGNAL_RUN_LAST,
+		             0,
+		             NULL,
+		             NULL,
+		             g_cclosure_marshal_VOID__BOOLEAN,
+		             G_TYPE_NONE,
+		             1,
+		             G_TYPE_BOOLEAN);
+}
+
+static gboolean
+on_speaking(CainteoirSpeechSynthesizersPrivate *priv)
+{
+	if (priv->speech->is_speaking())
+	{
+		g_signal_emit(priv->self, signals[SPEAKING], 0, TRUE);
+		return TRUE;
+	}
+
+	g_signal_emit(priv->self, signals[SPEAKING], 0, FALSE);
+	return FALSE;
 }
 
 static void
@@ -85,12 +120,16 @@ cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizersPrivate *priv,
 	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(index));
 	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(index));
 	priv->speech = priv->tts.speak(priv->out, listing, doc->children(sel), priv->narration);
+
+	g_timeout_add(100, (GSourceFunc)on_speaking, priv);
 }
 
 CainteoirSpeechSynthesizers *
 cainteoir_speech_synthesizers_new()
 {
-	return CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_new(CAINTEOIR_TYPE_SPEECH_SYNTHESIZERS, nullptr));
+	CainteoirSpeechSynthesizers *synthesizers = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_new(CAINTEOIR_TYPE_SPEECH_SYNTHESIZERS, nullptr));
+	CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->self = synthesizers;
+	return synthesizers;
 }
 
 gboolean

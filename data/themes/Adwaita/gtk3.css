@@ -1,47 +1,5 @@
-@define-color borders  #8e8e8e;
-@define-color progress #1a73a7;
-
-#toc row,
-.label {
-	color: grey;
-}
-
-#toc row:selected,
-#toc row:selected:focused {
-	background-image: none;
-	color: black;
-}
-
-GtkNotebook {
-	border-color: @borders;
-	border-width: 1px 0 1px 0;
-}
-
-/* The toc pane is coloured white by default, with the notebook
- * background grey, so make these both white ...
- */
-
-GtkNotebook, #toc {
-	background-color: @theme_base_color;
-}
-
-/* Use the backdrop styling for the progress bar in the active view.
- */
-
-GtkProgressBar,
-GtkProgressBar.vertical,
-.trough row,
-.trough.vertical row {
-    background-image: none;
-    background-color: @unfocused_dark_bg;
-}
-
-.progressbar,
-.progressbar row,
-.progressbar row:selected {
-    background-image: none;
-    background-color: @progress;
-    border-color: @progressbar_unfocused_border;
-    box-shadow: none;
-    -adwaita-progressbar-pattern: none;
+.bottombar {
+	border-style: solid;
+	border-color: #8e8e8e;
+	border-top-width: 1px;
 }

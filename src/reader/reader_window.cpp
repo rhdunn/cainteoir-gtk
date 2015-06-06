@@ -546,10 +546,11 @@ reader_window_load_document(ReaderWindow *reader,
 
 		cainteoir_speech_voice_view_set_filter_language_from_document(CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), doc);
 
-		gtk_container_child_set(GTK_CONTAINER(priv->stack), priv->view, "title", title, nullptr);
+		const gchar *doc_title = title ? title : i18n("Cainteoir Text-to-Speech");
+		gtk_container_child_set(GTK_CONTAINER(priv->stack), priv->view, "title", doc_title, nullptr);
 		GtkWidget *active = gtk_stack_get_visible_child(GTK_STACK(priv->stack));
 		if (!active || active == priv->view)
-			gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), title);
+			gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), doc_title);
 
 		if (title) g_free(title);
 		g_object_unref(G_OBJECT(metadata));

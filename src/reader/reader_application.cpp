@@ -108,8 +108,10 @@ reader_application_open(GApplication *application,
 			reader_window_load_document(READER_WINDOW(window), filename);
 	}
 	else
+	{
 		window = reader_window_new(GTK_APPLICATION(application), filename);
-	gtk_widget_show_all(GTK_WIDGET(window));
+		gtk_widget_show_all(GTK_WIDGET(window));
+	}
 	g_free(filename);
 
 	gtk_window_present(GTK_WINDOW(window));

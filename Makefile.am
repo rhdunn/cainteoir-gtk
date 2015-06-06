@@ -164,6 +164,8 @@ src_cainteoir_gtk_SOURCES = \
 	src/reader/reader_settings_view.cpp \
 	src/reader/reader_window.h \
 	src/reader/reader_window.cpp \
+	src/reader/reader_application.h \
+	src/reader/reader_application.cpp \
 	src/reader/main.cpp
 
 EXTRA_DIST += ${man1_MANS}

@@ -41,12 +41,12 @@ typedef struct _ReaderWindowClass   ReaderWindowClass;
 
 struct _ReaderWindow
 {
-	GtkWindow parent_instance;
+	GtkApplicationWindow parent_instance;
 };
 
 struct _ReaderWindowClass
 {
-	GtkWindowClass parent_class;
+	GtkApplicationWindowClass parent_class;
 
 	/* Padding for future expansion */
 	void (*_reserved1)(void);
@@ -57,7 +57,8 @@ struct _ReaderWindowClass
 
 GType                                  reader_window_get_type(void) G_GNUC_CONST;
 
-GtkWidget *                            reader_window_new(const gchar *filename);
+GtkWidget *                            reader_window_new(GtkApplication *application,
+                                                         const gchar *filename);
 
 gboolean                               reader_window_load_document(ReaderWindow *reader,
                                                                    const gchar *filename);

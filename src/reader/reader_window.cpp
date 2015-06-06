@@ -88,7 +88,7 @@ struct ReaderWindowPrivate
 	}
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_WINDOW)
+G_DEFINE_TYPE_WITH_PRIVATE(ReaderWindow, reader_window, GTK_TYPE_APPLICATION_WINDOW)
 
 #define READER_WINDOW_PRIVATE(object) \
 	((ReaderWindowPrivate *)reader_window_get_instance_private(READER_WINDOW(object)))
@@ -424,9 +424,12 @@ create_main_menu()
 }
 
 GtkWidget *
-reader_window_new(const gchar *filename)
+reader_window_new(GtkApplication *application,
+                  const gchar *filename)
 {
-	ReaderWindow *reader = READER_WINDOW(g_object_new(READER_TYPE_WINDOW, nullptr));
+	ReaderWindow *reader = READER_WINDOW(g_object_new(READER_TYPE_WINDOW,
+		"application", application,
+		nullptr));
 	ReaderWindowPrivate *priv = READER_WINDOW_PRIVATE(reader);
 	priv->self = GTK_WIDGET(reader);
 

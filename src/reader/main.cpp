@@ -19,70 +19,15 @@
  */
 
 #include "config.h"
-#include "i18n.h"
 
 #include <gtk/gtk.h>
-#include "reader_window.h"
-#include <cainteoir-gtk/cainteoir_document_view.h>
-
-#include <cainteoir/buffer.hpp>
-#include <locale.h>
-
-static void
-load_theme(const gchar *theme_name, const gchar *theme_file)
-{
-	try
-	{
-		const gchar *data_dir = getenv("CAINTEOIR_GTK_DATA_DIR");
-		if (!data_dir)
-			data_dir = DATADIR "/" PACKAGE;
-
-		gchar *path = nullptr;
-		if (theme_name)
-			path = g_strdup_printf("%s/themes/%s/%s", data_dir, theme_name, theme_file);
-		else
-			path = g_strdup_printf("%s/themes/%s", data_dir, theme_file);
-		auto theme = cainteoir::make_file_buffer(path);
-		g_free(path);
-
-		GdkScreen *screen = gdk_display_get_default_screen(gdk_display_get_default());
-
-		GtkCssProvider *provider = gtk_css_provider_new();
-		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER (provider), theme->begin(), theme->size(), nullptr);
-	}
-	catch (const std::exception &e)
-	{
-	}
-}
-
-static void
-on_window_destroy(GtkWidget *object, gpointer data)
-{
-	gtk_main_quit();
-}
+#include "reader_application.h"
 
 int
 main(int argc, char ** argv)
 {
-	setlocale(LC_MESSAGES, "");
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	textdomain(PACKAGE);
-
-	gtk_init(&argc, &argv);
-
-	load_theme(nullptr, "gtk3-common.css");
-
-	gchar *theme_name = nullptr;
-	g_object_get(gtk_settings_get_default(), "gtk-theme-name", &theme_name, nullptr);
-	load_theme(theme_name, "gtk3.css");
-	g_free(theme_name);
-
-	GtkWidget *window = reader_window_new((argc == 2) ? argv[1] : nullptr);
-	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
-
-	gtk_widget_show_all(window);
-	gtk_main();
-
-	return 0;
+	GApplication *application = reader_application_new();
+	int status = g_application_run(application, argc, argv);
+	g_object_unref(G_OBJECT(application));
+	return status;
 }

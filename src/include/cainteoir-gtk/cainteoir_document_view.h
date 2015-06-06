@@ -69,6 +69,10 @@ CainteoirDocument *                    cainteoir_document_view_get_document(Cain
 void                                   cainteoir_document_view_scroll_to_anchor(CainteoirDocumentView *view,
                                                                                 const gchar *anchor);
 
+void                                   cainteoir_document_view_select_text(CainteoirDocumentView *view,
+                                                                           gint start_pos,
+                                                                           gint end_pos);
+
 G_END_DECLS
 
 #endif

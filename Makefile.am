@@ -104,6 +104,9 @@ AdwaitaTheme_DATA = data/themes/Adwaita/gtk3.css
 AmbianceThemedir = ${themedir}/Ambiance
 AmbianceTheme_DATA = data/themes/Ambiance/gtk3.css
 
+HighContrastThemedir = ${themedir}/HighContrast
+HighContrastTheme_DATA = data/themes/HighContrast/gtk3.css
+
 RadianceThemedir = ${themedir}/Radiance
 RadianceTheme_DATA = data/themes/Radiance/gtk3.css
 

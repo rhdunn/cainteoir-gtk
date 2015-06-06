@@ -1,0 +1,5 @@
+.bottombar {
+	border-style: solid;
+	border-color: @borders;
+	border-top-width: 1px;
+}

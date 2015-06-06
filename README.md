@@ -21,8 +21,7 @@ In order to build Cainteoir Text-to-Speech, you need:
     `intltool` and `pkg-config`);
 2.  a functional c++ compiler;
 3.  the [Cainteoir text-to-speech engine](https://github.com/rhdunn/cainteoir-engine);
-4.  Gtk+ 3.4 or later development libraries;
-5.  SigC++ development libraries.
+4.  Gtk+ 3.10 or later development libraries.
 
 When running `cainteoir-gtk`, you will need:
 
@@ -35,7 +34,6 @@ When running `cainteoir-gtk`, you will need:
 | autotools                 | `sudo apt-get install make autoconf automake libtool intltool pkg-config` |
 | c++ compiler              | `sudo apt-get install gcc g++`                                            |
 | gtk+                      | `sudo apt-get install libgtk-3-dev`                                       |
-| sigc++                    | `sudo apt-get install libsigc++-2.0-dev`                                  |
 | gnome-icon-theme-symbolic | `sudo apt-get install gnome-icon-theme-symbolic`                          |
 
 ## Building

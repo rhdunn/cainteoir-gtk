@@ -3,3 +3,7 @@
 	border-color: @borders;
 	border-top-width: 1px;
 }
+
+.timebar GtkLabel {
+	padding: 5px;
+}

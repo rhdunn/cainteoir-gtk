@@ -487,6 +487,7 @@ reader_window_new(GtkApplication *application,
 	gtk_toolbar_insert(GTK_TOOLBAR(bottombar), timebar, -1);
 
 	priv->timebar = cainteoir_timebar_new();
+	gtk_style_context_add_class(gtk_widget_get_style_context(priv->timebar), "timebar");
 	gtk_container_add(GTK_CONTAINER(timebar), priv->timebar);
 
 	priv->previous = gtk_button_new();

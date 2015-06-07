@@ -36,16 +36,33 @@
 namespace rdf = cainteoir::rdf;
 namespace rql = cainteoir::rdf::query;
 namespace tts = cainteoir::tts;
+namespace events = cainteoir::events;
+
+struct text_range_t
+{
+	CainteoirSpeechSynthesizers *synthesizers;
+	gint text_start;
+	gint text_end;
+};
 
 enum
 {
 	SPEAKING,
+	TEXT_RANGE_CHANGED,
 	LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-struct CainteoirSpeechSynthesizersPrivate
+static gboolean
+on_text_range_changed(text_range_t *range)
+{
+	g_signal_emit(range->synthesizers, signals[TEXT_RANGE_CHANGED], 0, range->text_start, range->text_end);
+	g_free(range);
+	return FALSE;
+}
+
+struct CainteoirSpeechSynthesizersPrivate : public tts::synthesis_callback
 {
 	CainteoirSpeechSynthesizers *self;
 
@@ -57,10 +74,15 @@ struct CainteoirSpeechSynthesizersPrivate
 	std::shared_ptr<cainteoir::audio> out;
 	gchar *device_name;
 
+	gint offset;
+	bool need_linebreak;
+
 	CainteoirSpeechSynthesizersPrivate()
 		: tts(metadata)
 		, narration(tts::media_overlays_mode::tts_only)
 		, device_name(nullptr)
+		, offset(-1)
+		, need_linebreak(false)
 	{
 	}
 
@@ -70,7 +92,56 @@ struct CainteoirSpeechSynthesizersPrivate
 
 		g_free(device_name);
 	}
+
+	tts::state_t state() const;
+
+	void onaudiodata(short *data, int nsamples);
+
+	void ontextrange(const cainteoir::range<uint32_t> &range);
+
+	void onevent(const cainteoir::document_item &item);
 };
+
+tts::state_t CainteoirSpeechSynthesizersPrivate::state() const
+{
+	return tts::stopped;
+}
+
+void CainteoirSpeechSynthesizersPrivate::onaudiodata(short *data, int nsamples)
+{
+}
+
+void CainteoirSpeechSynthesizersPrivate::ontextrange(const cainteoir::range<uint32_t> &range)
+{
+	text_range_t *param = g_new(text_range_t, 1);
+	param->synthesizers = self;
+	param->text_start   = (gint)range.begin()+offset;
+	param->text_end     = (gint)range.end()+offset;
+	g_idle_add((GSourceFunc)on_text_range_changed, param);
+}
+
+void CainteoirSpeechSynthesizersPrivate::onevent(const cainteoir::document_item &item)
+{
+	if (item.type & events::begin_context)
+	{
+		if (need_linebreak && item.styles) switch (item.styles->display)
+		{
+		case cainteoir::css::display::block:
+		case cainteoir::css::display::line_break:
+		case cainteoir::css::display::list_item:
+		case cainteoir::css::display::table:
+		case cainteoir::css::display::table_row:
+		case cainteoir::css::display::table_cell:
+			++offset; // Track the '\n' characters.
+			need_linebreak = false;
+			break;
+		}
+	}
+	if (item.type & cainteoir::events::text)
+	{
+		need_linebreak = true;
+	}
+}
 
 G_DEFINE_TYPE_WITH_PRIVATE(CainteoirSpeechSynthesizers, cainteoir_speech_synthesizers, G_TYPE_OBJECT)
 
@@ -96,6 +167,18 @@ cainteoir_speech_synthesizers_class_init(CainteoirSpeechSynthesizersClass *klass
 		             G_TYPE_NONE,
 		             1,
 		             G_TYPE_BOOLEAN);
+
+	signals[TEXT_RANGE_CHANGED] =
+		g_signal_new("text-range-changed",
+		             G_TYPE_FROM_CLASS(object),
+		             G_SIGNAL_RUN_LAST,
+		             0,
+		             NULL,
+		             NULL,
+		             g_cclosure_marshal_generic,
+		             G_TYPE_NONE,
+		             2,
+		             G_TYPE_INT, G_TYPE_INT);
 }
 
 static gboolean
@@ -119,7 +202,10 @@ cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizersPrivate *priv,
 	auto doc = cainteoir_document_get_document(document);
 	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(index));
 	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(index));
-	priv->speech = priv->tts.speak(priv->out, listing, doc->children(sel), priv->narration);
+
+	priv->offset = -1;
+	priv->need_linebreak = false;
+	priv->speech = priv->tts.speak(priv->out, listing, doc->children(sel), priv->narration, priv);
 
 	g_timeout_add(100, (GSourceFunc)on_speaking, priv);
 }

@@ -69,6 +69,8 @@ struct CainteoirSpeechSynthesizersPrivate : public tts::synthesis_callback
 	rdf::graph metadata;
 	tts::engines tts;
 	tts::media_overlays_mode narration;
+	CainteoirTextEventMode text_event_mode;
+	CainteoirTextEventMode speak_mode;
 
 	std::shared_ptr<cainteoir::tts::speech> speech;
 	std::shared_ptr<cainteoir::audio> out;
@@ -80,6 +82,8 @@ struct CainteoirSpeechSynthesizersPrivate : public tts::synthesis_callback
 	CainteoirSpeechSynthesizersPrivate()
 		: tts(metadata)
 		, narration(tts::media_overlays_mode::tts_only)
+		, text_event_mode(CAINTEOIR_TEXT_EVENT_NONE)
+		, speak_mode(CAINTEOIR_TEXT_EVENT_NONE)
 		, device_name(nullptr)
 		, offset(-1)
 		, need_linebreak(false)
@@ -113,11 +117,14 @@ void CainteoirSpeechSynthesizersPrivate::onaudiodata(short *data, int nsamples)
 
 void CainteoirSpeechSynthesizersPrivate::ontextrange(const cainteoir::range<uint32_t> &range)
 {
-	text_range_t *param = g_new(text_range_t, 1);
-	param->synthesizers = self;
-	param->text_start   = (gint)range.begin()+offset;
-	param->text_end     = (gint)range.end()+offset;
-	g_idle_add((GSourceFunc)on_text_range_changed, param);
+	if (text_event_mode == speak_mode || text_event_mode == CAINTEOIR_TEXT_EVENT_BOTH)
+	{
+		text_range_t *param = g_new(text_range_t, 1);
+		param->synthesizers = self;
+		param->text_start   = (gint)range.begin()+offset;
+		param->text_end     = (gint)range.end()+offset;
+		g_idle_add((GSourceFunc)on_text_range_changed, param);
+	}
 }
 
 void CainteoirSpeechSynthesizersPrivate::onevent(const cainteoir::document_item &item)
@@ -296,6 +303,19 @@ cainteoir_speech_synthesizers_set_narration(CainteoirSpeechSynthesizers *synthes
 	}
 }
 
+CainteoirTextEventMode
+cainteoir_speech_synthesizers_get_text_event_mode(CainteoirSpeechSynthesizers *synthesizers)
+{
+	return CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->text_event_mode;
+}
+
+void
+cainteoir_speech_synthesizers_set_text_event_mode(CainteoirSpeechSynthesizers *synthesizers,
+                                                  CainteoirTextEventMode mode)
+{
+	CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->text_event_mode = mode;
+}
+
 void
 cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
                                    CainteoirDocument *doc,
@@ -318,6 +338,7 @@ cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
 			priv->metadata,
 			priv->tts.voice());
 
+		priv->speak_mode = CAINTEOIR_TEXT_EVENT_WHILE_READING;
 		cainteoir_speech_synthesizers_speak(priv, doc, index);
 	}
 	catch (const std::exception &e)
@@ -367,7 +388,10 @@ cainteoir_speech_synthesizers_record(CainteoirSpeechSynthesizers *synthesizers,
 		}
 
 		if (priv->out)
+		{
+			priv->speak_mode = CAINTEOIR_TEXT_EVENT_WHILE_RECORDING;
 			cainteoir_speech_synthesizers_speak(priv, doc, index);
+		}
 	}
 	catch (const std::exception &e)
 	{

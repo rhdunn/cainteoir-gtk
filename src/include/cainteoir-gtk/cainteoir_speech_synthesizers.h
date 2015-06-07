@@ -75,6 +75,14 @@ enum CainteoirSpeechParameterType
 	CAINTEOIR_SPEECH_WORD_GAP,
 };
 
+enum CainteoirTextEventMode
+{
+	CAINTEOIR_TEXT_EVENT_NONE,
+	CAINTEOIR_TEXT_EVENT_WHILE_READING,
+	CAINTEOIR_TEXT_EVENT_WHILE_RECORDING,
+	CAINTEOIR_TEXT_EVENT_BOTH,
+};
+
 GType                                  cainteoir_speech_synthesizers_get_type(void) G_GNUC_CONST;
 
 CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new();
@@ -91,6 +99,11 @@ CainteoirNarration                     cainteoir_speech_synthesizers_get_narrati
 
 void                                   cainteoir_speech_synthesizers_set_narration(CainteoirSpeechSynthesizers *synthesizers,
                                                                                    CainteoirNarration narration);
+
+CainteoirTextEventMode                 cainteoir_speech_synthesizers_get_text_event_mode(CainteoirSpeechSynthesizers *synthesizers);
+
+void                                   cainteoir_speech_synthesizers_set_text_event_mode(CainteoirSpeechSynthesizers *synthesizers,
+                                                                                         CainteoirTextEventMode mode);
 
 void                                   cainteoir_speech_synthesizers_read(CainteoirSpeechSynthesizers *synthesizers,
                                                                           CainteoirDocument *doc,

@@ -286,7 +286,7 @@ reader_settings_view_new(CainteoirSettings *settings,
 	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang, 1, 2, 1, 1);
 	g_signal_connect(filter_voices_by_doclang, "notify::active", G_CALLBACK(on_filter_voices_by_doclang_active), priv);
 
-	gchar *filter = cainteoir_settings_get_string(priv->settings, "voicelist", "filter", FALSE);
+	gchar *filter = cainteoir_settings_get_string(priv->settings, "voicelist", "filter", "all");
 	if (filter)
 	{
 		gtk_switch_set_active(GTK_SWITCH(filter_voices_by_doclang), !strcmp(filter, "language"));

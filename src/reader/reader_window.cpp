@@ -165,6 +165,15 @@ on_speaking(CainteoirSpeechSynthesizers *synthesizers,
 }
 
 static void
+on_text_range_changed(CainteoirSpeechSynthesizers *synthesizers,
+                      gint start_pos,
+                      gint end_pos,
+                      ReaderWindowPrivate *priv)
+{
+	reader_document_view_select_text(READER_DOCUMENT_VIEW(priv->view), start_pos, end_pos);
+}
+
+static void
 on_speak(ReaderWindowPrivate *priv)
 {
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(priv->play_stop), "media-playback-stop-symbolic");
@@ -503,6 +512,7 @@ reader_window_new(GtkApplication *application,
 	g_signal_connect(reader, "delete_event", G_CALLBACK(on_window_delete), priv);
 	g_signal_connect(reader, "show", G_CALLBACK(on_window_show), priv);
 	g_signal_connect(priv->tts, "speaking", G_CALLBACK(on_speaking), priv);
+	g_signal_connect(priv->tts, "text-range-changed", G_CALLBACK(on_text_range_changed), priv);
 
 	gtk_window_resize(GTK_WINDOW(reader),
 	                  cainteoir_settings_get_integer(priv->settings, "window", "width",  700),

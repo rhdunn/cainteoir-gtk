@@ -206,6 +206,18 @@ on_tts_fallback_active(GtkWidget *tts_fallback, GdkEvent *event, ReaderSettingsV
 }
 
 static void
+on_highlight_active(GtkWidget *highlight, GdkEvent *event, ReaderSettingsViewPrivate *priv)
+{
+	gboolean active = gtk_switch_get_active(GTK_SWITCH(highlight));
+
+	cainteoir_speech_synthesizers_set_text_event_mode(priv->tts,
+		active ? CAINTEOIR_TEXT_EVENT_WHILE_READING : CAINTEOIR_TEXT_EVENT_NONE);
+
+	cainteoir_settings_set_string(priv->settings, "document", "highlight", active ? "reading" : "none");
+	cainteoir_settings_save(priv->settings);
+}
+
+static void
 on_filter_voices_by_doclang_active(GtkWidget *filter_voices_by_doclang, GdkEvent *event, ReaderSettingsViewPrivate *priv)
 {
 	gboolean active = gtk_switch_get_active(GTK_SWITCH(filter_voices_by_doclang));
@@ -277,13 +289,22 @@ reader_settings_view_new(CainteoirSettings *settings,
 	                      cainteoir_settings_get_boolean(priv->settings, "narration", "tts-fallback", FALSE));
 	g_signal_connect(tts_fallback, "notify::active", G_CALLBACK(on_tts_fallback_active), priv);
 
+	GtkWidget *highlight_label = gtk_label_new(i18n("Highlight text while reading"));
+	gtk_widget_set_hexpand(highlight_label, TRUE);
+	gtk_widget_set_halign(highlight_label, GTK_ALIGN_START);
+	gtk_grid_attach(GTK_GRID(settings_grid), highlight_label, 0, 2, 1, 1);
+
+	GtkWidget *highlight = gtk_switch_new();
+	gtk_grid_attach(GTK_GRID(settings_grid), highlight, 1, 2, 1, 1);
+	g_signal_connect(highlight, "notify::active", G_CALLBACK(on_highlight_active), priv);
+
 	GtkWidget *filter_voices_by_doclang_label = gtk_label_new(i18n("Filter voices by document language"));
 	gtk_widget_set_hexpand(filter_voices_by_doclang_label, TRUE);
 	gtk_widget_set_halign(filter_voices_by_doclang_label, GTK_ALIGN_START);
-	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang_label, 0, 2, 1, 1);
+	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang_label, 0, 3, 1, 1);
 
 	GtkWidget *filter_voices_by_doclang = gtk_switch_new();
-	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang, 1, 2, 1, 1);
+	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang, 1, 3, 1, 1);
 	g_signal_connect(filter_voices_by_doclang, "notify::active", G_CALLBACK(on_filter_voices_by_doclang_active), priv);
 
 	gchar *filter = cainteoir_settings_get_string(priv->settings, "voicelist", "filter", "all");
@@ -291,6 +312,16 @@ reader_settings_view_new(CainteoirSettings *settings,
 	{
 		gtk_switch_set_active(GTK_SWITCH(filter_voices_by_doclang), !strcmp(filter, "language"));
 		g_free(filter);
+	}
+
+	gchar *highlight_mode = cainteoir_settings_get_string(priv->settings, "document", "highlight", "reading");
+	if (highlight_mode)
+	{
+		bool reading = !strcmp(highlight_mode, "reading");
+		cainteoir_speech_synthesizers_set_text_event_mode(priv->tts,
+			reading ? CAINTEOIR_TEXT_EVENT_WHILE_READING : CAINTEOIR_TEXT_EVENT_NONE);
+		gtk_switch_set_active(GTK_SWITCH(highlight), reading);
+		g_free(highlight_mode);
 	}
 
 	update_narration_mode(priv);

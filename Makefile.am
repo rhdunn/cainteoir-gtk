@@ -179,5 +179,10 @@ tests_content_CXXFLAGS = ${AM_CXXFLAGS} -I src
 tests_content_LDADD    = src/libcainteoir-gtk/libcainteoir-gtk.la
 tests_content_SOURCES  = tests/content.cpp tests/tester.hpp
 
+noinst_bin_PROGRAMS += tests/header_c_compat
+tests_header_c_compat_CFLAGS  = ${AM_CXXFLAGS}
+tests_header_c_compat_LDADD   = src/libcainteoir-gtk/libcainteoir-gtk.la
+tests_header_c_compat_SOURCES = tests/header_c_compat.c
+
 check: tests/content
 	tests/content

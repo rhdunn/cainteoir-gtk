@@ -58,11 +58,11 @@ struct _CainteoirSpeechVoiceViewClass
 	void (*_reserved4)(void);
 };
 
-enum CainteoirVoiceFilter
+typedef enum
 {
 	CAINTEOIR_VOICE_FILTER_ALL,
 	CAINTEOIR_VOICE_FILTER_BY_LANGUAGE,
-};
+} CainteoirVoiceFilter;
 
 GType                                  cainteoir_speech_voice_view_get_type(void) G_GNUC_CONST;
 

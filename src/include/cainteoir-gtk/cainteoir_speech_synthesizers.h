@@ -59,29 +59,29 @@ struct _CainteoirSpeechSynthesizersClass
 	void (*_reserved4)(void);
 };
 
-enum CainteoirNarration
+typedef enum
 {
 	CAINTEOIR_NARRATION_TTS_ONLY,
 	CAINTEOIR_NARRATION_MEDIA_OVERLAYS_ONLY,
 	CAINTEOIR_NARRATION_TTS_AND_MEDIA_OVERLAYS,
-};
+} CainteoirNarration;
 
-enum CainteoirSpeechParameterType
+typedef enum
 {
 	CAINTEOIR_SPEECH_RATE,
 	CAINTEOIR_SPEECH_VOLUME,
 	CAINTEOIR_SPEECH_PITCH,
 	CAINTEOIR_SPEECH_PITCH_RANGE,
 	CAINTEOIR_SPEECH_WORD_GAP,
-};
+} CainteoirSpeechParameterType;
 
-enum CainteoirTextEventMode
+typedef enum
 {
 	CAINTEOIR_TEXT_EVENT_NONE,
 	CAINTEOIR_TEXT_EVENT_WHILE_READING,
 	CAINTEOIR_TEXT_EVENT_WHILE_RECORDING,
 	CAINTEOIR_TEXT_EVENT_BOTH,
-};
+} CainteoirTextEventMode;
 
 GType                                  cainteoir_speech_synthesizers_get_type(void) G_GNUC_CONST;
 

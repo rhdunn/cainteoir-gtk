@@ -18,6 +18,7 @@ po/*.gmo
 po/stamp-it
 
 tests/content
+tests/header_c_compat
 
 # autotools output:
 

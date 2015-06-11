@@ -63,6 +63,11 @@ GtkWidget *                            reader_window_new(GtkApplication *applica
 gboolean                               reader_window_load_document(ReaderWindow *reader,
                                                                    const gchar *filename);
 
+GtkAlign                               reader_window_get_highlight_anchor(ReaderWindow *reader);
+
+void                                   reader_window_set_highlight_anchor(ReaderWindow *reader,
+                                                                          GtkAlign anchor);
+
 G_END_DECLS
 
 #endif

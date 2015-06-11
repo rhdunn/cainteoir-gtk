@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "reader_settings_view.h"
+#include "reader_window.h"
 
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 #include <cainteoir-gtk/cainteoir_speech_voice_view.h>
@@ -32,6 +33,14 @@
 #include <cainteoir-gtk/cainteoir_settings.h>
 
 #include "extensions/glib.h"
+
+enum HighlightAnchorColumns
+{
+	HIGHLIGHT_ANCHOR_LABEL,
+	HIGHLIGHT_ANCHOR_ID,
+	HIGHLIGHT_ANCHOR_ALIGN,
+	HIGHLIGHT_ANCHOR_COUNT,
+};
 
 struct SpeechParameterSetting
 {
@@ -142,6 +151,7 @@ struct ReaderSettingsViewPrivate
 	CainteoirSettings *settings;
 	CainteoirSpeechSynthesizers *tts;
 	CainteoirSpeechVoiceView *voice_view;
+	ReaderWindow *reader;
 
 	SpeechParameterSetting rate;
 	SpeechParameterSetting volume;
@@ -213,7 +223,7 @@ on_highlight_active(GtkWidget *highlight, GdkEvent *event, ReaderSettingsViewPri
 	cainteoir_speech_synthesizers_set_text_event_mode(priv->tts,
 		active ? CAINTEOIR_TEXT_EVENT_WHILE_READING : CAINTEOIR_TEXT_EVENT_NONE);
 
-	cainteoir_settings_set_string(priv->settings, "document", "highlight", active ? "reading" : "none");
+	cainteoir_settings_set_string(priv->settings, "highlight", "mode", active ? "reading" : "none");
 	cainteoir_settings_save(priv->settings);
 }
 
@@ -229,16 +239,84 @@ on_filter_voices_by_doclang_active(GtkWidget *filter_voices_by_doclang, GdkEvent
 	cainteoir_settings_save(priv->settings);
 }
 
+static void
+on_highlight_anchor_changed(GtkWidget *widget, ReaderSettingsViewPrivate *priv)
+{
+	GtkTreeIter item;
+	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &item))
+	{
+		gchar *id = nullptr;
+		GtkAlign align = GTK_ALIGN_FILL;
+
+		GtkTreeModel *model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+		gtk_tree_model_get(model, &item, HIGHLIGHT_ANCHOR_ID, &id, HIGHLIGHT_ANCHOR_ALIGN, &align, -1);
+
+		cainteoir_settings_set_string(priv->settings, "highlight", "anchor", id);
+		cainteoir_settings_save(priv->settings);
+
+		reader_window_set_highlight_anchor(priv->reader, align);
+
+		g_free(id);
+	}
+}
+
+static GtkWidget *
+create_highlight_anchor_combo()
+{
+	GtkTreeStore *store = gtk_tree_store_new(HIGHLIGHT_ANCHOR_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+	GtkTreeIter row;
+
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
+	                   HIGHLIGHT_ANCHOR_LABEL, i18n("None"),
+	                   HIGHLIGHT_ANCHOR_ID,    "none",
+	                   HIGHLIGHT_ANCHOR_ALIGN, GTK_ALIGN_FILL,
+	                   -1);
+
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
+	                   HIGHLIGHT_ANCHOR_LABEL, i18n("Top"),
+	                   HIGHLIGHT_ANCHOR_ID,    "top",
+	                   HIGHLIGHT_ANCHOR_ALIGN, GTK_ALIGN_START,
+	                   -1);
+
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
+	                   HIGHLIGHT_ANCHOR_LABEL, i18n("Middle"),
+	                   HIGHLIGHT_ANCHOR_ID,    "middle",
+	                   HIGHLIGHT_ANCHOR_ALIGN, GTK_ALIGN_CENTER,
+	                   -1);
+
+	gtk_tree_store_append(store, &row, nullptr);
+	gtk_tree_store_set(store, &row,
+	                   HIGHLIGHT_ANCHOR_LABEL, i18n("Bottom"),
+	                   HIGHLIGHT_ANCHOR_ID,    "bottom",
+	                   HIGHLIGHT_ANCHOR_ALIGN, GTK_ALIGN_END,
+	                   -1);
+
+	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtk_combo_box_set_id_column(GTK_COMBO_BOX(combo), HIGHLIGHT_ANCHOR_ID);
+
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
+	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer, "text", HIGHLIGHT_ANCHOR_LABEL, nullptr);
+
+	g_object_unref(G_OBJECT(store));
+	return combo;
+}
+
 GtkWidget *
 reader_settings_view_new(CainteoirSettings *settings,
                          CainteoirSpeechSynthesizers *synthesizers,
-                         CainteoirSpeechVoiceView *voice_view)
+                         CainteoirSpeechVoiceView *voice_view,
+                         ReaderWindow *reader)
 {
 	ReaderSettingsView *view = READER_SETTINGS_VIEW(g_object_new(READER_TYPE_SETTINGS_VIEW, nullptr));
 	ReaderSettingsViewPrivate *priv = READER_SETTINGS_VIEW_PRIVATE(view);
 	priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
 	priv->tts = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_ref(G_OBJECT(synthesizers)));
 	priv->voice_view = CAINTEOIR_SPEECH_VOICE_VIEW(g_object_ref(G_OBJECT(voice_view)));
+	priv->reader = reader;
 
 #if GTK_CHECK_VERSION(3, 12, 0)
 	gtk_widget_set_margin_start(GTK_WIDGET(view), 5);
@@ -298,13 +376,22 @@ reader_settings_view_new(CainteoirSettings *settings,
 	gtk_grid_attach(GTK_GRID(settings_grid), highlight, 1, 2, 1, 1);
 	g_signal_connect(highlight, "notify::active", G_CALLBACK(on_highlight_active), priv);
 
+	GtkWidget *highlight_anchor_label = gtk_label_new(i18n("Scroll highlighted text to"));
+	gtk_widget_set_hexpand(highlight_anchor_label, TRUE);
+	gtk_widget_set_halign(highlight_anchor_label, GTK_ALIGN_START);
+	gtk_grid_attach(GTK_GRID(settings_grid), highlight_anchor_label, 0, 3, 1, 1);
+
+	GtkWidget *highlight_anchor = create_highlight_anchor_combo();
+	gtk_grid_attach(GTK_GRID(settings_grid), highlight_anchor, 1, 3, 1, 1);
+	g_signal_connect(highlight_anchor, "changed", G_CALLBACK(on_highlight_anchor_changed), priv);
+
 	GtkWidget *filter_voices_by_doclang_label = gtk_label_new(i18n("Filter voices by document language"));
 	gtk_widget_set_hexpand(filter_voices_by_doclang_label, TRUE);
 	gtk_widget_set_halign(filter_voices_by_doclang_label, GTK_ALIGN_START);
-	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang_label, 0, 3, 1, 1);
+	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang_label, 0, 4, 1, 1);
 
 	GtkWidget *filter_voices_by_doclang = gtk_switch_new();
-	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang, 1, 3, 1, 1);
+	gtk_grid_attach(GTK_GRID(settings_grid), filter_voices_by_doclang, 1, 4, 1, 1);
 	g_signal_connect(filter_voices_by_doclang, "notify::active", G_CALLBACK(on_filter_voices_by_doclang_active), priv);
 
 	gchar *filter = cainteoir_settings_get_string(priv->settings, "voicelist", "filter", "all");
@@ -314,7 +401,7 @@ reader_settings_view_new(CainteoirSettings *settings,
 		g_free(filter);
 	}
 
-	gchar *highlight_mode = cainteoir_settings_get_string(priv->settings, "document", "highlight", "reading");
+	gchar *highlight_mode = cainteoir_settings_get_string(priv->settings, "highlight", "mode", "reading");
 	if (highlight_mode)
 	{
 		bool reading = !strcmp(highlight_mode, "reading");
@@ -323,6 +410,10 @@ reader_settings_view_new(CainteoirSettings *settings,
 		gtk_switch_set_active(GTK_SWITCH(highlight), reading);
 		g_free(highlight_mode);
 	}
+
+	gchar *anchor = cainteoir_settings_get_string(priv->settings, "highlight", "anchor", "none");
+	gtk_combo_box_set_active_id(GTK_COMBO_BOX(highlight_anchor), anchor);
+	g_free(anchor);
 
 	update_narration_mode(priv);
 	reader_settings_view_update_speech_parameters(view);

@@ -471,7 +471,7 @@ reader_window_new(GtkApplication *application,
 	g_signal_connect(priv->voice_view, "voice-changed", G_CALLBACK(on_voice_changed), priv);
 	gtk_container_add(GTK_CONTAINER(scroll), priv->voice_view);
 
-	priv->settings_view = reader_settings_view_new(priv->settings, priv->tts, CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view));
+	priv->settings_view = reader_settings_view_new(priv->settings, priv->tts, CAINTEOIR_SPEECH_VOICE_VIEW(priv->voice_view), reader);
 	gtk_stack_add_titled(GTK_STACK(priv->stack), priv->settings_view, "settings", i18n("Settings"));
 
 	GtkWidget *bottombar = gtk_toolbar_new();
@@ -573,4 +573,17 @@ reader_window_load_document(ReaderWindow *reader,
 		return TRUE;
 	}
 	return FALSE;
+}
+
+GtkAlign
+reader_window_get_highlight_anchor(ReaderWindow *reader)
+{
+	return READER_WINDOW_PRIVATE(reader)->highlight_anchor;
+}
+
+void
+reader_window_set_highlight_anchor(ReaderWindow *reader,
+                                   GtkAlign anchor)
+{
+	READER_WINDOW_PRIVATE(reader)->highlight_anchor = anchor;
 }

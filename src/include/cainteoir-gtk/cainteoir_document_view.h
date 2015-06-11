@@ -71,7 +71,8 @@ void                                   cainteoir_document_view_scroll_to_anchor(
 
 void                                   cainteoir_document_view_select_text(CainteoirDocumentView *view,
                                                                            gint start_pos,
-                                                                           gint end_pos);
+                                                                           gint end_pos,
+                                                                           GtkAlign anchor);
 
 G_END_DECLS
 

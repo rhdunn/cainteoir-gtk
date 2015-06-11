@@ -93,7 +93,8 @@ void                                   reader_document_view_set_index_pane_visib
 
 void                                   reader_document_view_select_text(ReaderDocumentView *view,
                                                                         gint start_pos,
-                                                                        gint end_pos);
+                                                                        gint end_pos,
+                                                                        GtkAlign anchor);
 
 G_END_DECLS
 

@@ -183,7 +183,8 @@ cainteoir_document_view_scroll_to_anchor(CainteoirDocumentView *view, const gcha
 void
 cainteoir_document_view_select_text(CainteoirDocumentView *view,
                                     gint start_pos,
-                                    gint end_pos)
+                                    gint end_pos,
+                                    GtkAlign anchor)
 {
 	GtkTextView *text_view = GTK_TEXT_VIEW(CAINTEOIR_DOCUMENT_VIEW_PRIVATE(view)->text_view);
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
@@ -195,4 +196,19 @@ cainteoir_document_view_select_text(CainteoirDocumentView *view,
 	gtk_text_buffer_get_iter_at_offset(buffer, &end, end_pos);
 
 	gtk_text_buffer_select_range(buffer, &start, &end);
+
+	switch (anchor)
+	{
+	case GTK_ALIGN_START:
+		gtk_text_view_scroll_to_iter(text_view, &start, 0.0, TRUE, 0.0, 0.0);
+		break;
+	case GTK_ALIGN_CENTER:
+		gtk_text_view_scroll_to_iter(text_view, &start, 0.0, TRUE, 0.0, 0.5);
+		break;
+	case GTK_ALIGN_END:
+		gtk_text_view_scroll_to_iter(text_view, &end, 0.0, TRUE, 0.0, 1.0);
+		break;
+	default:
+		break;
+	}
 }

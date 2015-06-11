@@ -73,12 +73,14 @@ struct ReaderWindowPrivate
 	CainteoirSpeechSynthesizers *tts;
 
 	std::stack<GtkWidget *> view_history;
+	GtkAlign highlight_anchor;
 
 	ReaderWindowPrivate()
 		: settings(cainteoir_settings_new("settings.dat"))
 		, document_formats(cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS))
 		, audio_formats(cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS))
 		, tts(cainteoir_speech_synthesizers_new())
+		, highlight_anchor(GTK_ALIGN_FILL)
 	{
 	}
 
@@ -170,7 +172,7 @@ on_text_range_changed(CainteoirSpeechSynthesizers *synthesizers,
                       gint end_pos,
                       ReaderWindowPrivate *priv)
 {
-	reader_document_view_select_text(READER_DOCUMENT_VIEW(priv->view), start_pos, end_pos);
+	reader_document_view_select_text(READER_DOCUMENT_VIEW(priv->view), start_pos, end_pos, priv->highlight_anchor);
 }
 
 static void

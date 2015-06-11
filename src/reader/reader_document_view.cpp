@@ -310,8 +310,9 @@ reader_document_view_set_index_pane_visible(ReaderDocumentView *view,
 void
 reader_document_view_select_text(ReaderDocumentView *view,
                                  gint start_pos,
-                                 gint end_pos)
+                                 gint end_pos,
+                                 GtkAlign anchor)
 {
 	ReaderDocumentViewPrivate *priv = READER_DOCUMENT_VIEW_PRIVATE(view);
-	cainteoir_document_view_select_text(CAINTEOIR_DOCUMENT_VIEW(priv->view), start_pos, end_pos);
+	cainteoir_document_view_select_text(CAINTEOIR_DOCUMENT_VIEW(priv->view), start_pos, end_pos, anchor);
 }

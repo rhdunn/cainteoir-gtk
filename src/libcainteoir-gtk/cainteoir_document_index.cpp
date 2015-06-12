@@ -193,11 +193,20 @@ cainteoir_document_index_build(CainteoirDocumentIndex *index,
 			title << "... ";
 		title << entry.title;
 
+		std::ostringstream tooltip;
+		for (auto c : entry.title) switch (c)
+		{
+		case '&': tooltip << "&amp;"; break;
+		case '<': tooltip << "&lt;";  break;
+		case '>': tooltip << "&gt;";  break;
+		default:  tooltip << c;       break;
+		}
+
 		gtk_tree_store_append(priv->store, &row, nullptr);
 		gtk_tree_store_set(priv->store, &row,
 			INDEX_ENTRY_PTR, &entry,
 			INDEX_GUTTER,    "",
-			INDEX_TITLE,     entry.title.c_str(),
+			INDEX_TITLE,     tooltip.str().c_str(),
 			INDEX_ANCHOR,    entry.location.str().c_str(),
 			INDEX_DISPLAY,   title.str().c_str(),
 			-1);

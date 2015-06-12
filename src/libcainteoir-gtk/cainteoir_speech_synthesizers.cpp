@@ -212,7 +212,7 @@ cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizersPrivate *priv,
 
 	priv->offset = -1;
 	priv->need_linebreak = false;
-	priv->speech = priv->tts.speak(priv->out, listing, doc->children(sel), priv->narration, priv);
+	priv->speech = priv->tts.speak(priv->out, listing, *doc, doc->children(sel), priv->narration, priv);
 
 	g_timeout_add(100, (GSourceFunc)on_speaking, priv);
 }

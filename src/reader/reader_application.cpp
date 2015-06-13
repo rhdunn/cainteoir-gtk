@@ -22,6 +22,7 @@
 #include "i18n.h"
 
 #include <gtk/gtk.h>
+#include <cainteoir-gtk/cainteoir_settings.h>
 
 #include "reader_application.h"
 #include "reader_window.h"
@@ -34,9 +35,11 @@
 struct ReaderApplicationPrivate
 {
 	GtkCssProvider *theme;
+	CainteoirSettings *settings;
 
 	ReaderApplicationPrivate()
 		: theme(gtk_css_provider_new())
+		, settings(cainteoir_settings_new("settings.dat"))
 	{
 	}
 
@@ -97,6 +100,7 @@ reader_application_open(GApplication *application,
                         gint n_files,
                         const gchar *hint)
 {
+	ReaderApplicationPrivate *priv = READER_APPLICATION_PRIVATE(application);
 	gchar *filename = n_files > 0 ? g_file_get_path(files[0]) : nullptr;
 
 	GtkWidget *window = nullptr;
@@ -109,7 +113,7 @@ reader_application_open(GApplication *application,
 	}
 	else
 	{
-		window = reader_window_new(GTK_APPLICATION(application), filename);
+		window = reader_window_new(GTK_APPLICATION(application), priv->settings, filename);
 		gtk_widget_show_all(GTK_WIDGET(window));
 	}
 	g_free(filename);

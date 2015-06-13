@@ -76,7 +76,7 @@ struct ReaderWindowPrivate
 	GtkAlign highlight_anchor;
 
 	ReaderWindowPrivate()
-		: settings(cainteoir_settings_new("settings.dat"))
+		: settings(nullptr)
 		, document_formats(cainteoir_supported_formats_new(CAINTEOIR_DOCUMENT_FORMATS))
 		, audio_formats(cainteoir_supported_formats_new(CAINTEOIR_AUDIO_FORMATS))
 		, tts(cainteoir_speech_synthesizers_new())
@@ -435,6 +435,7 @@ create_main_menu()
 
 GtkWidget *
 reader_window_new(GtkApplication *application,
+                  CainteoirSettings *settings,
                   const gchar *filename)
 {
 	ReaderWindow *reader = READER_WINDOW(g_object_new(READER_TYPE_WINDOW,
@@ -442,6 +443,7 @@ reader_window_new(GtkApplication *application,
 		nullptr));
 	ReaderWindowPrivate *priv = READER_WINDOW_PRIVATE(reader);
 	priv->self = GTK_WIDGET(reader);
+	priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
 
 	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));

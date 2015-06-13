@@ -21,6 +21,8 @@
 #ifndef CAINTEOIR_READER_READER_WINDOW_H
 #define CAINTEOIR_READER_READER_WINDOW_H
 
+typedef struct _CainteoirSettings      CainteoirSettings;
+
 G_BEGIN_DECLS
 
 #define READER_TYPE_WINDOW \
@@ -58,6 +60,7 @@ struct _ReaderWindowClass
 GType                                  reader_window_get_type(void) G_GNUC_CONST;
 
 GtkWidget *                            reader_window_new(GtkApplication *application,
+                                                         CainteoirSettings *settings,
                                                          const gchar *filename);
 
 gboolean                               reader_window_load_document(ReaderWindow *reader,

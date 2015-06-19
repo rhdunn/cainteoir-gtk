@@ -448,16 +448,25 @@ reader_window_new(GtkApplication *application,
 	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));
 
+	GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_add(GTK_CONTAINER(reader), layout);
+
 	priv->header = gtk_header_bar_new();
 	gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), i18n("Cainteoir Text-to-Speech"));
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(priv->header), TRUE);
-	gtk_window_set_titlebar(GTK_WINDOW(reader), priv->header);
+	if (cainteoir_settings_get_boolean(priv->settings, "window", "have-csd", TRUE))
+	{
+		// Use client-side decorations (e.g. on Gnome Shell and Unity) ...
+		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(priv->header), TRUE);
+		gtk_window_set_titlebar(GTK_WINDOW(reader), priv->header);
+	}
+	else
+	{
+		// Don't use client-side decorations (e.g. on KDE) ...
+		gtk_box_pack_start(GTK_BOX(layout), priv->header, FALSE, FALSE, 0);
+	}
 
 	priv->actions = create_action_group(priv);
 	gtk_widget_insert_action_group(GTK_WIDGET(reader), "cainteoir", G_ACTION_GROUP(priv->actions));
-
-	GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_container_add(GTK_CONTAINER(reader), layout);
 
 	priv->stack = gtk_stack_new();
 	gtk_box_pack_start(GTK_BOX(layout), priv->stack, TRUE, TRUE, 0);

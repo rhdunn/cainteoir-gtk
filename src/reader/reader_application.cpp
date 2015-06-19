@@ -29,6 +29,7 @@
 
 #include <locale.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "extensions/glib.h"
 
@@ -77,6 +78,11 @@ on_theme_changed(GtkSettings *settings,
 		// Pass an empty CSS data string to clear the CSS provider styling ...
 		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(priv->theme), "\0", 0, nullptr);
 	}
+
+	bool is_kde = !strcmp(theme_name, "oxygen-gtk") // KDE4 L&F
+	           || !strcmp(theme_name, "Orion");     // KDE5 L&F
+
+	cainteoir_settings_set_boolean(priv->settings, "window", "have-csd", !is_kde);
 
 	g_free(path);
 	g_free(theme_name);

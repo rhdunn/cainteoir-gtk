@@ -70,7 +70,13 @@ on_theme_changed(GtkSettings *settings,
 
 	gchar *path = g_strdup_printf("%s/themes/%s/gtk3.css", data_dir, theme_name);
 
-	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(priv->theme), path, nullptr);
+	if (access(path, R_OK) == 0)
+		gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(priv->theme), path, nullptr);
+	else
+	{
+		// Pass an empty CSS data string to clear the CSS provider styling ...
+		gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(priv->theme), "\0", 0, nullptr);
+	}
 
 	g_free(path);
 	g_free(theme_name);

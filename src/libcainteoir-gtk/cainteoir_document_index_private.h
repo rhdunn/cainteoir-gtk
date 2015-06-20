@@ -32,6 +32,6 @@ const std::vector<cainteoir::ref_entry> *
 void                                   cainteoir_document_index_set_playing(CainteoirDocumentIndex *index,
                                                                             const cainteoir::ref_entry &entry);
 
-cainteoir_document_index_selection     cainteoir_document_index_get_selection(CainteoirDocumentIndex *index);
+cainteoir_document_index_selection     cainteoir_document_index_get_selection_uri(CainteoirDocumentIndex *index);
 
 #endif

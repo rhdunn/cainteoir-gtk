@@ -207,7 +207,7 @@ cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizersPrivate *priv,
                                     CainteoirDocumentIndex *index)
 {
 	auto doc = cainteoir_document_get_document(document);
-	auto sel = cainteoir_document_index_get_selection(CAINTEOIR_DOCUMENT_INDEX(index));
+	auto sel = cainteoir_document_index_get_selection_uri(CAINTEOIR_DOCUMENT_INDEX(index));
 	const std::vector<cainteoir::ref_entry> &listing = *cainteoir_document_index_get_listing(CAINTEOIR_DOCUMENT_INDEX(index));
 
 	priv->offset = -1;

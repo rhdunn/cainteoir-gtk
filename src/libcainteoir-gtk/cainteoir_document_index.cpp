@@ -246,7 +246,7 @@ cainteoir_document_index_set_playing(CainteoirDocumentIndex *index,
 }
 
 cainteoir_document_index_selection
-cainteoir_document_index_get_selection(CainteoirDocumentIndex *index)
+cainteoir_document_index_get_selection_uri(CainteoirDocumentIndex *index)
 {
 	CainteoirDocumentIndexPrivate *priv = CAINTEOIR_DOCUMENT_INDEX_PRIVATE(index);
 

@@ -24,6 +24,7 @@
 
 #include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 #include <cainteoir-gtk/cainteoir_document_index.h>
+#include <cainteoir-gtk/cainteoir_settings.h>
 #include <cainteoir/engines.hpp>
 #include <cainteoir/locale.hpp>
 
@@ -217,11 +218,31 @@ cainteoir_speech_synthesizers_speak(CainteoirSpeechSynthesizersPrivate *priv,
 	g_timeout_add(100, (GSourceFunc)on_speaking, priv);
 }
 
+static void
+initialize_speech_parameter(CainteoirSettings *settings, const gchar *key, const std::shared_ptr<cainteoir::tts::parameter> &param)
+{
+	param->set_value(cainteoir_settings_get_integer(settings, "voice", key, param->default_value()));
+}
+
 CainteoirSpeechSynthesizers *
-cainteoir_speech_synthesizers_new()
+cainteoir_speech_synthesizers_new(CainteoirSettings *settings)
 {
 	CainteoirSpeechSynthesizers *synthesizers = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_new(CAINTEOIR_TYPE_SPEECH_SYNTHESIZERS, nullptr));
-	CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers)->self = synthesizers;
+	CainteoirSpeechSynthesizersPrivate *priv = CAINTEOIR_SPEECH_SYNTHESIZERS_PRIVATE(synthesizers);
+	priv->self = synthesizers;
+	if (settings)
+	{
+		gchar *voice = cainteoir_settings_get_string(settings, "voice", "name", nullptr);
+		if (voice)
+			cainteoir_speech_synthesizers_set_voice(synthesizers, voice);
+		g_free(voice);
+
+		initialize_speech_parameter(settings, "rate", priv->tts.parameter(tts::parameter::rate));
+		initialize_speech_parameter(settings, "volume", priv->tts.parameter(tts::parameter::volume));
+		initialize_speech_parameter(settings, "pitch", priv->tts.parameter(tts::parameter::pitch));
+		initialize_speech_parameter(settings, "pitch-range", priv->tts.parameter(tts::parameter::pitch_range));
+		initialize_speech_parameter(settings, "word-gap", priv->tts.parameter(tts::parameter::word_gap));
+	}
 	return synthesizers;
 }
 

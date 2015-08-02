@@ -49,9 +49,9 @@ struct ReaderApplicationPrivate
 		: self(nullptr)
 		, theme(gtk_css_provider_new())
 		, settings(cainteoir_settings_new("settings.dat"))
-		, tts(cainteoir_speech_synthesizers_new())
 		, doc(nullptr)
 	{
+		tts = cainteoir_speech_synthesizers_new(settings);
 	}
 
 	~ReaderApplicationPrivate()

@@ -24,6 +24,7 @@
 typedef struct _CainteoirDocument           CainteoirDocument;
 typedef struct _CainteoirDocumentIndex      CainteoirDocumentIndex;
 typedef struct _CainteoirSpeechParameter    CainteoirSpeechParameter;
+typedef struct _CainteoirSettings           CainteoirSettings;
 
 G_BEGIN_DECLS
 
@@ -85,7 +86,7 @@ typedef enum
 
 GType                                  cainteoir_speech_synthesizers_get_type(void) G_GNUC_CONST;
 
-CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new();
+CainteoirSpeechSynthesizers *          cainteoir_speech_synthesizers_new(CainteoirSettings *settings);
 
 gboolean                               cainteoir_speech_synthesizers_set_voice(CainteoirSpeechSynthesizers *synthesizers,
                                                                                const gchar *voice);

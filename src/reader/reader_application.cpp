@@ -57,6 +57,29 @@ G_DEFINE_TYPE_WITH_PRIVATE(ReaderApplication, reader_application, GTK_TYPE_APPLI
 
 GXT_DEFINE_TYPE_CONSTRUCTION(ReaderApplication, reader_application, READER_APPLICATION)
 
+static GMenuModel *
+create_application_menu()
+{
+	GMenu *menu = g_menu_new();
+
+	g_menu_append(menu, i18n("_Quit"), "app.quit");
+
+	return G_MENU_MODEL(menu);
+}
+
+static void
+on_quit_activated(GSimpleAction *action,
+                  GVariant *parameter,
+                  gpointer application)
+{
+	g_application_quit(G_APPLICATION(application));
+}
+
+static GActionEntry app_entries[] =
+{
+	{ "quit", on_quit_activated, nullptr, nullptr, nullptr },
+};
+
 static void
 on_theme_changed(GtkSettings *settings,
                  GParamSpec *param,
@@ -91,6 +114,8 @@ on_theme_changed(GtkSettings *settings,
 static void
 reader_application_startup(GApplication *application)
 {
+	static const gchar *quit_accels[] = { "<Ctrl>Q", nullptr };
+
 	G_APPLICATION_CLASS(reader_application_parent_class)->startup(application);
 	ReaderApplicationPrivate *priv = READER_APPLICATION_PRIVATE(application);
 
@@ -104,6 +129,13 @@ reader_application_startup(GApplication *application)
 	GtkSettings *settings = gtk_settings_get_default();
 	g_signal_connect(settings, "notify::gtk-theme-name", G_CALLBACK(on_theme_changed), priv);
 	on_theme_changed(settings, nullptr, priv);
+
+	GMenuModel *app_menu = create_application_menu();
+	g_action_map_add_action_entries(G_ACTION_MAP(application),
+	                                app_entries, G_N_ELEMENTS(app_entries),
+	                                application);
+	gtk_application_set_accels_for_action(GTK_APPLICATION(application), "app.quit", quit_accels);
+	gtk_application_set_app_menu(GTK_APPLICATION(application), app_menu);
 }
 
 static void

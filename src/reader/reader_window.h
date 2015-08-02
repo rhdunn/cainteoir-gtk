@@ -21,7 +21,8 @@
 #ifndef CAINTEOIR_READER_READER_WINDOW_H
 #define CAINTEOIR_READER_READER_WINDOW_H
 
-typedef struct _CainteoirSettings      CainteoirSettings;
+typedef struct _CainteoirSettings           CainteoirSettings;
+typedef struct _CainteoirSpeechSynthesizers CainteoirSpeechSynthesizers;
 
 G_BEGIN_DECLS
 
@@ -61,6 +62,7 @@ GType                                  reader_window_get_type(void) G_GNUC_CONST
 
 GtkWidget *                            reader_window_new(GtkApplication *application,
                                                          CainteoirSettings *settings,
+                                                         CainteoirSpeechSynthesizers *synthesizers,
                                                          const gchar *filename);
 
 gboolean                               reader_window_load_document(ReaderWindow *reader,

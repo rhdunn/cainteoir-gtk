@@ -21,8 +21,10 @@
 #ifndef CAINTEOIR_READER_READER_PREFERENCES_H
 #define CAINTEOIR_READER_READER_PREFERENCES_H
 
-typedef struct _CainteoirSettings      CainteoirSettings;
-typedef struct _ReaderWindow           ReaderWindow;
+typedef struct _CainteoirSettings           CainteoirSettings;
+typedef struct _CainteoirSpeechSynthesizers CainteoirSpeechSynthesizers;
+typedef struct _CainteoirDocument           CainteoirDocument;
+typedef struct _ReaderWindow                ReaderWindow;
 
 G_BEGIN_DECLS
 
@@ -61,7 +63,9 @@ struct _ReaderPreferencesClass
 GType                                  reader_preferences_get_type(void) G_GNUC_CONST;
 
 GtkWidget *                            reader_preferences_new(ReaderWindow *window,
-                                                              CainteoirSettings *settings);
+                                                              CainteoirSettings *settings,
+                                                              CainteoirSpeechSynthesizers *synthesizers,
+                                                              CainteoirDocument *doc);
 
 G_END_DECLS
 

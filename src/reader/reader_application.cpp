@@ -22,7 +22,9 @@
 #include "i18n.h"
 
 #include <gtk/gtk.h>
+#include <cainteoir-gtk/cainteoir_document.h>
 #include <cainteoir-gtk/cainteoir_settings.h>
+#include <cainteoir-gtk/cainteoir_speech_synthesizers.h>
 
 #include "reader_application.h"
 #include "reader_window.h"
@@ -38,18 +40,26 @@ struct ReaderApplicationPrivate
 {
 	GApplication *self;
 	GtkCssProvider *theme;
+
 	CainteoirSettings *settings;
+	CainteoirSpeechSynthesizers *tts;
+	CainteoirDocument *doc;
 
 	ReaderApplicationPrivate()
 		: self(nullptr)
 		, theme(gtk_css_provider_new())
 		, settings(cainteoir_settings_new("settings.dat"))
+		, tts(cainteoir_speech_synthesizers_new())
+		, doc(nullptr)
 	{
 	}
 
 	~ReaderApplicationPrivate()
 	{
-		if (theme) g_object_unref(theme);
+		g_object_unref(theme);
+		g_object_unref(settings);
+		g_object_unref(tts);
+		if (doc) g_object_unref(doc);
 	}
 };
 
@@ -77,7 +87,7 @@ on_preferences_activated(GSimpleAction *action,
                          ReaderApplicationPrivate *priv)
 {
 	ReaderWindow *window = READER_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(priv->self)));
-	GtkWidget *prefs = reader_preferences_new(window, priv->settings);
+	GtkWidget *prefs = reader_preferences_new(window, priv->settings, priv->tts, priv->doc);
 	gtk_window_present(GTK_WINDOW(prefs));
 }
 
@@ -175,7 +185,7 @@ reader_application_open(GApplication *application,
 	}
 	else
 	{
-		window = reader_window_new(GTK_APPLICATION(application), priv->settings, filename);
+		window = reader_window_new(GTK_APPLICATION(application), priv->settings, priv->tts, filename);
 		gtk_widget_show_all(GTK_WIDGET(window));
 	}
 	g_free(filename);
@@ -208,4 +218,12 @@ reader_application_new()
 		"application-id", "uk.co.reecedunn.cainteoir-gtk",
 		"flags", G_APPLICATION_HANDLES_OPEN,
 		nullptr));
+}
+
+void reader_application_set_active_document(ReaderApplication *application,
+                                            CainteoirDocument *doc)
+{
+	ReaderApplicationPrivate *priv = READER_APPLICATION_PRIVATE(application);
+	if (priv->doc) g_object_unref(priv->doc);
+	priv->doc = CAINTEOIR_DOCUMENT(g_object_ref(G_OBJECT(doc)));
 }

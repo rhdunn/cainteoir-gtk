@@ -21,6 +21,8 @@
 #ifndef CAINTEOIR_READER_READER_APPLICATION_H
 #define CAINTEOIR_READER_READER_APPLICATION_H
 
+typedef struct _CainteoirDocument           CainteoirDocument;
+
 G_BEGIN_DECLS
 
 #define READER_TYPE_APPLICATION \
@@ -58,6 +60,9 @@ struct _ReaderApplicationClass
 GType                                  reader_application_get_type(void) G_GNUC_CONST;
 
 GApplication *                         reader_application_new(void);
+
+void                                   reader_application_set_active_document(ReaderApplication *application,
+                                                                              CainteoirDocument *doc);
 
 G_END_DECLS
 

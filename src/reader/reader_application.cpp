@@ -26,6 +26,7 @@
 
 #include "reader_application.h"
 #include "reader_window.h"
+#include "reader_preferences.h"
 
 #include <locale.h>
 #include <stdlib.h>
@@ -35,11 +36,13 @@
 
 struct ReaderApplicationPrivate
 {
+	GApplication *self;
 	GtkCssProvider *theme;
 	CainteoirSettings *settings;
 
 	ReaderApplicationPrivate()
-		: theme(gtk_css_provider_new())
+		: self(nullptr)
+		, theme(gtk_css_provider_new())
 		, settings(cainteoir_settings_new("settings.dat"))
 	{
 	}
@@ -62,22 +65,36 @@ create_application_menu()
 {
 	GMenu *menu = g_menu_new();
 
+	g_menu_append(menu, i18n("_Preferences"), "app.preferences");
 	g_menu_append(menu, i18n("_Quit"), "app.quit");
 
 	return G_MENU_MODEL(menu);
 }
 
 static void
+on_preferences_activated(GSimpleAction *action,
+                         GVariant *parameter,
+                         ReaderApplicationPrivate *priv)
+{
+	ReaderWindow *window = READER_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(priv->self)));
+	GtkWidget *prefs = reader_preferences_new(window, priv->settings);
+	gtk_window_present(GTK_WINDOW(prefs));
+}
+
+static void
 on_quit_activated(GSimpleAction *action,
                   GVariant *parameter,
-                  gpointer application)
+                  ReaderApplicationPrivate *priv)
 {
-	g_application_quit(G_APPLICATION(application));
+	g_application_quit(G_APPLICATION(priv->self));
 }
+
+typedef decltype(GActionEntry::activate) activate_fn;
 
 static GActionEntry app_entries[] =
 {
-	{ "quit", on_quit_activated, nullptr, nullptr, nullptr },
+	{ "preferences", (activate_fn)on_preferences_activated, nullptr, nullptr, nullptr },
+	{ "quit", (activate_fn)on_quit_activated, nullptr, nullptr, nullptr },
 };
 
 static void
@@ -118,6 +135,7 @@ reader_application_startup(GApplication *application)
 
 	G_APPLICATION_CLASS(reader_application_parent_class)->startup(application);
 	ReaderApplicationPrivate *priv = READER_APPLICATION_PRIVATE(application);
+	priv->self = application;
 
 	setlocale(LC_MESSAGES, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
@@ -133,7 +151,7 @@ reader_application_startup(GApplication *application)
 	GMenuModel *app_menu = create_application_menu();
 	g_action_map_add_action_entries(G_ACTION_MAP(application),
 	                                app_entries, G_N_ELEMENTS(app_entries),
-	                                application);
+	                                priv);
 	gtk_application_set_accels_for_action(GTK_APPLICATION(application), "app.quit", quit_accels);
 	gtk_application_set_app_menu(GTK_APPLICATION(application), app_menu);
 }

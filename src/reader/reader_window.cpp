@@ -84,7 +84,6 @@ struct ReaderWindowPrivate
 		g_object_unref(G_OBJECT(audio_formats));
 		g_object_unref(G_OBJECT(settings));
 		g_object_unref(G_OBJECT(tts));
-		g_object_unref(G_OBJECT(application));
 	}
 };
 
@@ -375,7 +374,7 @@ reader_window_new(GtkApplication *application,
 	priv->self = GTK_WIDGET(reader);
 	priv->settings = CAINTEOIR_SETTINGS(g_object_ref(G_OBJECT(settings)));
 	priv->tts = CAINTEOIR_SPEECH_SYNTHESIZERS(g_object_ref(G_OBJECT(synthesizers)));
-	priv->application = READER_APPLICATION(g_object_ref(G_OBJECT(application)));
+	priv->application = READER_APPLICATION(application);
 
 	gtk_window_set_default_size(GTK_WINDOW(reader), INDEX_PANE_WIDTH + DOCUMENT_PANE_WIDTH + 5, 300);
 	gtk_window_set_title(GTK_WINDOW(reader), i18n("Cainteoir Text-to-Speech"));

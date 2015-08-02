@@ -22,6 +22,7 @@
 #include "i18n.h"
 
 #include <gtk/gtk.h>
+#include <string.h>
 
 #include "reader_window.h"
 #include "reader_application.h"
@@ -464,6 +465,18 @@ reader_window_new(GtkApplication *application,
 			reader_window_load_document(reader, prev_filename);
 			g_free(prev_filename);
 		}
+	}
+
+	gchar *anchor = cainteoir_settings_get_string(priv->settings, "highlight", "anchor", "none");
+	if (anchor)
+	{
+		if (!strcmp(anchor, "top"))
+			reader_window_set_highlight_anchor(reader, GTK_ALIGN_START);
+		else if (!strcmp(anchor, "middle"))
+			reader_window_set_highlight_anchor(reader, GTK_ALIGN_CENTER);
+		else if (!strcmp(anchor, "bottom"))
+			reader_window_set_highlight_anchor(reader, GTK_ALIGN_END);
+		g_free(anchor);
 	}
 
 	return GTK_WIDGET(reader);

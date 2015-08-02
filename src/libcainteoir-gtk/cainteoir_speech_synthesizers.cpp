@@ -242,6 +242,25 @@ cainteoir_speech_synthesizers_new(CainteoirSettings *settings)
 		initialize_speech_parameter(settings, "pitch", priv->tts.parameter(tts::parameter::pitch));
 		initialize_speech_parameter(settings, "pitch-range", priv->tts.parameter(tts::parameter::pitch_range));
 		initialize_speech_parameter(settings, "word-gap", priv->tts.parameter(tts::parameter::word_gap));
+
+		if (cainteoir_settings_get_boolean(settings, "narration", "enabled", FALSE))
+		{
+			if (cainteoir_settings_get_boolean(settings, "narration", "tts-fallback", FALSE))
+				priv->narration = tts::media_overlays_mode::tts_and_media_overlays;
+			else
+				priv->narration = tts::media_overlays_mode::media_overlays_only;
+		}
+		else
+			priv->narration = tts::media_overlays_mode::tts_only;
+
+		gchar *highlight_mode = cainteoir_settings_get_string(settings, "highlight", "mode", "reading");
+		if (highlight_mode)
+		{
+			bool reading = !strcmp(highlight_mode, "reading");
+			cainteoir_speech_synthesizers_set_text_event_mode(synthesizers,
+				reading ? CAINTEOIR_TEXT_EVENT_WHILE_READING : CAINTEOIR_TEXT_EVENT_NONE);
+			g_free(highlight_mode);
+		}
 	}
 	return synthesizers;
 }

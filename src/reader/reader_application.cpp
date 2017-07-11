@@ -36,6 +36,18 @@
 
 #include "extensions/glib.h"
 
+#if !GTK_CHECK_VERSION(3,12,0)
+static void
+gtk_application_set_accels_for_action(GtkApplication      *application,
+                                      const gchar         *detailed_action_name,
+                                      const gchar * const *accels)
+{
+	for (; *accels; ++accels) {
+		gtk_application_add_accelerator(application, *accels, detailed_action_name, NULL);
+	}
+}
+#endif
+
 struct ReaderApplicationPrivate
 {
 	GApplication *self;

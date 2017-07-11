@@ -55,7 +55,6 @@ main(int argc, char ** argv)
 	gtk_container_add(GTK_CONTAINER(window), scroll);
 
 	GtkWidget *view = cainteoir_waveform_view_new();
-	cainteoir_waveform_view_set_view_duration(CAINTEOIR_WAVEFORM_VIEW(view), 5.0);
 	gtk_container_add(GTK_CONTAINER(scroll), view);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(on_window_destroy), nullptr);
@@ -65,6 +64,9 @@ main(int argc, char ** argv)
 		CainteoirAudioDataS16 *audio = cainteoir_audio_data_s16_new(argv[1], nullptr, nullptr, 0, 16000);
 		if (audio)
 		{
+			float duration = cainteoir_audio_data_s16_get_duration(audio);
+			cainteoir_waveform_view_set_view_duration(CAINTEOIR_WAVEFORM_VIEW(view), duration);
+
 			cainteoir_waveform_view_set_s16_data(CAINTEOIR_WAVEFORM_VIEW(view), audio);
 			g_object_unref(audio);
 		}
